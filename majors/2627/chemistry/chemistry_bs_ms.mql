@@ -1,0 +1,37 @@
+// Chemistry simultaneous B.S./M.S. -- B.S. requirements (13 course credits beyond the prerequisites, including the senior requirement) plus graduate work.
+$advlab = [CHEM 2260L, CHEM 2510L, CHEM 3310L, CHEM 3490L, CHEM 3550L, CHEM 3350L, RANGE_TAG(CHEM 4010, CHEM 4999, "YC CHEM Advanced Courses")];
+$advlec = [RANGE_TAG(CHEM 4010, CHEM 4999, "YC CHEM Advanced Courses"), TAG("YC CHEM GR of Interest to UG")];
+$outside = PLACEMENT("Advanced science course outside Chemistry approved in writing by the DUS (up to two credits)");
+$physics = [PHYS 1700, PHYS 1710, PHYS 1800, PHYS 1810, PHYS 2000, PHYS 2010, PHYS 2600, PHYS 2610];
+
+SELECT 1 FROM [
+    SELECT 4 FROM [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L],
+    SELECT 2 FROM [CHEM 1700, CHEM 1710L],
+    SELECT 2 FROM [CHEM 1630, CHEM 1670],
+    PLACEMENT("Advanced placement beyond general chemistry approved by the DUS")
+] : "Prerequisite: two terms of general chemistry with laboratory (letter grade)" : 1;
+SELECT 1 FROM [MATH 1150, MATH 1160, MATH 1200, MATH 1210, ENAS 1510, PLACEMENT("Placement beyond MATH 1150 or equivalent course approved by the DUS")] : "Prerequisite: single-variable calculus" : 1;
+SELECT 1 FROM [$physics] : "Prerequisite: one term of introductory physics numbered 1700 or higher" : 1;
+
+SELECT 1 FROM [CHEM 1740, CHEM 2200] : "Organic chemistry I" : 1;
+SELECT 1 FROM [CHEM 1750, CHEM 2210, CHEM 2300] : "Organic chemistry II" : 1;
+SELECT 2 FROM [CHEM 2220L, CHEM 2230L] : "Organic chemistry laboratories" : 1;
+SELECT 1 FROM [CHEM 3320, CHEM 3280] : "Physical chemistry" : 1;
+SELECT 1 FROM CHEM 2520 : "Inorganic chemistry" : 1;
+SELECT 1 FROM CHEM 3330 : "Second term of physical chemistry" : 1;
+SELECT 1 FROM CHEM 3300L : "Physical chemistry laboratory" : 1;
+
+// Advanced lecture courses numbered 4000+ are half-credit; the range covers 4 course credits.
+SELECT 4-8 FROM [$advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $advlab, $advlec, $outside, $outside] : "4 course credits of advanced chemistry lecture or laboratory courses" : 3;
+SELECT 1-2 FROM [$advlec, $advlec] : "At least 1 full credit of advanced Chemistry lecture courses" : 2;
+SELECT 1 FROM [$advlab] : "At least one advanced Chemistry laboratory course" : 2;
+LIMIT 2 FROM [$outside, $outside] : "At most two credits of advanced science outside Chemistry" : 3;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [CHEM 4900, CHEM 4900],
+    SELECT 2 FROM [CHEM 4000, SELECT 1 FROM [CHEM 4900, $advlab, $advlec]]
+] : "Senior requirement: two terms of CHEM 4900 with capstone report, or CHEM 4000 plus one additional advanced credit or CHEM 4900" : 1;
+
+// Graduate requirements are set by the GSAS program selected with the DUS and DGS before the fifth term.
+SELECT 1 FROM [PLACEMENT("Relevant graduate course requirements for the selected M.S. program completed with grades of Honors, High Pass, or Pass (at least two Honors; High Pass average)")] : "M.S.: graduate course requirements" : 4;
+SELECT 1 FROM [PLACEMENT("Admission to the simultaneous B.S./M.S. program approved by the DUS and DGS")] : "M.S.: program admission" : 1;

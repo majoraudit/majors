@@ -17,6 +17,9 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/chemistry/",
     "websiteLink": "https://chem.yale.edu/",
     "specializations": [
-        "african_american_studies_ba.mql"
+        "chemistry_ba.mql",
+        "chemistry_bs.mql",
+        "chemistry_bs_intensive.mql",
+        "chemistry_bs_ms.mql"
     ]
 }

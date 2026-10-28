@@ -1,0 +1,19 @@
+// Art B.A. -- Filmmaking concentration. 14 courses including prerequisites and the senior project.
+$intro = RANGE(ART 0001, ART 1999);
+$upper = RANGE(ART 2000, ART 9999);
+$hsar = RANGE(HSAR 0000, HSAR 9999);
+$film = PLACEMENT("Non-production course in Film and Media Studies");
+SELECT 1 FROM PLACEMENT("Favorable sophomore review of studio work") : "Prerequisite: sophomore review" : 1;
+SELECT 2 FROM [ART 1111, ART 1514] : "Prerequisite: Visual Thinking and Basic Drawing" : 1;
+SELECT 3 FROM [$intro, $intro, $intro] : "Prerequisite: three additional introductory courses (0001-1999)" : 2;
+
+// A sixth introductory course may count toward this requirement.
+SELECT 4 FROM [$upper, $upper, $upper, $upper, $intro] : "Four courses numbered 2000 or above" : 3;
+LIMIT 1 FROM $intro : "At most one additional introductory course counts toward the 2000-level requirement" : 3;
+
+SELECT 3 FROM [ART 1942, ART 3941, ART 3942] : "Filmmaking: ART 1942, 3941, and 3942" : 1;
+SELECT 1 FROM [ART 4942, ART 4943] : "Filmmaking: ART 4942 or 4943" : 1;
+
+SELECT 1 FROM ART 3995 : "Junior Seminar" : 1;
+SELECT 2 FROM [$hsar, $hsar, $film, $film] : "Two courses in the history of art (Two non-production Film and Media Studies courses may substitute)" : 2;
+SELECT 2 FROM [ART 4995, ART 4996] : "Two-term senior project" : 1;

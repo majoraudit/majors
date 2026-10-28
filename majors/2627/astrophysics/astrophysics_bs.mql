@@ -1,0 +1,23 @@
+// Astrophysics B.S. -- 12 courses beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [
+    SELECT 2 FROM [PHYS 1800, PHYS 1810],
+    SELECT 2 FROM [PHYS 2000, PHYS 2010],
+    SELECT 2 FROM [PHYS 2600, PHYS 2610]
+] : "Prerequisite: introductory physics sequence" : 1;
+SELECT 1 FROM [
+    SELECT 2 FROM [PHYS 1650L, PHYS 1660L],
+    SELECT 2 FROM [PHYS 2050L, PHYS 2060L],
+    SELECT 2 FROM [ASTR 1550, SELECT 1 FROM [PHYS 1650L, PHYS 1660L, PHYS 2050L, PHYS 2060L]]
+] : "Prerequisite: physics laboratory sequence (ASTR 1550 may replace one term)" : 1;
+SELECT 3 FROM [MATH 1120, MATH 1150, SELECT 1 FROM [MATH 1200, ENAS 1510]] : "Prerequisite: MATH 1120, MATH 1150, and MATH 1200 or ENAS 1510" : 1;
+
+SELECT 1 FROM [ASTR 2100, ASTR 2200] : "ASTR 2100 or ASTR 2200" : 1;
+SELECT 3 FROM [ASTR 2550, ASTR 3100, ASTR 3200] : "ASTR 2550, ASTR 3100, and ASTR 3200" : 1;
+
+SELECT 3 FROM [PHYS 4010, PHYS 4020, PHYS 4390, RANGE(PHYS 4000, PHYS 4999), RANGE(PHYS 4000, PHYS 4999), RANGE(PHYS 4000, PHYS 4999)] : "Three physics courses numbered 4000 or higher (normally PHYS 4010, 4020, 4390)" : 2;
+SELECT 1 FROM [RANGE(PHYS 4000, PHYS 4999), RANGE(ASTR 3000, ASTR 9999)] : "One additional 4000-level physics course or astronomy elective numbered 3000 or higher" : 3;
+
+SELECT 1 FROM [MATH 2460, PHYS 4000, ENAS 1940] : "Differential equations" : 2;
+SELECT 1 FROM [RANGE(MATH 2000, MATH 9999), CPSC 2010, ASTR 3560, RANGE(S&DS 0000, S&DS 9999), PLACEMENT("Statistics or computing course approved by the DUS")] : "Additional mathematics (2000+), statistics, or computing course" : 3;
+
+SELECT 2 FROM [ASTR 4900, ASTR 4910] : "Two-term senior research project" : 1;

@@ -12,5 +12,7 @@
     "dus": [["Austin Hinkley", "austin.hinkley@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/humanities/",
     "websiteLink": "https://humanities.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "humanities_ba.mql"
+    ]
 }

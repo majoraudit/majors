@@ -12,5 +12,16 @@
     "dus": [["Alex Manning", "alex.manning@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/sociology/",
     "websiteLink": "https://sociology.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "sociology_ba_standard_economy_and_society.mql",
+        "sociology_ba_intensive_economy_and_society.mql",
+        "sociology_ba_standard_health_and_society.mql",
+        "sociology_ba_intensive_health_and_society.mql",
+        "sociology_ba_standard_data_and_society.mql",
+        "sociology_ba_intensive_data_and_society.mql",
+        "sociology_ba_standard_inequality_race_and_society.mql",
+        "sociology_ba_intensive_inequality_race_and_society.mql",
+        "sociology_ba_standard_student_designed.mql",
+        "sociology_ba_intensive_student_designed.mql"
+    ]
 }

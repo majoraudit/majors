@@ -1,0 +1,16 @@
+// Biomedical Engineering B.S. -- Biomolecular Engineering concentration.
+// 13 term courses (at least 11 course credits) beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [SELECT 2 FROM [BIOL 1010, BIOL 1020], PLACEMENT("Higher-level MCDB or MB&B course approved by the DUS")] : "Prerequisite: BIOL 1010 and 1020" : 1;
+SELECT 1 FROM [RANGE(CHEM 1610, CHEM 9999)] : "Prerequisite: chemistry lecture numbered CHEM 1610 or higher" : 1;
+SELECT 1 FROM [MATH 1150, MATH 1160, PLACEMENT("Placement into MATH 1200 or ENAS 1510")] : "Prerequisite: MATH 1150 or 1160" : 1;
+SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: MATH 1200 or ENAS 1510" : 1;
+SELECT 1 FROM ENAS 1940 : "Prerequisite: ENAS 1940" : 1;
+SELECT 2 FROM [PHYS 1800, PHYS 1810] : "Prerequisite: PHYS 1800 and 1810" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 2050L, PHYS 2060L], SELECT 2 FROM [PHYS 1650L, PHYS 1660L]] : "Prerequisite: physics laboratories" : 1;
+
+SELECT 9 FROM [BENG 2800, BENG 2080, BENG 3200, BENG 3600, BENG 3400, BENG 3500, BENG 3100, BENG 3110, BENG 4080] : "Required courses for all concentrations" : 1;
+LIMIT 1 FROM [MB&B 3000, PLACEMENT("Relevant course substituted with DUS permission")] : "At most one relevant substitution with DUS permission" : 2;
+
+SELECT 3 FROM [TAG("YC BENG Biomolecular Engrng"), TAG("YC BENG Biomolecular Engrng"), TAG("YC BENG Biomolecular Engrng"), BENG 4104, BENG 4106, BENG 4410, BENG 4611, BENG 4622, BENG 4350, BENG 4630, BENG 4261, BENG 4767, BENG 4680, BENG 4690, MENG 3422] : "Three Biomolecular Engineering concentration courses" : 2;
+
+SELECT 1 FROM [CLASS(BENG 4974), SELECT 2 FROM [BENG 4973, BENG 4974]] : "Senior project (BENG 4974, or BENG 4973 and 4974)" : 1;

@@ -1,5 +1,21 @@
-SELECT 3 FROM [SELECT 1 FROM [CLASS(MATH 1200), CLASS(ENAS 1510)], SELECT 1 FROM [CLASS(CHEM 1650), CLASS(CHEM 1670)], SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 1700), CLASS(PHYS 1710)], SELECT 2 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810)], SELECT 2 FROM [CLASS(PHYS 2000), CLASS(PHYS 2010)]]] : "Prerequisites" : 1;
-SELECT 2 FROM [CLASS(EPS 1000), CLASS(EPS 1010), SELECT 2 FROM [CLASS(EPS 1100), CLASS(1110L)], SELECT 2 FROM [CLASS(EPS 1250), CLASS(EPS 1260L)], CLASS(EPS 1400)] : "Intro EPS Courses" : 2;
-SELECT 4 FROM [SELECT 1 FROM [CLASS(EPS 2100), CLASS(EPS 2120), CLASS(EPS 3500)], CLASS(EPS 2200), CLASS(EPS 2320), CLASS(EPS 3100), CLASS(EPS 3120)] : "EPS Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("EPS Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+// Earth and Planetary Sciences B.S. -- Solid Earth Science concentration.
+// At least 11 term courses beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [CHEM 1650, CHEM 1670] : "Prerequisite: CHEM 1650 or 1670" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010]] : "Prerequisite: physics sequence" : 1;
+SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
+
+$intro = [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L], EPS 1400];
+SELECT 2 FROM [$intro] : "Two introductory EPS courses" : 2;
+SELECT 4 FROM [
+    SELECT 1 FROM [EPS 2100, EPS 2120, EPS 3500],
+    SELECT 1 FROM [EPS 2200],
+    SELECT 1 FROM [EPS 2320],
+    SELECT 1 FROM [EPS 3100],
+    SELECT 1 FROM [EPS 3120],
+    PLACEMENT("Higher-level EPS course substituted with DUS permission")
+] : "Four core courses: tectonics, rocks and minerals, sedimentary processes, isotope geochemistry, structural geology" : 2;
+$el = [RANGE(EPS 2000, EPS 9999), PLACEMENT("Elective in geology, geochemistry, geophysics, or a related topic approved by the DUS")];
+SELECT 4 FROM [$el, $el, $el, $el] : "Four electives (core courses may count)" : 3;
+SELECT 2 FROM [RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999)] : "At least two electives from EPS" : 3;
+
+SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;

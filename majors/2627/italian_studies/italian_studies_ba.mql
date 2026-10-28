@@ -1,26 +1,19 @@
-SELECT 1 FROM [
-  CLASS(ITAL 1300),
-  TAG("Equivalent Course or Credit")
-] : "Prerequisites" : 1;
+// Italian Studies B.A. -- 11 term courses beyond the prerequisite, including the senior requirement.
+$ital = RANGE(ITAL 1400, ITAL 9999);
+$related = PLACEMENT("Related course in another language and literature, history of art, history, linguistics, philosophy, or media approved by the DUS");
 
-SELECT 8 FROM [
-  CLASS(ITAL 1400),
-  SELECT 1 FROM [CLASS(ITAL 1500), CLASS(ITAL 1510)],
-  SELECT 1 FROM [CLASS(ITAL 4162), CLASS(ITAL 4172)],
-  SELECT 1 FROM [CLASS(ITAL 1310), TAG("Equivalent Course")],
-  RANGE(ITAL 1400 , ITAL 9999),
-  RANGE(ITAL 1400 , ITAL 9999),
-  RANGE(ITAL 1400 , ITAL 9999),
-  RANGE(ITAL 1400 , ITAL 9999)
-] : "Core Classes" : 5;
+SELECT 1 FROM [ITAL 1300, PLACEMENT("Equivalent L3 Italian credit by placement")] : "Prerequisite: ITAL 1300 (L3) or equivalent" : 1;
 
-SELECT 2 FROM [
-  RANGE(LITR 1000 , LITR 9999),
-  RANGE(HIST 1000 , HIST 9999),
-  RANGE(HSAR 1000 , HSAR 9999),
-  RANGE(LING 1000 , LING 9999),
-  RANGE(PHIL 1000 , PHIL 9999),
-  RANGE(FILM 1000 , FILM 9999)
-] : "Electives" : 2;
+SELECT 1 FROM [ITAL 1400, PLACEMENT("Equivalent of ITAL 1400 approved by the DUS")] : "ITAL 1400 or equivalent" : 1;
+SELECT 1 FROM [ITAL 1500, ITAL 1510] : "ITAL 1500 or 1510" : 1;
+SELECT 1 FROM [ITAL 4162, ITAL 4172] : "Survey of Italian literature (ITAL 4162 or 4172)" : 1;
+SELECT 1 FROM [ITAL 1310, PLACEMENT("Equivalent course on Dante's Divine Comedy")] : "Dante's Divine Comedy (ITAL 1310 or equivalent)" : 1;
+SELECT 4 FROM [$ital, $ital, $ital, $ital] : "Four additional Italian Studies courses numbered 1400 or above (including graduate courses)" : 3;
+SELECT 5 FROM [TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian")] : "At least five of the eight Italian Studies courses conducted in Italian" : 2;
+LIMIT 3 FROM [TAG("YC ITAL Taught in English"), TAG("YC ITAL Taught in English"), TAG("YC ITAL Taught in English")] : "No more than three Italian department courses taught in English" : 3;
 
-SELECT 1 FROM [CLASS(ITAL 4491)] : "Senior Requirement" : 1;
+SELECT 2 FROM [$related, $related, PLACEMENT("Graduate course in another national literature or in linguistics")] : "Two related courses in other departments" : 4;
+LIMIT 1 FROM PLACEMENT("Graduate course in another national literature or in linguistics") : "At most one graduate substitution for the related courses" : 4;
+
+SELECT 1 FROM ITAL 4491 : "Senior essay written in Italian (ITAL 4491)" : 1;
+SELECT 1 FROM PLACEMENT("Concluding meeting with department faculty and regular meetings with the DUS in the senior year") : "Senior meetings with the DUS and faculty" : 1;

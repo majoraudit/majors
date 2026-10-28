@@ -12,5 +12,7 @@
     "dus": [["Aleksandar Uskokov", "aleksandar.uskokov@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/south-asian-studies/",
     "websiteLink": "https://southasia.macmillan.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "south_asian_studies_ba_second_major.mql"
+    ]
 }

@@ -1,0 +1,15 @@
+// Russian, East European, and Eurasian Studies B.A. -- Russian Studies concentration. 12 term courses including the senior requirement.
+SELECT 1 FROM [RUSS 1400, RUSS 1420, RUSS 1450, PLACEMENT("RUSS S140 or placement examination")] : "Prerequisite: second-year Russian" : 1;
+$rsee = [RANGE(RSEE 0000, RSEE 4899), RANGE(RSEE 4911, RSEE 9999)];
+$area = PLACEMENT("Russian, East European, or Eurasian area course approved by the DUS");
+
+SELECT 2 FROM [TAG("YC HIST Europe"), TAG("YC HIST Europe"), $area, $area] : "Two courses in Russian, East European, or Eurasian history" : 2;
+SELECT 1 FROM [PLACEMENT("RSEE-area focused social science course (anthropology, economics, sociology, political science, global affairs, etc.)")] : "One RSEE-area social science course" : 2;
+SELECT 1 FROM [RANGE(RUSS 0001, RUSS 0999), RANGE(RUSS 2000, RUSS 4899), PLACEMENT("Russian, East European, or Eurasian literature or culture course selected with the DUS")] : "One course in Russian, East European, or Eurasian literature or culture" : 2;
+SELECT 2 FROM [SELECT 1 FROM [RUSS 1500, PLACEMENT("Russian proficiency by equivalency examination (replace with an additional course)")], SELECT 1 FROM [RUSS 1510, PLACEMENT("Russian proficiency by equivalency examination (replace with an additional course)")]] : "Language: RUSS 1500 and 1510 or equivalency examination" : 1;
+$el = [$rsee, RUSS 1600, RUSS 1610, RANGE(RUSS 1700, RUSS 1900), RANGE(CZEC 1300, CZEC 9999), RANGE(PLSH 1300, PLSH 9999), RANGE(ROMN 1300, ROMN 9999), RANGE(SBCR 1300, SBCR 9999), RANGE(HGRN 1300, HGRN 9999), RANGE(UKRN 1300, UKRN 9999), $area];
+SELECT 5 FROM [$el, $el, $el, $el, $el] : "Five electives selected with the DUS (RUSS 1600/1610, Russian content courses, other regional languages at the second-year level or above)" : 4;
+LIMIT 5 FROM [RANGE(RUSS 1000, RUSS 1699), RANGE(RUSS 1000, RUSS 1699), RANGE(RUSS 1000, RUSS 1699), RANGE(RUSS 1000, RUSS 1699), RANGE(RUSS 1000, RUSS 1699), PLACEMENT("Other language course")] : "At most five language courses count toward the major" : 4;
+
+// Only one of RSEE 4900 and 4910 counts, except as an extra course for double majors.
+SELECT 1 FROM [RSEE 4900, RSEE 4910] : "Senior essay (RSEE 4900 or 4910)" : 1;

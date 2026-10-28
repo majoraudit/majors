@@ -1,0 +1,22 @@
+// American Studies B.A. (standard) -- 14 term courses including the senior requirement.
+$gateway = RANGE(AMST 1000, AMST 2999);
+$conc = PLACEMENT("Concentration course approved by the DUS (letter grade)");
+$amst = RANGE(AMST 0000, AMST 9999);
+
+SELECT 4 FROM [
+    SELECT 2 FROM [RANGE_TAG(AMST 1000, AMST 2999, "YC AMST Cultural Hist/Studies"), RANGE_TAG(AMST 1000, AMST 2999, "YC AMST Cultural Hist/Studies")],
+    SELECT 1 FROM [RANGE_TAG(AMST 1000, AMST 2999, "YC AMST Survey of Am Lit")],
+    SELECT 1 FROM [$gateway, PLACEMENT("First-Year Seminar substituted for a gateway course with DUS permission")],
+    $gateway
+] : "Four gateway courses: two cultural history/studies, one American literature survey, one concentration preparatory course" : 1;
+SELECT 1 FROM [TAG("YC AMST Early Americas")] : "One gateway course must carry the Early Americas attribute" : 1;
+
+SELECT 2 FROM [RANGE(AMST 3000, AMST 3999), RANGE(AMST 3000, AMST 3999)] : "Two junior seminars (one in the area of concentration)" : 2;
+
+
+SELECT 5 FROM [$conc, $conc, $conc, $conc, $conc] : "Five courses in the area of concentration (one from a non-U.S. perspective)" : 3;
+SELECT 1 FROM PLACEMENT("Concentration course on a comparable topic from a non-U.S. perspective") : "Non-U.S. perspective course within the concentration" : 3;
+
+SELECT 2 FROM [$amst, $amst] : "Two American Studies electives" : 4;
+
+SELECT 1 FROM [RANGE(AMST 4000, AMST 4490), CLASS(AMST 4491), RANGE(AMST 4495, AMST 4999)] : "Senior requirement: senior seminar (AMST 4000-4999) or one-term senior project AMST 4491, in the area of concentration" : 1;

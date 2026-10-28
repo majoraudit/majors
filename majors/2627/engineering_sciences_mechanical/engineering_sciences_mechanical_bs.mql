@@ -1,10 +1,12 @@
-SELECT 11 FROM [
-  DEPT("MENG")
-] : "MENG Electives" : 2;
+// Engineering Sciences (Mechanical) B.S. -- 12 approved course credits in engineering beyond the prerequisites, including the senior project.
+$meng = [TAG("YC MENG Eng Sci-Mech Crse"), RANGE(MENG 0000, MENG 4990), RANGE(MENG 4993, MENG 9999), PLACEMENT("Engineering course approved by the DUS")];
+SELECT 3 FROM [SELECT 1 FROM [MATH 1120, PLACEMENT("Equivalent of MATH 1120")], SELECT 1 FROM [MATH 1150, PLACEMENT("Equivalent of MATH 1150")], SELECT 1 FROM [ENAS 1510, PLACEMENT("Equivalent of ENAS 1510")]] : "Prerequisite: MATH 1120, MATH 1150, and ENAS 1510 (or equivalents)" : 1;
+SELECT 1 FROM [PHYS 1800, PHYS 2000, PHYS 2600, PLACEMENT("Equivalent physics lecture approved by the DUS")] : "Prerequisite: physics lecture (PHYS 1800, 2000, or 2600)" : 1;
+SELECT 1 FROM [PHYS 1810, PHYS 2010, PHYS 2610, PLACEMENT("Equivalent physics lecture approved by the DUS")] : "Prerequisite: physics lecture (PHYS 1810, 2010, or 2610)" : 1;
+SELECT 1 FROM [PHYS 1650L, PHYS 2050L, PLACEMENT("Equivalent physics laboratory approved by the DUS")] : "Prerequisite: physics laboratory (PHYS 1650L or 2050L)" : 1;
+SELECT 1 FROM [PHYS 1660L, PHYS 2060L, MENG 2616L, PLACEMENT("Equivalent laboratory approved by the DUS")] : "Prerequisite: laboratory (PHYS 1660L, 2060L, or MENG 2616L)" : 1;
 
-SELECT 1 FROM [
-  CLASS(MENG 4154),
-  CLASS(MENG 4991),
-  CLASS(MENG 4992),
-  RANGE(MENG 4000, MENG 4999)
-] : "Senior Project" : 1;
+SELECT 11 FROM [$meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng] : "Eleven approved engineering courses forming a coherent program" : 3;
+LIMIT 1 FROM [MENG 4991, MENG 4992] : "At most one Special Projects course (MENG 4991 or 4992) may count" : 3;
+
+SELECT 1 FROM [MENG 4154, MENG 4991, MENG 4992, PLACEMENT("Upper-level design course taken in the senior year, chosen with the DUS")] : "Senior project" : 1;

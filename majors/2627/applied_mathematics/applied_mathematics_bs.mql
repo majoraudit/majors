@@ -1,0 +1,34 @@
+// Applied Mathematics B.S -- 14 term courses beyond the prerequisites, including the senior requirement.
+// Breadth areas (a)-(k); the DUS maintains a more exhaustive list.
+$opt = [AMTH 4310, AMTH 4370, ECE 4000, CPSC 4850, S&DS 4320];  // optimization
+$prob = [S&DS 2420, S&DS 3120, S&DS 3510, S&DS 3640, S&DS 4000, S&DS 4100, S&DS 4110, S&DS 4250, ECON 2136, APHY 4700];  // probability and statistics
+$pde = [MATH 2470, MATH 2550, MATH 2560, MATH 2600, MATH 3020, MATH 3050, MATH 3100, MATH 3200, MATH 3250, MATH 4470, AMTH 4280];  // partial differential equations and analysis
+$alg = [CPSC 3650, CPSC 3660, CPSC 4240, CPSC 4371, CPSC 4410, CPSC 4650, CPSC 4660, CPSC 4670, CPSC 4680, CPSC 4690, CPSC 6400, ENAS 4040, ENAS 4041];  // algorithms and numerical methods
+$graph = [AMTH 3620, AMTH 4200, AMTH 5620, MATH 7990, CPSC 4620];  // graph theory
+$econ = [ECON 2125, ECON 2126, ECON 3350, ECON 3351, ECON 4417, ECON 4428, ECON 4433, ECON 4471, CPSC 4550];  // mathematical economics
+$eng = [ECE 4390, AMTH 3420, S&DS 3640, MENG 2311, MENG 2615, MENG 3422, MENG 3465, MENG 3323, MENG 4463, MENG 4469, CENG 3010, CENG 3150];  // engineering
+$ml = [S&DS 2620, S&DS 2660, S&DS 3650, S&DS 6690, S&DS 6710, S&DS 6850, CPSC 4391, CPSC 4520, CPSC 4530, CPSC 4700, CPSC 4740, CPSC 4770, CPSC 3810, CPSC 4830, CPSC 4860, CPSC 4880, CPSC 7450, AMTH 5520, AMTH 2320];  // data mining and machine learning
+$bio = [CPSC 4530, CPSC 4750, CPSC 4760, BENG 3400, BENG 4450, BENG 4580, PSYC 2658];  // biological modeling and computation
+$phys = [ASTR 3200, ASTR 4200, CHEM 3330, EPS 3220, EPS 3230, EPS 4210, EPS 4280, EPS 4560, EPS 5290, EPS 6590, PHYS 3430, PHYS 3440, PHYS 4010, PHYS 4020, PHYS 4100, PHYS 4120, PHYS 4500, PHYS 4300, PHYS 4400, PHYS 4410, PHYS 4420, APHY 4390, APHY 4480];  // physical sciences
+$ling = [LING 2249, LING 2270, LING 3800, PHIL 2267, PHIL 4427, MATH 2700];  // mathematical linguistics and philosophy
+
+SELECT 2 FROM [SELECT 1 FROM [MATH 1200, ENAS 1510], SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260]] : "Prerequisite: multivariable calculus and linear algebra" : 1;
+SELECT 1 FROM [ENAS 1300, CPSC 1001] : "Prerequisite: computer programming" : 1;
+
+SELECT 1 FROM [ENAS 1940, MATH 2460] : "Differential equations" : 1;
+SELECT 1 FROM [S&DS 2410, S&DS 2380] : "Probability" : 1;
+SELECT 1 FROM [S&DS 3610, S&DS 2300] : "Data analysis" : 1;
+SELECT 1 FROM [AMTH 2440, CPSC 2020] : "Discrete mathematics" : 1;
+
+// One course in each of at least three different breadth areas.
+SELECT 3 FROM [SELECT 1 FROM [$opt], SELECT 1 FROM [$prob], SELECT 1 FROM [$pde], SELECT 1 FROM [$alg], SELECT 1 FROM [$graph], SELECT 1 FROM [$econ], SELECT 1 FROM [$eng], SELECT 1 FROM [$ml], SELECT 1 FROM [$bio], SELECT 1 FROM [$phys], SELECT 1 FROM [$ling], PLACEMENT("Course in a breadth area approved by the DUS"), PLACEMENT("Course in a breadth area approved by the DUS"), PLACEMENT("Course in a breadth area approved by the DUS")] : "Breadth: courses in at least three areas" : 3;
+
+// Standard concentration: three courses from one breadth category, at least two numbered 3000 or above.
+SELECT 1 FROM [SELECT 3 FROM [$opt], SELECT 3 FROM [$prob], SELECT 3 FROM [$pde], SELECT 3 FROM [$alg], SELECT 3 FROM [$graph], SELECT 3 FROM [$econ], SELECT 3 FROM [$eng], SELECT 3 FROM [$ml], SELECT 3 FROM [$bio], SELECT 3 FROM [$phys], SELECT 3 FROM [$ling], PLACEMENT("Nonstandard concentration of three advanced courses approved by the DUS")] : "Concentration: three advanced courses applying mathematics to one field" : 2;
+
+// B.S. only. Not counted toward the breadth requirement.
+SELECT 1 FROM [MATH 3020, MATH 3050, MATH 3100, MATH 3200, MATH 3250, MATH 4470, AMTH 4280, PLACEMENT("MATH 3500 or MATH 4400 with DUS approval")] : "B.S.: vector analysis (or approved analysis replacement)" : 2;
+SELECT 1 FROM [$opt, $prob, $pde, $alg, $graph, $econ, $eng, $ml, $bio, $phys, $ling, PLACEMENT("Course in a breadth area approved by the DUS")] : "B.S.: one additional breadth-area course" : 4;
+SELECT 1 FROM [RANGE(MATH 3000, MATH 9999), RANGE(AMTH 3000, AMTH 9999), RANGE(S&DS 3000, S&DS 9999), RANGE(CPSC 3000, CPSC 9999), RANGE(ENAS 3000, ENAS 9999), PLACEMENT("Breadth-area or quantitative course numbered 3000 or higher approved by the DUS")] : "B.S.: one additional course numbered 3000 or higher" : 4;
+
+SELECT 1 FROM AMTH 4910 : "Senior thesis research project" : 1;

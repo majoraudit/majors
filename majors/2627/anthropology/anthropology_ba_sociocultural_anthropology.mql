@@ -1,0 +1,23 @@
+// Anthropology B.A. -- Concentration in Sociocultural Anthropology -- 12 course credits including the senior requirement.
+$anth = RANGE(ANTH 0000, ANTH 9999);
+$adv = RANGE(ANTH 3000, ANTH 4999);
+$cognate = PLACEMENT("Cognate course in another department approved by the DUS");
+
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Biological")] : "Introductory/intermediate course: evolution of human and nonhuman primates (biological)" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Archaeology")] : "Introductory/intermediate course: archaeological study of human societies" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Linguistic")] : "Introductory/intermediate course: social, cultural, and linguistic dimensions" : 1;
+
+// ANTH 4071, ANTH 4091, and a seminar used for the senior essay do not count here.
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999)] : "Three advanced ANTH courses (3000-4000 level), excluding senior essay work" : 2;
+LIMIT 3 FROM [$cognate, $cognate, $cognate] : "At most three cognate courses from other departments" : 2;
+
+// Remaining credits (ANTH 4071 counts here for the yearlong essay option).
+SELECT 5 FROM [$anth, $anth, $anth, $anth, $anth, $cognate, $cognate, $cognate] : "Anthropology electives or approved cognates" : 4;
+
+// Concentration requirements (six credits, overlapping with the major requirements above).
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 1999, "YC ANTH Sociocultural")] : "Sociocultural: introductory course at the 1000 level" : 1;
+SELECT 3 FROM [RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Linguistic"), RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Linguistic"), RANGE_TAG(ANTH 2000, ANTH 4999, "YC ANTH Linguistic")] : "Sociocultural: three electives in sociocultural and linguistic anthropology (2000-4000 level)" : 3;
+SELECT 1 FROM [ANTH 3720, PLACEMENT("Similar research methods course approved by the DUS")] : "Sociocultural: core research methods course" : 1;
+SELECT 1 FROM ANTH 3710 : "Sociocultural: core theory course" : 1;
+
+SELECT 1 FROM [CLASS(ANTH 4091), SELECT 2 FROM [ANTH 4071, ANTH 4091], PLACEMENT("Senior essay written in an additional advanced seminar, approved by the instructor")] : "Senior essay (seminar essay, ANTH 4091, or yearlong ANTH 4071 and ANTH 4091)" : 1;

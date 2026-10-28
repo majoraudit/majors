@@ -1,0 +1,29 @@
+// History of Science, Medicine, and Public Health B.A. -- 12 term courses including the two-term senior requirement.
+// Standard concentrations: Colonialism, Knowledge, and Power; Environment and Society; Gender, Reproduction, and the Body;
+// Media, Information, and the Public; Medicine and Public Health; Minds and Brains; Science, Technology, and Society;
+// or a customized concentration designed with the DUS.
+$hshm = RANGE(HSHM 0000, HSHM 9999);
+$related = PLACEMENT("Concentration-related elective from any department, chosen with the adviser");
+
+// Concentration: seven courses.
+SELECT 1 FROM [
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Colonial Know & Power"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Colonial Know & Power")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Environ & Society"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Environ & Society")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Gender, Reprod & Body"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Gender, Reprod & Body")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Media Info & Public"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Media Info & Public")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Med & Public Health"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Med & Public Health")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Minds and Brains"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Minds and Brains")],
+    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Sci, Tech & Society"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Sci, Tech & Society")],
+    SELECT 2 FROM [PLACEMENT("HSHM course in a customized concentration approved by the DUS"), PLACEMENT("HSHM course in a customized concentration approved by the DUS")]
+] : "Concentration: two HSHM courses in the concentration" : 2;
+SELECT 1 FROM [PLACEMENT("HSHM or HIST seminar in the concentration")] : "Concentration: one seminar in HSHM or History" : 2;
+SELECT 1 FROM DIST("SC") : "Concentration: one full-credit science (SC) course" : 2;
+SELECT 3 FROM [$related, $related, $related] : "Concentration: three related electives from any department" : 3;
+
+SELECT 3 FROM [$hshm, $hshm, $hshm] : "Three additional HSHM electives" : 3;
+SELECT 1 FROM PLACEMENT("One additional HSHM elective is a seminar") : "Additional electives: one seminar" : 3;
+SELECT 1 FROM PLACEMENT("One additional HSHM elective comes from a concentration other than the student's") : "Additional electives: one course outside the concentration" : 3;
+SELECT 1 FROM PLACEMENT("At least one HSHM or HIST seminar completed before the senior year") : "Seminar before the senior year" : 2;
+
+// HSHM 4200 (half credit) may be taken in addition to the twelve courses.
+SELECT 2 FROM [HSHM 4900, HSHM 4910] : "Two-term senior project" : 1;

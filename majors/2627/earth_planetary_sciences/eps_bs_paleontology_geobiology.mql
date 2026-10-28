@@ -1,48 +1,26 @@
+// Earth and Planetary Sciences B.S. -- Paleontology and Geobiology concentration.
+// At least 12 term courses (11.5 credits) beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [CHEM 1650, CHEM 1670] : "Prerequisite: CHEM 1650 or 1670" : 1;
+SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
+SELECT 4 FROM [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040] : "Prerequisite: BIOL 1010-1040" : 1;
+
+SELECT 1 FROM [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L]] : "Introductory course for geological and environmental context" : 2;
+SELECT 2 FROM [EPS 1250, EPS 1260L] : "EPS 1250 and 1260L" : 1;
 SELECT 4 FROM [
-    SELECT 1 FROM [
-        CLASS(MATH 1200),
-        CLASS(ENAS 1510)
-    ],
-    SELECT 4 FROM [
-        CLASS(BIOL 1010),
-        CLASS(BIOL 1020),
-        CLASS(BIOL 1030),
-        CLASS(BIOL 1040)
-    ],
-    CLASS(CHEM 1650),
-    CLASS(CHEM 1670)
-] : "Prerequisites" : 1;
-SELECT 4 FROM [
-    SELECT 1 FROM [
-        CLASS(EPS 1000), 
-        CLASS(EPS 1010),
-        SELECT 2 FROM [
-            CLASS(EPS 1100),
-            CLASS(EPS 1110L)
-        ]
-    ], 
-    CLASS(EPS 1250),
-    CLASS(EPS 1260L),
-    SELECT 4 FROM [
-        SELECT 1 FROM [
-            CLASS(EPS 2320),
-            CLASS(EPS 3550)
-        ],
-        CLASS(EEB 2225),
-        SELECT 1 FROM [
-            CLASS(EPS 2700),
-            CLASS(EPS 3250),
-            CLASS(EPS 3750)
-        ],
-        CLASS(EPS 3130),
-        CLASS(EPS 3450),
-        CLASS(EPS 2550),
-        SELECT 1 FROM [
-            CLASS(EPS 3100),
-            CLASS(EPS 4020)
-        ],
-        PLACEMENT("Statistical Data Analysis Class with DUS Approval")
-    ]
-] : "EPS Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("EPS 2000+ Paleontology Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+    SELECT 1 FROM [EPS 2320, EPS 3550],
+    SELECT 1 FROM [EEB 2225, E&EB 2225],
+    SELECT 1 FROM [EPS 2700, EPS 3250, EPS 3750],
+    SELECT 1 FROM [EPS 3130],
+    SELECT 1 FROM [EPS 3450],
+    SELECT 1 FROM [EPS 2550],
+    SELECT 1 FROM [EPS 3100],
+    SELECT 1 FROM [PLACEMENT("Statistical data analysis course applied to the life sciences, approved by the DUS")],
+    PLACEMENT("Higher-level EPS course substituted with DUS permission")
+] : "Four core courses from four different areas" : 2;
+$el = [RANGE(EPS 2000, EPS 9999), RANGE(E&EB 0000, E&EB 9999), RANGE(EEB 0000, EEB 9999), RANGE(MCDB 0000, MCDB 9999), PLACEMENT("Elective in a related field approved by the DUS")];
+SELECT 4 FROM [$el, $el, $el, $el] : "Four electives (EPS, EEB, MCDB, or related fields)" : 3;
+SELECT 1 FROM [RANGE(EPS 2000, EPS 9999)] : "At least one elective from EPS" : 3;
+$paleo = [EPS 2700, EPS 3250, EPS 3750, EPS 3130, EPS 3450, EPS 2550, PLACEMENT("Upper-level paleontology course approved by the DUS")];
+SELECT 4 FROM [$paleo, $paleo, $paleo, $paleo] : "At least four of the twelve courses must be upper-level (2000+) paleontology courses" : 4;
+
+SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;

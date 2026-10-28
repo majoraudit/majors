@@ -1,119 +1,34 @@
-SELECT 4 FROM [
-  CLASS(BIOL 1010),
-  CLASS(BIOL 1020),
-  CLASS(BIOL 1030),
-  CLASS(BIOL 1040)
-] : "Biology Prerequisites" : 15;
+// Molecular Biophysics and Biochemistry -- Medicine concentration. B.A. -- 9.5 course credits beyond the introductory courses, including the senior requirement.
+// Concentration courses may also satisfy major requirements; placement and acceleration credit do not count toward them.
+$cure = PLACEMENT("Course-based undergraduate research experience or research-for-credit course related to the concentration, approved by the DUS");
+$physlab = [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, PHYS 1650L, PHYS 1660L, CHEM 3550L, PLACEMENT("Other 2000+ physics lab approved by the DUS")];
+$biochemlab = [MB&B 2510L, CHEM 3550L, PLACEMENT("Other 2000+ biochemistry lab approved by the DUS")];
+$tools = [MB&B 4350, S&DS 2380, CPSC 1001, PLACEMENT("Critical tools course approved by the DUS")];
+$skills = [$physlab, $biochemlab, $tools, MB&B 4700];
 
-SELECT 4 FROM [
-  SELECT 1 FROM [
-    CLASS(CHEM 1610),
-    CLASS(CHEM 1630)
-  ],
-  SELECT 1 FROM [
-    CLASS(CHEM 1650),
-    CLASS(CHEM 1670)
-  ],
-  CLASS(CHEM 1340L),
-  CLASS(CHEM 1360L)
-] : "General Chemistry Prerequisites" : 14;  
+SELECT 2 FROM [BIOL 1010, BIOL 1020] : "Introductory: BIOL 1010 and 1020" : 1;
+SELECT 1 FROM [SELECT 4 FROM [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L], SELECT 4 FROM [CHEM 1630, CHEM 1670, CHEM 1340L, CHEM 1360L]] : "Introductory: two terms of general chemistry with laboratories" : 1;
+SELECT 2 FROM [SELECT 1 FROM [CHEM 2200, CHEM 1740], CHEM 2220L] : "Introductory: one term of organic chemistry with laboratory" : 1;
+SELECT 1 FROM [SELECT 2 FROM [MATH 1120, MATH 1150], CLASS(MATH 1160)] : "Introductory: two terms of calculus (MATH 1120 and 1150, or MATH 1160)" : 1;
 
-SELECT 3 FROM [
-  SELECT 1 FROM [
-    CLASS(CHEM 1740),
-    CLASS(CHEM 2200)
-  ],
-  SELECT 1 FROM [
-    CLASS(CHEM 1750),
-    CLASS(CHEM 2210)
-  ],
-  CLASS(CHEM 2220L)
-] : "Organic Chemistry Prerequisites" : 13;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Biophysics: two semesters of physics (PHYS 1700 and 1710 or higher)" : 1;
+SELECT 1 FROM [MB&B 2750, CHEM 3320] : "Biophysics: biophysical chemistry (MB&B 2750 or CHEM 3320)" : 1;
+SELECT 2 FROM [MB&B 3000, MB&B 3010] : "Biochemistry: MB&B 3000 and 3010 (no substitutions)" : 1;
+SELECT 1 FROM [CHEM 1750, RANGE(CHEM 2000, CHEM 9999)] : "Biochemistry: CHEM 1750 or any 2000+ Chemistry course" : 1;
+SELECT 1 FROM [MB&B 2680, MB&B 1070, AFAM 1370, HSHM 2060, HSHM 4060, HSHM 4240, HSHM 4750, HSHM 4810, HIST 1779, SOCY 1600, SOCY 1601, SOCY 3760, MCDB 3750, WGSS 2270, WGSS 4457, PLACEMENT("Science and society course approved by petition")] : "Science and society (0.5 credit; MB&B 2680 recommended)" : 2;
 
-SELECT 2 FROM [
-  CLASS(MATH 1120),
-  SELECT 1 FROM [
-    CLASS(MATH 1150),
-    CLASS(MATH 1160)
-  ]
-] : "Calculus Prerequisites" : 12;
+// Practical skills credits come from two or three categories (physics lab, biochemistry lab, critical tools);
+// at least one half-credit must be an MB&B course. MB&B 4700 counts according to the research project.
+SELECT 1-2 FROM [$skills, $skills] : "Practical skills: one credit (one full-credit or two half-credit courses)" : 3;
+SELECT 1 FROM [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, MB&B 2510L, MB&B 4350, MB&B 4700] : "Practical skills: at least one half-credit from MB&B" : 3;
+SELECT 1 FROM [RANGE(MB&B 2000, MB&B 4699), RANGE(MB&B 4701, MB&B 4899), RANGE(MB&B 4911, MB&B 9999)] : "Elective: MB&B lecture or seminar at the 2000+ level" : 4;
 
-SELECT 3 FROM [
-  SELECT 1 FROM [
-    CLASS(MB&B 2750),
-    CLASS(CHEM 3320)
-  ],
-  SELECT 1 FROM [
-    CLASS(PHYS 1700),
-    CLASS(PHYS 1800),
-    CLASS(PHYS 2000),
-    CLASS(PHYS 2600)
-  ],
-  SELECT 1 FROM [
-    CLASS(PHYS 1710),
-    CLASS(PHYS 1810),
-    CLASS(PHYS 2010),
-    CLASS(PHYS 2610)
-  ]
-] : "Biophysics Requirements" : 11;
+SELECT 1 FROM [MB&B 4900, MB&B 4910] : "Senior essay: literature project (MB&B 4900) or laboratory research essay (MB&B 4910)" : 1;
 
-SELECT 3 FROM [
-  CLASS(MB&B 3000),
-  CLASS(MB&B 3010),
-  SELECT 1 FROM [
-    CLASS(CHEM 1750),
-    RANGE(CHEM 2000 , CHEM 9999)
-  ]
-] : "Biochemistry Requirements" : 10;
-
-SELECT 1 FROM [
-  CLASS(MB&B 2680),
-  PLACEMENT("Other Science and Society courses based on petiton")
-] : "Science and Society Core Requirement" : 9;
-
-SELECT 1 FROM [
-  PLACEMENT("Physics/Biochemistry Lab or Critical Tools with DUS approval")
-] : "Practical Skills Requirement" : 8;
-
-SELECT 2 FROM [
-  SELECT 1 FROM [
-    RANGE(S&DS 1000 , S&DS 9999),
-    RANGE_TAG(MATH 2000 , MATH 9999 , "In linear algebra, probability, statistics, or stochastic processes")
-  ],
-  SELECT 1 FROM [
-    RANGE(PSYC 1100 , PSYC 9999)
-  ]
-] : "Staistics and Psychology Requirement" : 7;
-
-SELECT 2 FROM [ 
-  CLASS(MB&B 1010L),
-  CLASS(PHYS 1650L),
-  CLASS(PHYS 1660L),
-  CLASS(MB&B 3640),
-  TAG("Others with DUS approval")
-] : "Physics Lab Requirement" : 5;
-
-SELECT 1 FROM [
-  CLASS(MB&B 4700),
-  TAG("Others with DUS approval")
-] : "Research Requirement" : 4;
-
-SELECT 1 FROM [
-  CLASS(MB&B 4490),
-  CLASS(MB&B 4450),
-  CLASS(MB&B 4520),
-  CLASS(BENG 3500),
-  CLASS(MCDB 3150),
-  CLASS(MCDB 4500),
-  TAG("Others with DUS approval")
-] : "Advanced Biomedical Lecture or Seminar Requirement" : 3;
-
-SELECT 1 FROM [ 
-  RANGE_TAG(MB&B 2000 , MB&B 9999 , "Seminar or Lecture")
-] : "Elective Course" : 2;
-
-SELECT 1 FROM [
-  CLASS(MB&B 4900),
-  CLASS(MB&B 4910)
-] : "Senior Requirement" : 1;
-
+SELECT 2 FROM [BIOL 1030, BIOL 1040] : "Medicine: BIOL 1030 and 1040" : 2;
+SELECT 1 FROM [CHEM 1750, CHEM 2210] : "Medicine: second term of organic chemistry" : 2;
+SELECT 1 FROM [RANGE(S&DS 1000, S&DS 9999), PLACEMENT("2000+ MATH course in linear algebra, probability, statistics, or stochastic processes")] : "Medicine: statistics" : 2;
+SELECT 1 FROM [RANGE(PSYC 1100, PSYC 9999)] : "Medicine: PSYC 1100 or higher" : 2;
+SELECT 1-2 FROM [MB&B 1210L, MB&B 1240L, PHYS 1650L, PHYS 1660L, MB&B 3640, PLACEMENT("Physics laboratory approved by the DUS")] : "Medicine: physics laboratories (one credit)" : 2;
+SELECT 1-2 FROM [MB&B 4700, MB&B 2510L, MCDB 2910L, $cure] : "Medicine: biomedical research (one credit)" : 2;
+SELECT 1 FROM [MB&B 4450, MB&B 3520, MB&B 4490, MCDB 3150, MCDB 4500, PLACEMENT("Advanced seminar approved by the DUS")] : "Medicine: advanced seminar" : 2;

@@ -1,7 +1,25 @@
-SELECT 2 FROM [CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Core Classes" : 1;
-SELECT 1 FROM [CLASS(MCDB 3200)] : "Neurobiology Concentration Required Course" : 2;
-SELECT 1 FROM [TAG("YC MCDB Neurobiology Concentration Elective"), RANGE(MCDB 2500, MCDB 4999)] : "Concentration Elective" : 3;
-SELECT 1 FROM [RANGE(MCDB 2500, MCDB 4999), CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Elective" : 4;
-SELECT 1 FROM [RANGE(MCDB 3500, MCDB 4999)] : "Special Electives" : 5;
-SELECT 1 FROM [RANGE(MCDB 2000, MCDB 3999), RANGE(MB&B 3000, MB&B 3999), RANGE(BENG 3000, BENG 3999), RANGE(ANTH 3000, ANTH 3999), RANGE(E&EB 3000, E&EB 3999)] : "Biology Lab" : 6;
-SELECT 1 FROM [CLASS(MCDB 4750), TAG("MCDB Senior Essay")] : "Senior Requirement" : 7;
+// Molecular, Cellular, and Developmental Biology -- Neurobiology concentration. B.A. -- at least 5.5 course credits beyond the prerequisites, including the senior requirement.
+$core = [MCDB 2000, MCDB 2020, MCDB 2050, MCDB 2100, MCDB 2900, MCDB 3000, MB&B 3000];
+$elective = [RANGE(MCDB 2500, MCDB 4739), RANGE(MCDB 4741, MCDB 4749), RANGE(MCDB 4751, MCDB 4849), RANGE(MCDB 4861, MCDB 4949), RANGE(MCDB 4961, MCDB 9999), PLACEMENT("Intermediate or advanced science, engineering, mathematics, or statistics course approved by the DUS")];
+$special = [RANGE(MCDB 3500, MCDB 4739), RANGE(MCDB 4741, MCDB 4749), RANGE(MCDB 4751, MCDB 4849), RANGE(MCDB 4861, MCDB 4949), RANGE(MCDB 4961, MCDB 9999)];
+$labpair = [SELECT 2 FROM [MCDB 3420L, MCDB 3430L], SELECT 2 FROM [MCDB 3440L, MCDB 3450L]];
+$bioplace = PLACEMENT("BIOL module placed out by examination or DUS permission (one MCDB core course or 2000+ MCDB course substitutes for every two modules)");
+
+// The same course cannot satisfy both a prerequisite and a core or elective requirement.
+// Research courses (MCDB 4740, 4750, 4850, 4860, 4950, 4960) count only toward the senior requirement.
+SELECT 4 FROM [SELECT 1 FROM [BIOL 1010, $bioplace], SELECT 1 FROM [BIOL 1020, $bioplace], SELECT 1 FROM [BIOL 1030, $bioplace], SELECT 1 FROM [BIOL 1040, $bioplace]] : "Prerequisite: BIOL 1010, 1020, 1030, and 1040" : 1;
+SELECT 1 FROM [RANGE(MATH 1150, MATH 9999), S&DS 1000, S&DS 1080, S&DS 1090, S&DS 2380, PLACEMENT("Other Yale statistics course approved by the MCDB DUS (not S&DS 1600)")] : "Prerequisite: mathematics (MATH 1150 or higher) or approved statistics" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], CLASS(CHEM 1700), PLACEMENT("Placement out of the chemistry requirement")] : "Prerequisite: two-term chemistry lecture sequence" : 1;
+SELECT 1 FROM [RANGE(PHYS 1700, PHYS 9999), PLACEMENT("Placement out of the physics requirement")] : "Prerequisite: one term of physics (PHYS 1700 or higher)" : 1;
+SELECT 3 FROM [RANGE(CHEM 1000, CHEM 9999), RANGE(CHEM 1000, CHEM 9999), RANGE(CHEM 1000, CHEM 9999), RANGE(PHYS 1000, PHYS 9999), RANGE(PHYS 1000, PHYS 9999)] : "Students placing out of prerequisites still complete three Yale terms in chemistry and physics (at least one in each)" : 1;
+
+SELECT 2 FROM [$core] : "Two core courses" : 2;
+SELECT 2 FROM [$elective, $elective, $core, $labpair] : "Two general electives (MCDB 2500 or above, additional core courses, or paired labs)" : 3;
+SELECT 1 FROM [$special] : "One special elective (MCDB 3500 or above)" : 3;
+SELECT 1 FROM [MCDB 2010L, MCDB 2030L, MCDB 2210L, MCDB 2310L, MCDB 2510L, MCDB 2910L, MCDB 3030L, MCDB 3210L, MCDB 3410L, MCDB 3420L, MCDB 3430L, MCDB 3440L, MCDB 3450L, RANGE(MB&B 0000, MB&B 9999), RANGE(BENG 0000, BENG 9999), PLACEMENT("Laboratory in Anthropology or Ecology and Evolutionary Biology approved by the DUS")] : "One laboratory in the biological sciences (labs used as an elective may not also count here)" : 2;
+
+SELECT 1 FROM [MCDB 4750, PLACEMENT("Senior essay (15-20 pages, no course credit) approved via the Senior Essay Form")] : "Senior requirement: MCDB 4750 or senior essay" : 1;
+
+// Concentration courses fulfill the general or special elective requirements; a course may not count toward two concentrations.
+SELECT 1 FROM MCDB 3200 : "Neurobiology concentration: MCDB 3200" : 2;
+SELECT 1 FROM [BENG 4410, CPSC 4391, CPSC 4750, MCDB 2500, MCDB 3100, MCDB 3150, MCDB 3290, MCDB 3620, MCDB 4150, MCDB 4250, MCDB 4300, MCDB 4400] : "Neurobiology concentration: one concentration-related elective" : 2;

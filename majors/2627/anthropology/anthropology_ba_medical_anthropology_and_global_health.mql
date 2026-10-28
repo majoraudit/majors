@@ -1,0 +1,22 @@
+// Anthropology B.A. -- Concentration in Medical Anthropology and Global Health -- 12 course credits including the senior requirement.
+$anth = RANGE(ANTH 0000, ANTH 9999);
+$adv = RANGE(ANTH 3000, ANTH 4999);
+$cognate = PLACEMENT("Cognate course in another department approved by the DUS");
+
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Biological")] : "Introductory/intermediate course: evolution of human and nonhuman primates (biological)" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Archaeology")] : "Introductory/intermediate course: archaeological study of human societies" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Linguistic")] : "Introductory/intermediate course: social, cultural, and linguistic dimensions" : 1;
+
+// ANTH 4071, ANTH 4091, and a seminar used for the senior essay do not count here.
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999)] : "Three advanced ANTH courses (3000-4000 level), excluding senior essay work" : 2;
+LIMIT 3 FROM [$cognate, $cognate, $cognate] : "At most three cognate courses from other departments" : 2;
+
+// Remaining credits (ANTH 4071 counts here for the yearlong essay option).
+SELECT 5 FROM [$anth, $anth, $anth, $anth, $anth, $cognate, $cognate, $cognate] : "Anthropology electives or approved cognates" : 4;
+
+// Concentration requirements (six credits in medical anthropology, global health, or cognates).
+SELECT 1 FROM ANTH 4848 : "MAGH: ANTH 4848" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 3000, ANTH 4999, "YC ANTH Medical"), PLACEMENT("3000/4000-level seminar supporting senior essay preparation, approved by the DUS")] : "MAGH: seminar at the 3000 or 4000 level" : 2;
+SELECT 4 FROM [TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS")] : "MAGH: four other electives" : 3;
+
+SELECT 1 FROM [CLASS(ANTH 4091), SELECT 2 FROM [ANTH 4071, ANTH 4091], PLACEMENT("Senior essay written in an additional advanced seminar, approved by the instructor")] : "Senior essay (seminar essay, ANTH 4091, or yearlong ANTH 4071 and ANTH 4091)" : 1;

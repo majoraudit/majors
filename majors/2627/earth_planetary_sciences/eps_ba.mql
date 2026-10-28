@@ -1,4 +1,14 @@
-SELECT 3 FROM [CLASS(MATH 1150), SELECT 1 FROM [SELECT 2 FROM [CLASS(BIOL 1010), CLASS(BIOL 1020)], CLASS(EPS 2550), SELECT 2 FROM [CLASS(PHYS 1700), CLASS(PHYS 1710)], SELECT 2 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810)], SELECT 2 FROM [CLASS(PHYS 2000), CLASS(PHYS 2010)]], PLACEMENT("Chemistry Lecture Course")] : "Prerequisites" : 1;
-SELECT 3 FROM [SELECT 2 FROM [RANGE(EPS 1000, EPS 1400), RANGE(EPS 1000L, EPS 1400L)], SELECT 1 FROM [CLASS(EPS 2740), CLASS(EPS 2750)], SELECT 1 FROM [CLASS(EPS 2200), CLASS(EPS 2320), CLASS(EPS 2610), CLASS(EPS 3100)]] : "EPS Core Courses" : 2;
-SELECT 4 FROM [RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), PLACEMENT("2000+ Class with DUS Approval"), PLACEMENT("2000+ Class with DUS Approval"), PLACEMENT("2000+ Class with DUS Approval"), PLACEMENT("2000+ Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+// Earth and Planetary Sciences B.A. -- at least 9 term courses beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM MATH 1150 : "Prerequisite: MATH 1150" : 1;
+SELECT 1 FROM [SELECT 2 FROM [BIOL 1010, BIOL 1020], SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010]] : "Prerequisite: biology (BIOL 1010, 1020) or physics sequence" : 1;
+SELECT 1 FROM [RANGE(CHEM 1610, CHEM 1999)] : "Prerequisite: a chemistry lecture course" : 1;
+
+$intro = [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L], EPS 1400];
+SELECT 2 FROM [$intro, RANGE(EPS 1000, EPS 1400)] : "Two introductory EPS courses numbered 1000-1400, with accompanying laboratories" : 2;
+SELECT 1 FROM [EPS 2740, EPS 2750] : "Natural resources (EPS 2740 or 2750)" : 1;
+SELECT 1 FROM [EPS 2200, EPS 2320, EPS 2610, EPS 3100] : "Geochemical processes (EPS 2200, 2320, 2610, or 3100)" : 1;
+// The senior essay or thesis counts among these five courses.
+$upper = [RANGE(EPS 2000, EPS 9999), PLACEMENT("Course at the 2000 level or higher in a related field approved by the DUS")];
+SELECT 4 FROM [$upper, $upper, $upper, $upper] : "Additional courses at the 2000 level or higher in EPS or related fields (five including the senior requirement)" : 3;
+
+SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;

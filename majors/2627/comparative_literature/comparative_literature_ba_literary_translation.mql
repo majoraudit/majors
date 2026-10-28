@@ -1,0 +1,22 @@
+// Comparative Literature B.A. -- Literary Translation concentration. 12 term courses including the senior requirement.
+// Courses are listed as CPLT in the catalog; the parser's department list only accepts LITR.
+// Prospective majors must reach L5 competence in the language of the literature requirement.
+SELECT 1 FROM LITR 1300 : "Foundational seminar: CPLT 1300" : 1;
+SELECT 1 FROM [LITR 3048, PLACEMENT("Equivalent of CPLT 3048 approved by the DUS")] : "Second foundational seminar: CPLT 3048" : 1;
+
+SELECT 3 FROM [DIST("L5"), DIST("L5"), DIST("L5"), DIST("L4"), PLACEMENT("Non-instructional course with extensive readings in the language, or DUS-approved substitute")] : "3 in-language literature courses in a single language other than English" : 2;
+SELECT 2 FROM [DIST("L5"), DIST("L5")] : "At least 2 of those at the L5 level" : 2;
+LIMIT 1 FROM DIST("L4") : "At most one L4 course counts toward in-language literature" : 2;
+
+SELECT 3 FROM [
+    SELECT 1 FROM [TAG("YC CPLT Antiquity")],
+    SELECT 1 FROM [TAG("YC CPLT Medieval")],
+    SELECT 1 FROM [TAG("YC CPLT Early Modern"), TAG("YC CPLT 17th-18th centuries")],
+    SELECT 1 FROM [TAG("YC CPLT 19th Century")],
+    SELECT 1 FROM [TAG("YC CPLT 20th & 21st Centuries")]
+] : "Period requirement: one course in each of three of five historical periods" : 2;
+
+SELECT 1 FROM [TAG("YC CPLT Theory")] : "Course in literary or cultural theory" : 2;
+SELECT 2 FROM [TAG("YC CPLT Translation Studies"), TAG("YC CPLT Translation Studies"), PLACEMENT("Translation studies course approved by the DUS")] : "Two courses in translation studies" : 2;
+
+SELECT 1 FROM [CLASS(LITR 4910), SELECT 2 FROM [LITR 4920, LITR 4930]] : "Senior essay (CPLT 4910, or CPLT 4920 and 4930)" : 1;

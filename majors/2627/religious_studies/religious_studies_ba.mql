@@ -1,0 +1,13 @@
+// Religious Studies B.A. -- 12 term courses including the two-term senior essay.
+// Core courses must originate in Religious Studies (RLST subject code).
+$rlst = [RANGE(RLST 0000, RLST 4899), RANGE(RLST 4921, RLST 9999)];
+$elective = [$rlst, PLACEMENT("Elective complementing the area of expertise (language, other discipline, or Divinity School course), approved by the DUS")];
+
+SELECT 1 FROM [RANGE(RLST 0001, RLST 1999)] : "Core: one introductory course (RLST 0001-1999)" : 2;
+SELECT 1 FROM [PLACEMENT("RLST course introducing breadth into the core area of study")] : "Core: one breadth course" : 2;
+SELECT 3 FROM [$rlst, $rlst, $rlst] : "Core: three related RLST courses leading to the area of the senior essay" : 2;
+SELECT 1 FROM RLST 4900 : "Junior seminar (RLST 4900)" : 1;
+SELECT 4 FROM [$elective, $elective, $elective, $elective] : "Four electives" : 3;
+LIMIT 2 FROM [PLACEMENT("Course counted for a second major or outside certificate"), PLACEMENT("Course counted for a second major or outside certificate")] : "At most two electives shared with a second major or certificate" : 3;
+
+SELECT 2 FROM [RLST 4910, RLST 4920] : "Two-term senior essay (RLST 4910 and 4920)" : 1;

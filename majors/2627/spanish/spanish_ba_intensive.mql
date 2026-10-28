@@ -1,0 +1,13 @@
+// Spanish B.A. -- intensive major. 12 term courses beyond the prerequisite, including the senior requirement.
+$adv = RANGE(SPAN 3000, SPAN 4899);
+$el = [RANGE(SPAN 2000, SPAN 4899), RANGE(SPAN 0001, SPAN 0999), PLACEMENT("Course taught in a language other than Spanish approved by the DUS")];
+
+SELECT 1 FROM [SPAN 1400, SPAN 1450, SPAN 1500, PLACEMENT("Equivalent by placement examination, advanced placement, or study abroad")] : "Prerequisite: SPAN 1400, 1450, 1500, or equivalent" : 1;
+
+SELECT 1 FROM SPAN 2200 : "Required introductory course: SPAN 2200" : 1;
+SELECT 2 FROM [RANGE(SPAN 2201, SPAN 2999), RANGE(SPAN 2201, SPAN 2999)] : "Two courses numbered SPAN 2200-2999" : 2;
+SELECT 5 FROM [$adv, $adv, $adv, $adv, $adv] : "5 courses numbered SPAN 3000 or higher (three plus two for the intensive major)" : 2;
+SELECT 3 FROM [$el, $el, $el] : "Three electives numbered SPAN 2000 or higher (or a first-year seminar taught in Spanish)" : 3;
+LIMIT 1 FROM PLACEMENT("Course taught in a language other than Spanish") : "At most one course taught in a language other than Spanish (DUS approval)" : 3;
+
+SELECT 1 FROM SPAN 4900 : "Senior requirement: senior project (SPAN 4900)" : 1;

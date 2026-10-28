@@ -1,4 +1,21 @@
-SELECT 8 FROM [SELECT 1 FROM [CLASS(MATH 1200), CLASS(ENAS 1510)], SELECT 1 FROM [CLASS(CHEM 1650), CLASS(CHEM 1670)], CLASS(PHYS 1800), CLASS(PHYS 1810), CLASS(PHYS 2050L), CLASS(PHYS 2060L), SELECT 1 FROM [CLASS(ENAS 1300), PLACEMENT("Equivalent Qualification")], CLASS(ENAS 1940)] : "Prerequisites" : 1;
-SELECT 6 FROM [SELECT 1 FROM [CLASS(EPS 1000), CLASS(EPS 1010), SELECT 2 FROM [CLASS(EPS 1100), CLASS(EPS 1110L)], SELECT 2 FROM [CLASS(EPS 1250), CLASS(EPS 1260L)]], CLASS(EPS 1400), CLASS(EPS 3220), CLASS(EPS 3350), CLASS(MENG 3422), SELECT 1 FROM [CLASS(S&DS 2300), CLASS(S&DS 2380), CLASS(MATH 2220)]] : "EPS Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("EPS Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+// Earth and Planetary Sciences B.S. -- Atmosphere, Ocean, and Climate concentration.
+// At least 11 term courses beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
+SELECT 1 FROM [ENAS 1300, PLACEMENT("Equivalent programming course approved by the DUS")] : "Prerequisite: ENAS 1300 or equivalent" : 1;
+SELECT 1 FROM ENAS 1940 : "Prerequisite: ENAS 1940" : 1;
+SELECT 2 FROM [PHYS 1800, PHYS 1810] : "Prerequisite: PHYS 1800 and 1810" : 1;
+SELECT 2 FROM [PHYS 2050L, PHYS 2060L] : "Prerequisite: PHYS 2050L and 2060L" : 1;
+
+SELECT 1 FROM [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L]] : "Introductory EPS course (with laboratory where required)" : 2;
+SELECT 5 FROM [
+    SELECT 1 FROM [EPS 1400, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
+    SELECT 1 FROM [EPS 3220, EPS 3230, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
+    SELECT 1 FROM [EPS 3350, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
+    SELECT 1 FROM [MENG 3422, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
+    SELECT 1 FROM [S&DS 2300, S&DS 2380, MATH 2220]
+] : "Core: Earth's climate system, weather and climate, physical oceanography, fluid mechanics, statistics or linear algebra" : 1;
+$el = PLACEMENT("Elective in the environment, atmosphere, ocean, land surface, physics, or statistics approved by the DUS");
+SELECT 4 FROM [RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), $el, $el, $el] : "Four electives" : 3;
+SELECT 1 FROM [RANGE(EPS 2000, EPS 9999)] : "At least one elective from EPS" : 3;
+
+SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;

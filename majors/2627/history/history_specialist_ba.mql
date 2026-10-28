@@ -1,64 +1,47 @@
-SELECT 2 FROM [
-    RANGE(HIST 0000, HIST 4999)
-] : "Prerequisites" : 1;
+// History B.A. -- Specialist concentration. 12 course credits including the prerequisites and the senior requirement.
+$hist = RANGE(HIST 0000, HIST 9999);
+$outside = PLACEMENT("Course taught outside the department approved by the DUS (not for seminar or senior requirements)");
 
-SELECT 5 FROM [
-    TAG("YC HIST Africa"),
-    TAG("YC HIST Asia"),
-    TAG("YC HIST Europe"),
-    TAG("YC HIST Latin America"),
-    TAG("YC HIST Middle East"),
-    TAG("YC HIST United States"),
-    TAG("YC HIST Cultural History"),
-    TAG("YC HIST Empires & Colonialism"),
-    TAG("YC HIST Environmental History"),
-    TAG("YC HIST Ideas & Intellectuals"),
-    TAG("YC HIST Intl & Diplomat Hist"),
-    TAG("YC HIST Politics, Law & Govt"),
-    TAG("YC HIST Race Gender&Sexuality"),
-    TAG("YC HIST Religion in Context"),
-    TAG("YC HIST Sci, Tech, & Medicine"),
-    TAG("YC HIST Social Chng&Social Mvmnt"),
-    TAG("YC HIST The World Economy"),
-    TAG("YC HIST War & Society"),
-    TAG("YC HIST World")
-] : "Specialist Area (Region or Pathway)" : 2;
+SELECT 2 FROM [$hist, $hist] : "Prerequisite: two course credits in History" : 1;
 
-SELECT 2 FROM [
-    TAG("YC HIST Africa"),
-    TAG("YC HIST Asia"),
-    TAG("YC HIST Europe"),
-    TAG("YC HIST Latin America"),
-    TAG("YC HIST Middle East"),
-    TAG("YC HIST United States"),
-    TAG("YC HIST Cultural History"),
-    TAG("YC HIST Empires & Colonialism"),
-    TAG("YC HIST Environmental History"),
-    TAG("YC HIST Ideas & Intellectuals"),
-    TAG("YC HIST Intl & Diplomat Hist"),
-    TAG("YC HIST Politics, Law & Govt"),
-    TAG("YC HIST Race Gender&Sexuality"),
-    TAG("YC HIST Religion in Context"),
-    TAG("YC HIST Sci, Tech, & Medicine"),
-    TAG("YC HIST Social Chng&Social Mvmnt"),
-    TAG("YC HIST The World Economy"),
-    TAG("YC HIST War & Society"),
-    TAG("YC HIST World")
-] : "Outside Specialist Area" : 3;
+// The same course may count toward geographic, preindustrial, and seminar requirements.
+SELECT 2 FROM [TAG("YC HIST Preindustrial"), TAG("YC HIST Preindustrial")] : "Two preindustrial course credits (material before the mid-19th century)" : 2;
+SELECT 2 FROM [RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars"), RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars")] : "Two 3000-level departmental seminars" : 2;
+SELECT 1 FROM [
+    SELECT 5 FROM [TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa")],
+    SELECT 5 FROM [TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia")],
+    SELECT 5 FROM [TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe")],
+    SELECT 5 FROM [TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America")],
+    SELECT 5 FROM [TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East")],
+    SELECT 5 FROM [TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States")],
+    SELECT 5 FROM [TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History")],
+    SELECT 5 FROM [TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism")],
+    SELECT 5 FROM [TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History")],
+    SELECT 5 FROM [TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals")],
+    SELECT 5 FROM [TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist")],
+    SELECT 5 FROM [TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt")],
+    SELECT 5 FROM [TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality")],
+    SELECT 5 FROM [TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context")],
+    SELECT 5 FROM [TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine")],
+    SELECT 5 FROM [TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt")],
+    SELECT 5 FROM [TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy")],
+    SELECT 5 FROM [TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society")],
+    SELECT 5 FROM [PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS")]
+] : "At least five (up to eight) course credits in one geographic region or thematic pathway" : 2;
+SELECT 2 FROM [PLACEMENT("History course outside the area of specialization"), PLACEMENT("History course outside the area of specialization")] : "At least two course credits outside the area of specialization" : 3;
+SELECT 3 FROM [
+    SELECT 1 FROM [TAG("YC HIST Africa")],
+    SELECT 1 FROM [TAG("YC HIST Asia")],
+    SELECT 1 FROM [TAG("YC HIST Europe")],
+    SELECT 1 FROM [TAG("YC HIST Latin America")],
+    SELECT 1 FROM [TAG("YC HIST Middle East")],
+    SELECT 1 FROM [TAG("YC HIST United States")]
+] : "Overall coursework must include at least three geographic regions" : 3;
 
-SELECT 2 FROM [
-    TAG("YC HIST Preindustrial")
-] : "Preindustrial History" : 4;
-
-SELECT 2 FROM [
-    TAG("YC HIST Departmental Seminars")
-] : "Departmental Seminars" : 5;
+SELECT 8 FROM [$hist, $hist, $hist, $hist, $hist, $hist, $hist, $hist, $outside, $outside] : "Eight additional course credits toward the twelve" : 4;
+LIMIT 2 FROM [$outside, $outside] : "At most two non-departmental course credits" : 4;
 
 SELECT 1 FROM [
-    RANGE(HIST 0000, HIST 4999)
-] : "Additional History Elective" : 6;
-
-SELECT 1 FROM [
-    SELECT 1 FROM [CLASS(HIST 4997)],
-    SELECT 2 FROM [CLASS(HIST 4995), CLASS(HIST 4996)]
-] : "Senior Requirement" : 7;
+    SELECT 2 FROM [HIST 4995, HIST 4996],
+    SELECT 2 FROM [HIST 4997, PLACEMENT("One additional full-credit course (may be taken Credit/D/Fail unless a departmental seminar)")]
+] : "Senior requirement: two-term essay or project (HIST 4995, 4996), or one-term essay (HIST 4997) plus one additional course" : 1;

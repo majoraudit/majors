@@ -1,4 +1,12 @@
-SELECT 1 FROM CLASS(PORT 1300) : "The prerequisite for the major is PORT 1300 or the equivalent" : 3;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999)] : "Portuguese Lit/Culture" : 1;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999), RANGE(ANTH 2000 , ANTH 4999), RANGE(HIST 2000 , HIST 4999), RANGE(HSAR 2000 , HSAR 4999)] : "Electives" : 2;
-SELECT 1 FROM [CLASS(PORT 4910), CLASS(PORT 4920)] : "Senior Requirement" : 3;
+// Portuguese B.A. -- 10 term courses beyond the prerequisite, including the senior essay.
+$port = [RANGE(PORT 1400, PORT 4909), RANGE(PORT 4921, PORT 9999)];
+$related = PLACEMENT("Related course in another language and literature, anthropology, history, history of art, area studies, or study abroad, approved by the DUS");
+
+SELECT 1 FROM [PORT 1300, PLACEMENT("Equivalent of PORT 1300 by placement")] : "Prerequisite: PORT 1300 or equivalent" : 1;
+
+SELECT 5 FROM [$port, $port, $port, $port, $port] : "At least five courses in the literatures or cultures of the Portuguese world" : 2;
+// The senior essay counts for at most two credits; with a one-term essay, one more course is needed.
+SELECT 3-4 FROM [$port, $port, $port, $port, $related, $related, $related, $related] : "Additional courses (Portuguese or up to four approved related courses)" : 3;
+LIMIT 4 FROM [$related, $related, $related, $related] : "At most four courses from other departments or study abroad" : 3;
+
+SELECT 1 FROM [CLASS(PORT 4910), CLASS(PORT 4920), SELECT 2 FROM [PORT 4910, PORT 4920]] : "Senior essay (PORT 4910 and/or 4920)" : 1;

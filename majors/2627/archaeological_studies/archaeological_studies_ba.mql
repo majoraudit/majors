@@ -1,7 +1,24 @@
-SELECT 1 FROM [] : "Intro Laboratory" : 2
-SELECT 1 FROM [] : "Introductory Survey Course" : 2
-SELECT 1 FROM [] : "Advanced Laboratory"
-SELECT 1 FROM [] : "Theory Course" : 2
-SELECT 7 FROM [] : "Electives"
-SELECT 1 FROM [] : "Summer Research Project"
-SELECT 1 FROM [] : "Senior Requirement"
+// Archaeological Studies B.A. -- 12 term courses including the senior project.
+$arcg = RANGE(ARCG 0000, ARCG 9999);
+$sub = PLACEMENT("Course from another department related to the student's research, approved by the DUS");
+
+SELECT 1 FROM [TAG("YC ARCG Intro Survey")] : "Introductory survey course" : 1;
+SELECT 1 FROM ARCG 3116L : "Introductory laboratory" : 1;
+SELECT 1 FROM [TAG("YC ARCG Advanced Lab")] : "Advanced laboratory course" : 1;
+SELECT 1 FROM [TAG("YC ARCG Theory")] : "Theory course" : 1;
+
+// Electives are courses multiple-titled with Archaeological Studies; up to three may be research-related substitutions.
+SELECT 7 FROM [$arcg, $arcg, $arcg, $arcg, $arcg, $arcg, $arcg, $sub, $sub, $sub] : "Seven archaeology electives" : 3;
+SELECT 3 FROM [
+    SELECT 1 FROM [RANGE(ANTH 0000, ANTH 9999)],
+    SELECT 1 FROM [RANGE(CLSS 0000, CLSS 9999), RANGE(CLCV 0000, CLCV 9999)],
+    SELECT 1 FROM [RANGE(EPS 0000, EPS 9999)],
+    SELECT 1 FROM [RANGE(EVST 0000, EVST 9999)],
+    SELECT 1 FROM [RANGE(HIST 0000, HIST 9999)],
+    SELECT 1 FROM [RANGE(HSAR 0000, HSAR 9999)],
+    SELECT 1 FROM [RANGE(NELC 0000, NELC 9999)],
+    SELECT 1 FROM [RANGE(RLST 0000, RLST 9999)]
+] : "Three of the electives from different departments or programs" : 2;
+
+SELECT 1 FROM PLACEMENT("Yale-affiliated summer research project or field school approved in advance by the DUS") : "Summer field research" : 1;
+SELECT 1 FROM ARCG 4491 : "Senior research project" : 1;

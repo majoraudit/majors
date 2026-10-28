@@ -1,27 +1,17 @@
-SELECT 1 FROM [
-  CLASS(MATH 1200),
-  TAG("Equivalent Placement or Credit")
-] : "Prerequisites" : 1;
+// Mathematics and Philosophy B.A. -- 12 term courses including the prerequisite and the senior seminar.
+// Math courses must carry an undergraduate MATH number; graduate MATH 5000-5999 may count as electives, 6000+ may not.
+$math = [RANGE(MATH 2220, MATH 4690), RANGE(MATH 5000, MATH 5999)];
+$phil = [RANGE(PHIL 0000, PHIL 1114), RANGE(PHIL 1116, PHIL 9999)];
 
-SELECT 10 FROM [
-  CLASS(MATH 2700),
-  CLASS(PHIL 2267),
-  CLASS(PHIL 4427),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  TAG("YC PHIL Logic"),
-  TAG("YC PHIL Metaphysics&Epistemol"),
-  TAG("YC PHIL Ethics & Value Theory"),
-  TAG("YC PHIL Logic")
-] : "Core Classes" : 10;
+SELECT 1 FROM [MATH 1200, SELECT 3 FROM [MATH 3020, MATH 2250, MATH 2550]] : "Prerequisite: MATH 1200 (or MATH 3020 after MATH 2250 and 2550)" : 1;
 
-SELECT 1 FROM [
-  RANGE(PHIL 1000 , PHIL 4999),
-  RANGE(MATH 2220 , MATH 4690)
-] : "Electives" : 1;
+SELECT 1 FROM MATH 2700 : "Set theory (MATH 2700, before the end of junior year)" : 1;
+SELECT 1 FROM PHIL 2267 : "Mathematical logic (PHIL 2267, before the end of junior year)" : 1;
+SELECT 1 FROM PHIL 4427 : "Computability and logic (PHIL 4427)" : 1;
+SELECT 3 FROM [$math, $math, $math] : "Three additional mathematics courses numbered 2220 or higher" : 3;
+// PHIL 1115 (First-Order Logic) does not count.
+SELECT 3 FROM [$phil, $phil, $phil] : "Three additional philosophy courses" : 3;
+SELECT 1 FROM [TAG("YC PHIL Logic"), PLACEMENT("Advanced philosophy course with a substantive logical component (other than PHIL 4427)")] : "One additional philosophy course with an advanced logic component (may be the senior seminar)" : 2;
+SELECT 1 FROM [$math, $phil] : "One mathematics or philosophy elective" : 4;
 
-SELECT 1 FROM [
-  RANGE(MATH 4800 , MATH 4890),
-  TAG("YC PHIL Senior Seminar")
-] : "Senior Requirement" : 1;
+SELECT 1 FROM [RANGE(MATH 4800, MATH 4890), PLACEMENT("Philosophy seminar designated for the combined major's senior requirement (consult the Philosophy DUS)")] : "Senior seminar (with additional work agreed with the instructor)" : 1;

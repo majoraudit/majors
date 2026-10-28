@@ -12,5 +12,7 @@
     "dus": [["Sarah Mahurin", "sarah.mahurin@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/special-divisional-majors/",
     "websiteLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/special-divisional-majors/",
-    "specializations": []
+    "specializations": [
+        "special_divisional_major_ba_or_bs.mql"
+    ]
 }

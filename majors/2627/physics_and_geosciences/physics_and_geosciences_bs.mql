@@ -1,8 +1,22 @@
-SELECT 1 FROM [CLASS(PHYS 2060L)] : "Physics Lab" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 4010), CLASS(PHYS 4020)], SELECT 3 FROM [CLASS(PHYS 4100), CLASS(PHYS 4300), CLASS(PHYS 4500)]] : "Advanced Physics Sequence" : 2;
-SELECT 1 FROM [CLASS(PHYS 4390), CLASS(PHYS 4400)] : "Quantum Mechanics" : 3;
-SELECT 1 FROM [RANGE(PHYS 3000 , PHYS 4999)] : "Physics Elective" : 4;
-SELECT 1 FROM [RANGE(EPS 1000 , EPS 1400)] : "Intro EPS Course" : 5;
-SELECT 1 FROM [RANGE(EPS 2000 , EPS 4999)] : "EPS Elective" : 6;
-SELECT 4 FROM [RANGE(EPS 2000 , EPS 4999)] : "Advanced EPS Track Courses" : 7;
-SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 4710), CLASS(PHYS 4720)], SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 8;
+// Physics and Geosciences B.S. -- 12.5 course credits beyond the prerequisites (13 if the EPS introductory course has a lab),
+// including the senior project: at least 4.5 credits in Physics and at least 6 in Earth and Planetary Sciences.
+// No elective may count toward multiple requirements.
+SELECT 1 FROM [MATH 1200, PLACEMENT("Equivalent of MATH 1200")] : "Prerequisite: MATH 1200 or equivalent" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Prerequisite: introductory physics sequence" : 1;
+SELECT 1 FROM PHYS 2050L : "Prerequisite: PHYS 2050L" : 1;
+SELECT 1 FROM [ENAS 1940, MATH 2460, PHYS 4000] : "Prerequisite: ordinary differential equations" : 1;
+
+SELECT 1 FROM PHYS 2060L : "PHYS 2060L" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 4010, PHYS 4020], SELECT 3 FROM [PHYS 4100, PHYS 4300, PHYS 4500]] : "Advanced physics sequence: PHYS 4010 and 4020, or PHYS 4100, 4300, and 4500" : 1;
+SELECT 1 FROM [PHYS 4390, PHYS 4400] : "Quantum mechanics: PHYS 4390 or 4400" : 1;
+SELECT 1 FROM [RANGE(PHYS 3000, PHYS 4709), RANGE(PHYS 4721, PHYS 9999), PLACEMENT("Related course substituted with permission of the Physics DUS")] : "One physics elective numbered 3000 or above" : 3;
+
+SELECT 1 FROM [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L], EPS 1400] : "One introductory EPS course numbered 1000-1400 (with any accompanying laboratory)" : 2;
+SELECT 1 FROM [RANGE(EPS 2000, EPS 4899), PLACEMENT("Related course substituted with permission of the EPS DUS")] : "One EPS elective numbered 2000 or above" : 3;
+$epsadv = PLACEMENT("Advanced track elective approved by the EPS DUS");
+SELECT 1 FROM [
+    SELECT 4 FROM [EPS 3220, EPS 3230, EPS 3350, MENG 3422, EPS 1400, $epsadv, $epsadv, $epsadv, $epsadv],
+    SELECT 4 FROM [EPS 2100, EPS 2120, EPS 3500, EPS 2200, EPS 2320, EPS 3100, EPS 3120, $epsadv, $epsadv, $epsadv, $epsadv]
+] : "Four advanced electives from one EPS track (Atmosphere, Ocean, and Climate; or Solid Earth Science)" : 2;
+
+SELECT 1 FROM [SELECT 2 FROM [PHYS 4710, PHYS 4720], SELECT 2 FROM [EPS 4900, EPS 4910]] : "Two-term senior project (PHYS 4710 and 4720, or EPS 4900 and 4910) with oral reports to both departments" : 1;

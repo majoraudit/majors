@@ -17,6 +17,7 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/architecture/",
     "websiteLink": "https://www.architecture.yale.edu/academics/undergraduate-studies",
     "specializations": [
-        "architecture_ba.mql"
+        "architecture_ba_design.mql",
+        "architecture_ba_history_theory_criticism_and_urbanism.mql"
     ]
 }

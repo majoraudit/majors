@@ -1,5 +1,17 @@
-SELECT 3 FROM [RANGE(MUSI 2100 , MUSI 2199), RANGE(MUSI 3100 , MUSI 3199), RANGE(MUSI 4100 , MUSI 4199)] : "Group I" : 1;
-SELECT 3 FROM [RANGE(MUSI 2200 , MUSI 2299), RANGE(MUSI 3200 , MUSI 3299), RANGE(MUSI 4200 , MUSI 4299)] : "Group II" : 2;
-SELECT 3 FROM [RANGE(MUSI 2300 , MUSI 2399), RANGE(MUSI 3300 , MUSI 3399), RANGE(MUSI 4300 , MUSI 4399)] : "Group III" : 3;
-SELECT 3 FROM [RANGE(MUSI 2400 , MUSI 2499), RANGE(MUSI 3400 , MUSI 3499), RANGE(MUSI 4400 , MUSI 4494)] : "Group IV" : 4;
-SELECT 2 FROM [RANGE(MUSI 4997 , MUSI 4999)] : "Senior Requirement (Intensive)" : 5;
+// Music B.A. -- intensive major: 14 term courses numbered 2000 or above, including the senior requirement.
+// With DUS permission, one 1000-level course may replace an intermediate course in the appropriate group.
+// Up to three performance instruction courses may count toward the major.
+$sub1000 = PLACEMENT("1000-level course substituted for an intermediate course with DUS permission");
+
+SELECT 2 FROM [TAG("YC MUSI Intermediate Grp I"), TAG("YC MUSI Intermediate Grp I"), $sub1000] : "Group I (music theory and technology): two intermediate courses" : 2;
+SELECT 1 FROM [TAG("YC MUSI Advanced Grp I")] : "Group I (music theory and technology): one advanced course" : 2;
+SELECT 2 FROM [TAG("YC MUSI Intermediate Grp II"), TAG("YC MUSI Intermediate Grp II"), $sub1000] : "Group II (composition, technology, and performance): two intermediate courses" : 2;
+SELECT 1 FROM [TAG("YC MUSI Advanced Grp II")] : "Group II (composition, technology, and performance): one advanced course" : 2;
+SELECT 2 FROM [TAG("YC MUSI Intermediate Grp III"), TAG("YC MUSI Intermediate Grp III"), $sub1000] : "Group III (Western art-music tradition): two intermediate courses" : 2;
+SELECT 1 FROM [TAG("YC MUSI Advanced Grp III")] : "Group III (Western art-music tradition): one advanced course" : 2;
+SELECT 2 FROM [TAG("YC MUSI Intermediate Grp IV"), TAG("YC MUSI Intermediate Grp IV"), $sub1000] : "Group IV (popular, vernacular, or non-Western music): two intermediate courses" : 2;
+SELECT 1 FROM [TAG("YC MUSI Advanced Grp IV")] : "Group IV (popular, vernacular, or non-Western music): one advanced course" : 2;
+LIMIT 1 FROM $sub1000 : "At most one 1000-level substitution" : 3;
+
+SELECT 2 FROM [RANGE(MUSI 4997, MUSI 4999), RANGE(MUSI 4997, MUSI 4999)] : "Senior requirement: two-term senior essay or project in music research or composition (MUSI 4997-4999)" : 1;
+SELECT 1 FROM PLACEMENT("Admission to the intensive major after satisfactory first-term senior project work") : "Intensive major admission" : 1;

@@ -1,0 +1,15 @@
+// Psychology B.S. -- standard major. 12 courses beyond PSYC 1100, including the senior requirement.
+$psyc = RANGE(PSYC 0000, PSYC 9999);
+$outside = PLACEMENT("Course in a related department with substantial empirical psychology content, approved in advance by the DUS");
+
+SELECT 1 FROM [PSYC 1100, PLACEMENT("Score of 5 on AP Psychology or 7 on IB Psychology")] : "Prerequisite: PSYC 1100" : 1;
+SELECT 1 FROM [S&DS 1000, S&DS 2300, PLACEMENT("S&DS 1230 (YData) or S&DS 2300 for students with AP Statistics 5, with DUS approval")] : "Statistics (S&DS 1000 or 2300), preferably before the senior year" : 1;
+SELECT 2 FROM [TAG("YC PSYC Social Science Core"), SELECT 1 FROM [TAG("YC PSYC Social Science"), TAG("YC PSYC Social Science Core")]] : "Two social science courses (at least one Core: PSYC 1400, 1500, 1700)" : 2;
+SELECT 2 FROM [TAG("YC PSYC Natural Science Core"), SELECT 1 FROM [TAG("YC PSYC Natural Science"), TAG("YC PSYC Natural Science Core")]] : "Two natural science courses (at least one Core: PSYC 1300, 1600)" : 2;
+SELECT 1 FROM [RANGE(PSYC 2000, PSYC 2999)] : "Research methods: one data-collection course numbered PSYC 2000-2999 (before the senior year)" : 2;
+SELECT 4 FROM [$psyc, $psyc, $psyc, $psyc, $outside, $outside, $outside, PLACEMENT("Second statistics or quantitative methods course approved in advance by the DUS")] : "Four electives" : 4;
+LIMIT 3 FROM [$outside, $outside, $outside] : "At most three courses from related departments" : 4;
+LIMIT 3 FROM [RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999)] : "No more than three credits from PSYC 4900-4999" : 4;
+
+SELECT 1 FROM PSYC 4990 : "Senior requirement: empirical research in PSYC 4990 during the senior year" : 1;
+SELECT 1 FROM [RANGE(PSYC 4000, PSYC 4999)] : "Senior requirement: one additional course credit from PSYC 4000-4999" : 1;

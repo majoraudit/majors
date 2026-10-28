@@ -1,4 +1,21 @@
-SELECT 5 FROM [] : "Prerequisites - Physics" : 2
-SELECT 3 FROM [] : "Core Courses" : 2
-SELECT 3 FROM [] : "Area of Focus"
-SELECT 2 FROM [] : "Senior Requirement" : 2
+// Applied Physics B.S. -- 8 term courses beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [
+    SELECT 2 FROM [PHYS 1800, PHYS 1810],
+    SELECT 2 FROM [PHYS 2000, PHYS 2010],
+    SELECT 2 FROM [PHYS 2600, PHYS 2610]
+] : "Prerequisite: two introductory physics courses" : 1;
+SELECT 1 FROM [PHYS 1660L, PHYS 2060L] : "Prerequisite: physics laboratory" : 1;
+SELECT 1 FROM [APHY 1510, MATH 1200] : "Prerequisite: APHY 1510 or MATH 1200" : 1;
+SELECT 1 FROM [
+    CLASS(PHYS 4000),
+    SELECT 2 FROM [APHY 1940, SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260]]
+] : "Prerequisite: PHYS 4000 (or APHY 1940 with linear algebra)" : 1;
+
+SELECT 1 FROM [APHY 3220, PLACEMENT("Equivalent of APHY 3220 approved by the DUS")] : "Electromagnetic waves and devices" : 1;
+SELECT 1 FROM [APHY 4390, PHYS 4400, PLACEMENT("Equivalent quantum mechanics course approved by the DUS")] : "Quantum mechanics" : 1;
+SELECT 1 FROM [APHY 4200, PLACEMENT("Equivalent of APHY 4200 approved by the DUS")] : "Thermodynamics and statistical mechanics" : 1;
+
+$focus = PLACEMENT("Advanced course in the area of focus (physical or mathematical sciences or engineering) approved by the DUS");
+SELECT 3 FROM [APHY 3210, APHY 4480, APHY 4490, ECE 3200, ECE 3250, CHEM 2200, MENG 2615, $focus, $focus, $focus] : "Three advanced courses in an area of focus" : 3;
+
+SELECT 2 FROM [APHY 4710, APHY 4720] : "Senior research project" : 1;

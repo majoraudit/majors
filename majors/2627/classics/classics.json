@@ -17,6 +17,8 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/classics/",
     "websiteLink": "https://classics.yale.edu/",
     "specializations": [
-        "african_american_studies_ba.mql"
+        "classics_ba_two_literatures.mql",
+        "classics_ba_one_literature_greek.mql",
+        "classics_ba_one_literature_latin.mql"
     ]
 }

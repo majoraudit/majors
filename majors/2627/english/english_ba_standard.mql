@@ -1,36 +1,28 @@
-SELECT 3 FROM [
-  CLASS(ENGL 1025),
-  CLASS(ENGL 1026),
-  CLASS(ENGL 1027),
-  CLASS(ENGL 1028)
-] : "Core Courses" : 2;
+// English B.A. -- standard major. At least 14 courses including the senior requirement.
+$found = [ENGL 1025, ENGL 1026, ENGL 1027, ENGL 1028];
+$cw = TAG("YC ENGL Creative Writing");
+$engl = RANGE(ENGL 0000, ENGL 9999);
+$outside = PLACEMENT("Relevant upper-level course in another department (normally literature in translation or another language) approved by the DUS");
+
+SELECT 3 FROM [$found, SELECT 2 FROM [DRST 0001, DRST 0002], SELECT 2 FROM [ENGL 1029, ENGL 1030], PLACEMENT("Two overlapping upper-level courses substituted for one foundational course with DUS permission")] : "Three foundational courses from ENGL 1025-1028 (DRST 0001-0002 or ENGL 1029-1030 may replace one)" : 1;
+
+// Introductory courses do not fulfill the period requirements.
+SELECT 1 FROM [TAG("YC ENGL Medieval")] : "Historical period: Medieval" : 2;
+SELECT 1 FROM [TAG("YC ENGL Renaissance")] : "Historical period: Renaissance" : 2;
+SELECT 1 FROM [TAG("YC ENGL 18th/19th Century")] : "Historical period: 18th/19th century" : 2;
+SELECT 1 FROM [TAG("YC ENGL 20th/21st Century")] : "Historical period: 20th/21st century" : 2;
+
+SELECT 1 FROM [TAG("YC ENGL Junior Seminar")] : "Junior literature (non-creative writing) seminar" : 2;
+SELECT 1 FROM PLACEMENT("Meeting with a research librarian in the first term of the senior requirement") : "Library requirement" : 1;
+
+LIMIT 5 FROM [RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030)] : "At most five introductory courses (ENGL 1020 and 1023 count as introductory)" : 4;
+LIMIT 2 FROM [$outside, $outside] : "At most two courses from other departments" : 4;
+LIMIT 2 FROM [$cw, $cw] : "At most two designated creative writing courses" : 4;
+
+SELECT 4 FROM [$engl, $engl, $engl, $engl, $outside, $outside, PLACEMENT("Residential College Seminar approved by the DUS")] : "Four electives" : 4;
 
 SELECT 1 FROM [
-  TAG_DEPT("YC ENGL Medieval", "ENGL")
-] : "Historical Period Medieval" : 3;
-
-SELECT 1 FROM [
-  TAG_DEPT("YC ENGL Renaissance", "ENGL")
-] : "Historical Period Renaissance" : 4;
-
-SELECT 1 FROM [
-  TAG_DEPT("YC ENGL 18th/19th Century", "ENGL")
-] : "Historical Period Eighteenth and Nineteenth Century" : 5;
-
-SELECT 1 FROM [
-  TAG_DEPT("YC ENGL 20th/21st Century", "ENGL")
-] : "Historical Period Twentieth and Twenty First Century" : 6;
-
-SELECT 1 FROM [
-  TAG_DEPT("YC ENGL Junior Seminar", "ENGL")
-] : "Junior Seminar" : 7;
-
-SELECT 4 FROM [
-  DEPT("ENGL")
-] : "English Electives" : 8;
-
-SELECT 2 FROM [
-  TAG_DEPT("YC ENGL Senior Seminar", "ENGL"),
-  CLASS(ENGL 4100),
-  CLASS(ENGL 4101)
-] : "Senior Requirement" : 1;
+    SELECT 2 FROM [TAG("YC ENGL Senior Seminar"), TAG("YC ENGL Senior Seminar")],
+    SELECT 2 FROM [TAG("YC ENGL Senior Seminar"), ENGL 4100],
+    SELECT 2 FROM [ENGL 4100, ENGL 4101]
+] : "Senior requirement: two senior seminars, a senior seminar and ENGL 4100, or a two-term senior essay (ENGL 4100, 4101)" : 1;

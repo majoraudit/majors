@@ -1,0 +1,29 @@
+// Computer Science and Economics B.S. -- 14 term courses beyond the prerequisites, plus the senior project.
+// A more advanced course in the same area may substitute for a required course with DUS and adviser permission.
+$cs = TAG("YC CPSC Elective");
+$econ = RANGE(ECON 2000, ECON 4999);
+$related = TAG("YC CSEC Elective not CS or EC");
+
+SELECT 1 FROM [CPSC 2020, MATH 2440, PLACEMENT("Prior preparation in discrete mathematics (e.g., AP Computer Science)")] : "Prerequisite: discrete mathematics" : 1;
+SELECT 1 FROM [MATH 1120, PLACEMENT("Prior preparation in calculus (e.g., AP Calculus 4 or 5)")] : "Prerequisite: calculus" : 1;
+SELECT 1 FROM [ECON 1110, ECON 1115, PLACEMENT("Prior preparation in microeconomics (e.g., AP Microeconomics 4 or 5)")] : "Prerequisite: microeconomics" : 1;
+SELECT 1 FROM [ECON 1111, ECON 1116, PLACEMENT("Prior preparation in macroeconomics (e.g., AP Macroeconomics 4 or 5)")] : "Prerequisite: macroeconomics" : 1;
+
+SELECT 3 FROM [CPSC 2010, CPSC 2230, CPSC 3230] : "CPSC 2010, 2230, and 3230" : 1;
+SELECT 1 FROM [CPSC 3650, CPSC 3660] : "Algorithms (CPSC 3650 or 3660; only one may count)" : 1;
+SELECT 1 FROM [ECON 2121, ECON 2125] : "Intermediate microeconomics (ECON 2121 or 2125)" : 1;
+SELECT 1 FROM [
+    SELECT 2 FROM [ECON 1117, ECON 2123],
+    SELECT 2 FROM [ECON 2135, ECON 2136],
+    SELECT 3 FROM [S&DS 2410, S&DS 2420, ECON 2136]
+] : "Econometrics: ECON 1117 and 2123, or ECON 2135 and 2136 (S&DS 2410 and 2420 may replace ECON 2135)" : 1;
+SELECT 1 FROM [ECON 3351, CPSC 4550] : "Game theory (ECON 3351 or CPSC 4550)" : 1;
+// May not also count as an elective or for the game theory requirement.
+SELECT 1 FROM [TAG("YC CSEC Elctv intrsectn CS/EC"), CPSC 4550, ECON 4417, ECON 4433, ECON 4486, ECON 4441, ECON 4435, ECON 4478, CPSC 4740] : "Course in the intersection of computer science and economics" : 2;
+
+SELECT 5 FROM [$cs, $cs, $cs, $cs, $cs, $econ, $econ, $econ, $econ, ECON 2122, ECON 2259, ECON 6672, S&DS 3650, $related, $related] : "Five electives" : 3;
+SELECT 2 FROM [$cs, $cs] : "At least two electives in Computer Science" : 3;
+SELECT 1 FROM [$econ, ECON 2122, ECON 2259, ECON 6672] : "At least one elective in Economics" : 3;
+LIMIT 2 FROM [$related, $related, S&DS 3650] : "At most two electives from related departments (with adviser permission)" : 3;
+
+SELECT 1 FROM CSEC 4910 : "Senior project combining computer science and economics" : 1;

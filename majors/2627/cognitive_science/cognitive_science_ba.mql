@@ -1,0 +1,24 @@
+// Cognitive Science B.A. -- 15 term courses (13.5 credits), including the prerequisite and the senior requirement.
+// No course may fulfill more than one requirement.
+$depth = PLACEMENT("Intermediate/advanced depth course (normally 3000+) on the student's focal topic, approved by the DUS");
+
+SELECT 1 FROM CGSC 1100 : "Prerequisite: introductory survey" : 1;
+
+SELECT 4 FROM [
+    SELECT 1 FROM [CPSC 2010],
+    SELECT 1 FROM [ECON 2259],
+    SELECT 1 FROM [LING 1100, LING 1160, LING 1300, LING 1179, LING 2320, LING 2530],
+    SELECT 1 FROM [MCDB 3200, NSCI 3400, PSYC 1600, PSYC 2670],
+    SELECT 1 FROM [PHIL 1126, PHIL 1182, PHIL 2269, PHIL 2270, PHIL 2271],
+    SELECT 1 FROM [PSYC 1100, PLACEMENT("PSYC S1390 (Summer Session)"), PSYC 1400],
+    SELECT 1 FROM [ANTH 1482]
+] : "Breadth: one course in each of four of the seven subfields" : 2;
+
+// Depth courses must come from at least two disciplines; one directed reading/research course may count with DUS permission.
+SELECT 6 FROM [$depth, $depth, $depth, $depth, $depth, $depth] : "Depth: six intermediate/advanced courses on a specific topic" : 3;
+LIMIT 1 FROM [CGSC 4710, CGSC 4720, CGSC 4730, CGSC 4740] : "Only one term of CGSC 4710, 4720, 4730, or 4740 may count" : 3;
+
+SELECT 1 FROM [CPSC 1001, CPSC 2020, LING 2249, PSYC 2670, S&DS 1000, S&DS 2200, S&DS 2300, PLACEMENT("S&DS S107E or other skills course approved by the DUS")] : "Skills course" : 2;
+
+SELECT 1 FROM CGSC 3950 : "Junior colloquium" : 1;
+SELECT 2 FROM [CGSC 4800, CGSC 4810] : "Senior requirement: nonempirical senior essay" : 1;

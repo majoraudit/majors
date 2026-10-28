@@ -1,22 +1,18 @@
-SELECT 2 FROM [
-  DIST("HU"),
-  DIST("SO")
-] : "Core HU or SO Courses" : 2;
+// Environmental Studies B.S. -- at least 12 course credits beyond the prerequisites, including the two-term senior requirement.
+$conc = PLACEMENT("Concentration course planned with the DUS");
 
-SELECT 2 FROM [
-  DIST("SC")
-] : "Core Science Courses" : 3;
+SELECT 1 FROM [RANGE(MATH 1120, MATH 9999), RANGE(PHYS 1700, PHYS 9999), RANGE(S&DS 1000, S&DS 9999), PLACEMENT("Completion of the Certificate in Data Science")] : "Prerequisite: mathematics, physics, or statistics course" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670], RANGE(CHEM 1670, CHEM 9999)] : "Prerequisite: two-term chemistry lecture sequence (or CHEM 1670 or higher with advanced placement)" : 1;
+SELECT 4 FROM [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040] : "Prerequisite: BIOL 1010, 1020, 1030, and 1040" : 1;
+SELECT 1 FROM TAG("YC EVST BS Natural Sci Lab") : "Prerequisite: natural science laboratory" : 1;
 
-SELECT 3 FROM [
-  DIST("SC")
-] : "Science Distribution Concentration Courses" : 4;
+SELECT 1 FROM TAG("YC EVST Core Humanities") : "Core: humanities" : 2;
+SELECT 1 FROM TAG("YC EVST Core Social Sci") : "Core: social sciences" : 2;
+SELECT 2 FROM [TAG("YC EVST Core BS Natural Sci"), TAG("YC EVST Core BS Natural Sci")] : "Core: two natural science courses" : 2;
 
-SELECT 3 FROM [
-  DEPT("EVST"),
-  TAG("YC EVST Core Human/Social Sci"),
-  TAG("YC EVST Core BS Natural Scie")
-] : "Other Concentration Courses" : 5;
+SELECT 3 FROM [DIST("SC"), DIST("SC"), DIST("SC")] : "Concentration: three courses with the SC designation numbered 2000 or higher" : 2;
+SELECT 2 FROM [PLACEMENT("Concentration course providing interdisciplinary context"), PLACEMENT("Concentration course providing interdisciplinary context")] : "Concentration: two courses providing interdisciplinary context" : 2;
+SELECT 1 FROM $conc : "Concentration: one additional course (six in total)" : 3;
+SELECT 1 FROM PLACEMENT("Elective approved by the DUS") : "One elective" : 4;
 
-SELECT 2 FROM [
-  CLASS(EVST 4960)
-] : "Two Term Senior Research Project" : 1;
+SELECT 2 FROM [EVST 4960, EVST 4960] : "Senior requirement: two-term research project (EVST 4960)" : 1;

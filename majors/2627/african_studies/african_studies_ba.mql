@@ -1,0 +1,23 @@
+// African Studies B.A. -- 12 term courses including the senior requirement.
+$afst = RANGE(AFST 0000, AFST 9999);
+$focus = PLACEMENT("Area-of-focus course approved by the DUS");
+
+SELECT 1 FROM DIST_DEPT("HU", "AFST") : "African Studies course in the humanities" : 2;
+SELECT 1 FROM DIST_DEPT("SO", "AFST") : "African Studies course in the social sciences" : 2;
+
+SELECT 1 FROM [
+    SELECT 4 FROM [RANGE(SWAH 0000, SWAH 9999), RANGE(SWAH 0000, SWAH 9999), RANGE(SWAH 0000, SWAH 9999), RANGE(SWAH 0000, SWAH 9999)],
+    SELECT 4 FROM [RANGE(TWI 0000, TWI 9999), RANGE(TWI 0000, TWI 9999), RANGE(TWI 0000, TWI 9999), RANGE(TWI 0000, TWI 9999)],
+    SELECT 4 FROM [RANGE(WLOF 0000, WLOF 9999), RANGE(WLOF 0000, WLOF 9999), RANGE(WLOF 0000, WLOF 9999), RANGE(WLOF 0000, WLOF 9999)],
+    SELECT 4 FROM [RANGE(YORU 0000, YORU 9999), RANGE(YORU 0000, YORU 9999), RANGE(YORU 0000, YORU 9999), RANGE(YORU 0000, YORU 9999)],
+    SELECT 4 FROM [RANGE(ZULU 0000, ZULU 9999), RANGE(ZULU 0000, ZULU 9999), RANGE(ZULU 0000, ZULU 9999), RANGE(ZULU 0000, ZULU 9999)],
+    SELECT 4 FROM [RANGE(ARBC 0000, ARBC 9999), RANGE(ARBC 0000, ARBC 9999), RANGE(ARBC 0000, ARBC 9999), RANGE(ARBC 0000, ARBC 9999)],
+    SELECT 4 FROM [PLACEMENT("Two years of another African language with DUS permission"), PLACEMENT("Two years of another African language with DUS permission"), PLACEMENT("Two years of another African language with DUS permission"), PLACEMENT("Two years of another African language with DUS permission")],
+    SELECT 5 FROM [PLACEMENT("African language requirement waived by placement examination"), $afst, $afst, $afst, $afst]
+] : "Two years of an African language (or four substitute AFST courses if waived)" : 1;
+
+SELECT 1 FROM [AFST 5505, PLACEMENT("Research methods course selected in consultation with the DUS")] : "Research methods course" : 2;
+
+SELECT 4 FROM [$focus, $focus, $focus, $focus] : "Four courses in an area of focus" : 3;
+
+SELECT 1 FROM AFST 4491 : "Senior essay" : 1;

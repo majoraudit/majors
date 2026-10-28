@@ -1,33 +1,12 @@
-SELECT 2 FROM [
-    PLACEMENT("First year German completed or equivalent"),
-    PLACEMENT("Second year German completed or equivalent")
-] : "Prerequisites" : 1;
+// German Studies B.A. -- 10 course credits including the senior essay.
+// The intensive major replaces one advanced seminar with GMAN 4930, the second term of the senior essay.
+$gman = RANGE(GMAN 1600, GMAN 9999);
 
-SELECT 1 FROM [
-    SELECT 10 FROM [
-        SELECT 1 FROM [RANGE(GMAN 1500 , GMAN 1599)],
-        SELECT 6 FROM [
-            RANGE(GMAN 1600 , GMAN 1699),
-            RANGE(GMAN 1700 , GMAN 1799),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus")
-        ],
-        SELECT 2 FROM [RANGE(GMAN 1600 , GMAN 9999), RANGE(GMAN 1600 , GMAN 9999)],
-        SELECT 1 FROM [CLASS(GMAN 4920)]
-    ],
-    SELECT 10 FROM [
-        SELECT 1 FROM [RANGE(GMAN 1500 , GMAN 1599)],
-        SELECT 6 FROM [
-            RANGE(GMAN 1600 , GMAN 1699),
-            RANGE(GMAN 1700 , GMAN 1799),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus")
-        ],
-        SELECT 1 FROM [RANGE(GMAN 1600 , GMAN 9999)],
-        SELECT 2 FROM [CLASS(GMAN 4920), CLASS(GMAN 4930)]
-    ]
-] : "German Studies Major Plan" : 1;
+SELECT 1 FROM [GMAN 1400, PLACEMENT("Equivalent of first- and second-year German by placement")] : "Prerequisite: first- and second-year German or equivalent" : 1;
+
+SELECT 1 FROM [RANGE(GMAN 1500, GMAN 1599)] : "One GMAN course numbered in the 1500s" : 2;
+SELECT 1 FROM [RANGE(GMAN 1600, GMAN 1699)] : "One GMAN course numbered in the 1600s" : 2;
+SELECT 1 FROM [RANGE(GMAN 1700, GMAN 1799)] : "One GMAN course numbered in the 1700s" : 2;
+SELECT 6 FROM [$gman, $gman, $gman, $gman, $gman, $gman, GMAN 4930] : "Six additional courses numbered GMAN 1600 and above (Groups B and C)" : 3;
+
+SELECT 1 FROM GMAN 4920 : "Senior essay tutorial (GMAN 4920; intensive major continues in GMAN 4930)" : 1;

@@ -1,26 +1,23 @@
-SELECT 1 FROM [
-  DIST("QR")
-] : "Core QR Course" : 2;
+// Environmental Studies B.A. -- 13 course credits beyond the prerequisite, including the senior requirement.
+$conc = PLACEMENT("Concentration course planned with the DUS");
+$advsem = TAG("YC EVST Advanced Seminar");
 
-SELECT 2 FROM [
-  DIST("HU"),
-  DIST("SO")
-] : "Core HU or SO Courses" : 3;
+SELECT 1 FROM [RANGE(S&DS 1000, S&DS 9999), PLACEMENT("Completion of the Certificate in Data Science")] : "Prerequisite: S&DS 1000 or higher, or the Certificate in Data Science" : 1;
 
-SELECT 3 FROM [
-  DIST("SC")
-] : "Core Science Courses" : 4;
+SELECT 1 FROM TAG("YC EVST Core Humanities") : "Core: humanities" : 2;
+SELECT 1 FROM TAG("YC EVST Core Social Sci") : "Core: social sciences" : 2;
+SELECT 1 FROM TAG("YC EVST Core BA Life Sci") : "Core: life science and ecology" : 2;
+SELECT 1 FROM TAG("YC EVST Core BA Climate Sci") : "Core: earth and climate science" : 2;
+SELECT 1 FROM TAG("YC EVST Core BA Physical Sci") : "Core: physical science, technology, and environment" : 2;
 
-SELECT 6 FROM [
-  DEPT("EVST"),
-  TAG("YC EVST Core Human/Social Sci"),
-  TAG("YC EVST Core BA Natural Scie")
-] : "Concentration Courses" : 5;
-
-SELECT 1 FROM [
-  CLASS(EVST 4960)
-] : "Senior Essay" : 1;
+// Concentrations include biodiversity and conservation, climate change and energy, environmental humanities,
+// environmental justice, environmental policy, food and agriculture, human health and environment,
+// sustainability and natural resources, urban environments, or a self-designed concentration.
+SELECT 1 FROM $advsem : "Concentration: one advanced seminar" : 2;
+SELECT 1 FROM [$advsem, TAG("YC EVST BA QR Methods")] : "Concentration: a second advanced seminar or an intermediate/advanced quantitative research methods course" : 2;
+SELECT 4 FROM [$conc, $conc, $conc, $conc] : "Concentration: four additional courses (six in total)" : 3;
 
 SELECT 1 FROM [
-  TAG_DEPT("YC EVST Advanced Seminar", "EVST")
-] : "Advanced Environmental Seminar" : 6;
+    SELECT 2 FROM [EVST 4960, TAG("YC EVST Advanced Seminar")],
+    SELECT 2 FROM [EVST 4960, PLACEMENT("Second term of a two-term senior research project approved by the DUS before the end of junior year")]
+] : "Senior requirement: EVST 4960 plus an additional advanced seminar (beyond the concentration), or a two-term research project" : 1;

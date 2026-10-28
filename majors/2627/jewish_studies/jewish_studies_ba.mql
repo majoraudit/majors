@@ -1,21 +1,29 @@
+// Jewish Studies B.A. -- 13 term courses including the senior requirement.
+$jdst = RANGE(JDST 0000, JDST 9999);
+$area = PLACEMENT("Course in an area of concentration chosen with the DUS");
+
 SELECT 3 FROM [
-  CLASS(JDST 1000),
-  CLASS(JDST 3035),
-  CLASS(JDST 2000),
-  CLASS(JDST 2001),
-  CLASS(JDST 3681),
-  CLASS(JDST 3693),
-  PLACEMENT("Survey in Hebrew and Jewish Literature")
-] : "Core Classes" : 3;
+    SELECT 1 FROM [PLACEMENT("Course in Hebrew Bible")],
+    SELECT 1 FROM [PLACEMENT("Course in ancient Judaism (Second Temple or rabbinic literature)")],
+    SELECT 1 FROM [PLACEMENT("Course in premodern Jewish history")],
+    SELECT 1 FROM [PLACEMENT("Course in modern Jewish history")],
+    SELECT 1 FROM [PLACEMENT("Course in Jewish thought")],
+    SELECT 1 FROM [PLACEMENT("Survey course in Hebrew or Jewish literature")]
+] : "Core: three of six core areas" : 2;
 
-SELECT 8 FROM [
-  SELECT 2 FROM [CLASS(HEBR 1100), CLASS(HEBR 1200), PLACEMENT("Hebrew Literature")],
-  PLACEMENT("Ancient Israel and Hebrew Bible"),
-  PLACEMENT("Second Temple and Talmudic Judaism"),
-  PLACEMENT("Medieval and Renaissance Jewish Civilization"),
-  PLACEMENT("Modern Jewish History and Civilization"),
-  PLACEMENT("Jewish and Hebrew Literature"),
-  PLACEMENT("Jewish Thought")
-] : "Electives" : 8;
+SELECT 1 FROM [
+    SELECT 2 FROM [HEBR 1100, HEBR 1200],
+    SELECT 2 FROM [PLACEMENT("Hebrew literature in translation"), PLACEMENT("Hebrew literature in translation")]
+] : "Language or literature: HEBR 1100 and 1200, or two Hebrew literature courses in translation" : 1;
+LIMIT 3 FROM [RANGE(HEBR 0000, HEBR 9999), RANGE(HEBR 0000, HEBR 9999), RANGE(HEBR 0000, HEBR 9999)] : "Up to three Hebrew or Yiddish language courses may count" : 3;
 
-SELECT 2 FROM [CLASS(JDST 4491), CLASS(JDST 4492)] : "Senior Requirement" : 1;
+// Areas: ancient Israel/Hebrew Bible; Second Temple and rabbinic Judaism; medieval and early modern Jewish history and culture;
+// modern Jewish history and culture; Jewish/Hebrew literature (in Hebrew or Yiddish); Jewish thought; or student-designed.
+// Each area normally includes one introductory course, one seminar, and one relevant course outside Jewish Studies.
+SELECT 3 FROM [$jdst, $jdst, $area, $area, $area] : "First area of concentration: three courses" : 3;
+SELECT 3 FROM [$jdst, $jdst, $area, $area, $area] : "Second area of concentration: three courses" : 3;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [JDST 4491, JDST 4492],
+    SELECT 2 FROM [SELECT 1 FROM [JDST 4491, JDST 4492], PLACEMENT("Additional seminar related to the other area of concentration")]
+] : "Senior requirement: two-term senior essay, or one-term essay plus an additional seminar" : 1;

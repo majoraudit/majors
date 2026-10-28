@@ -1,0 +1,16 @@
+// Sociology B.A. -- Student-Designed concentration, non-intensive (standard) senior requirement. 13 term courses including the senior requirement.
+// No more than two introductory courses in any department or program may count toward the major.
+$socy = RANGE(SOCY 0000, SOCY 9999);
+$outside = PLACEMENT("Concentration-relevant course from outside Sociology approved by the DUS");
+
+SELECT 1 FROM [RANGE(SOCY 1000, SOCY 1999)] : "One introductory sociology course (1000 level)" : 2;
+SELECT 2 FROM [SOCY 2001, SOCY 2002] : "Sociological theory: SOCY 2001 and 2002" : 1;
+SELECT 1 FROM SOCY 2100 : "Research design (SOCY 2100), usually spring of junior year" : 1;
+SELECT 1 FROM [S&DS 1000, S&DS 1100, S&DS 1600, S&DS 2300, S&DS 3630, GLBL 2122, SOCY 2103, AMST 3304, PLACEMENT("Social science methodology course approved by the DUS")] : "One social science methodology course" : 2;
+SELECT 1 FROM [RANGE(SOCY 3000, SOCY 3999)] : "One advanced seminar in Sociology (3000 level)" : 2;
+$designed = [RANGE(SOCY 2000, SOCY 3999), PLACEMENT("2000/3000-level course relevant to the designed concentration (within or outside Sociology), approved by the DUS")];
+SELECT 5 FROM [$designed, $designed, $designed, $designed, $designed, RANGE(SOCY 1000, SOCY 1999)] : "Five electives relevant to the designed concentration (one 1000-level course acceptable)" : 4;
+SELECT 1 FROM PLACEMENT("Course of study approved by the DUS by the beginning of the junior year") : "Concentration plan approval" : 1;
+LIMIT 4 FROM [$outside, $outside, $outside, $outside] : "Up to 4 concentration-relevant courses from outside Sociology (DUS approval)" : 4;
+
+SELECT 2 FROM [SOCY 4100, RANGE(SOCY 3000, SOCY 3999)] : "Senior requirement (non-intensive): senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating the designed concentration topic" : 1;

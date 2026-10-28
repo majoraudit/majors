@@ -1,0 +1,21 @@
+// Art B.A. -- Photography concentration. 14 courses including prerequisites and the senior project.
+$intro = RANGE(ART 0001, ART 1999);
+$upper = RANGE(ART 2000, ART 9999);
+$hsar = RANGE(HSAR 0000, HSAR 9999);
+
+SELECT 1 FROM PLACEMENT("Favorable sophomore review of studio work") : "Prerequisite: sophomore review" : 1;
+SELECT 2 FROM [ART 1111, ART 1514] : "Prerequisite: Visual Thinking and Basic Drawing" : 1;
+SELECT 3 FROM [$intro, $intro, $intro] : "Prerequisite: three additional introductory courses (0001-1999)" : 2;
+
+// A sixth introductory course may count toward this requirement.
+SELECT 4 FROM [$upper, $upper, $upper, $upper, $intro] : "Four courses numbered 2000 or above" : 3;
+LIMIT 1 FROM $intro : "At most one additional introductory course counts toward the 2000-level requirement" : 3;
+
+SELECT 1-2 FROM [ART 1836, ART 1838] : "Photography: ART 1836 and/or 1838" : 1;
+SELECT 1-2 FROM [ART 2837, ART 2839] : "Photography: ART 2837 and/or 2839" : 1;
+SELECT 1 FROM [ART 3837, ART 3838] : "Photography: ART 3837 or 3838" : 1;
+SELECT 1 FROM [ART 3879, ART 4801, ART 4803] : "Photography: ART 3879, 4801, or 4803" : 1;
+
+SELECT 1 FROM ART 3995 : "Junior Seminar" : 1;
+SELECT 2 FROM [$hsar, $hsar, PLACEMENT("DUS-approved equivalent of a history of art course"), PLACEMENT("DUS-approved equivalent of a history of art course")] : "Two courses in the history of art (DUS-approved equivalents permitted)" : 2;
+SELECT 2 FROM [ART 4995, ART 4996] : "Two-term senior project" : 1;

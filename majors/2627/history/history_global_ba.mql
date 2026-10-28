@@ -1,31 +1,25 @@
-SELECT 2 FROM [
-    RANGE(HIST 0000, HIST 4999)
-] : "Prerequisites" : 1;
+// History B.A. -- Global concentration. 12 course credits including the prerequisites and the senior requirement.
+$hist = RANGE(HIST 0000, HIST 9999);
+$outside = PLACEMENT("Course taught outside the department approved by the DUS (not for seminar or senior requirements)");
 
+SELECT 2 FROM [$hist, $hist] : "Prerequisite: two course credits in History" : 1;
+
+// The same course may count toward geographic, preindustrial, and seminar requirements.
+SELECT 2 FROM [TAG("YC HIST Preindustrial"), TAG("YC HIST Preindustrial")] : "Two preindustrial course credits (material before the mid-19th century)" : 2;
+SELECT 2 FROM [RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars"), RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars")] : "Two 3000-level departmental seminars" : 2;
 SELECT 5 FROM [
-    TAG("YC HIST Africa"),
-    TAG("YC HIST Asia"),
-    TAG("YC HIST Europe"),
-    TAG("YC HIST Latin America"),
-    TAG("YC HIST Middle East"),
-    TAG("YC HIST United States")
-] : "Regional Distribution (Global)" : 2;
+    SELECT 1 FROM [TAG("YC HIST Africa")],
+    SELECT 1 FROM [TAG("YC HIST Asia")],
+    SELECT 1 FROM [TAG("YC HIST Europe")],
+    SELECT 1 FROM [TAG("YC HIST Latin America")],
+    SELECT 1 FROM [TAG("YC HIST Middle East")],
+    SELECT 1 FROM [TAG("YC HIST United States")]
+] : "One course credit in each of five of the six geographic regions" : 2;
 
-SELECT 2 FROM [
-    TAG("YC HIST Preindustrial")
-] : "Preindustrial History" : 3;
-
-SELECT 2 FROM [
-    TAG("YC HIST Departmental Seminars")
-] : "Departmental Seminars" : 4;
-
-SELECT 3 FROM [
-    RANGE(HIST 0000, HIST 4999),
-    RANGE(HIST 0000, HIST 4999),
-    RANGE(HIST 0000, HIST 4999)
-] : "Additional History Electives" : 5;
+SELECT 8 FROM [$hist, $hist, $hist, $hist, $hist, $hist, $hist, $hist, $outside, $outside] : "Eight additional course credits toward the twelve" : 4;
+LIMIT 2 FROM [$outside, $outside] : "At most two non-departmental course credits" : 4;
 
 SELECT 1 FROM [
-    SELECT 1 FROM [CLASS(HIST 4997)],
-    SELECT 2 FROM [CLASS(HIST 4995), CLASS(HIST 4996)]
-] : "Senior Requirement" : 6;
+    SELECT 2 FROM [HIST 4995, HIST 4996],
+    SELECT 2 FROM [HIST 4997, PLACEMENT("One additional full-credit course (may be taken Credit/D/Fail unless a departmental seminar)")]
+] : "Senior requirement: two-term essay or project (HIST 4995, 4996), or one-term essay (HIST 4997) plus one additional course" : 1;

@@ -1,0 +1,18 @@
+// Classical Civilization B.A. -- 12 term courses (including the Senior Tutorial) in Classics and related departments.
+$classics = [RANGE(CLCV 0000, CLCV 9999), RANGE(CLSS 0000, CLSS 9999), RANGE(GREK 0000, GREK 9999), RANGE(LATN 0000, LATN 9999), PLACEMENT("Related course in another department approved by the DUS")];
+$histarcg = [TAG("YC CLSS Ancient Hist Greece"), TAG("YC CLSS Ancient Hist Rome"), TAG("YC CLSS Hist, Phil, Art, Arcg")];
+
+SELECT 2 FROM [$histarcg, $histarcg] : "Two courses in ancient history and/or classical art and archaeology" : 2;
+SELECT 2 FROM [RANGE(GREK 2003, GREK 4999), RANGE(GREK 2003, GREK 4999), RANGE(LATN 2003, LATN 4999), RANGE(LATN 2003, LATN 4999)] : "Two courses in Greek or Latin numbered 2003 or higher" : 2;
+SELECT 1 FROM [RANGE_TAG(CLCV 1000, CLCV 2999, "YC CLSS Lit/Cult Anc Greece")] : "Course covering broadly the literature and/or culture of ancient Greece (CLCV 1000/2000-level)" : 2;
+SELECT 1 FROM [RANGE_TAG(CLCV 1000, CLCV 2999, "YC CLSS Lit/Cult Anc Rome")] : "Course covering broadly the literature and/or culture of ancient Rome (CLCV 1000/2000-level)" : 2;
+
+SELECT 4 FROM [$classics, $classics, $classics, $classics] : "Four additional courses in Classics and related departments" : 4;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [CLCV 4998, CLCV 4999],
+    SELECT 2 FROM [
+        SELECT 1 FROM [CLCV 4998, CLCV 4999],
+        SELECT 1 FROM [RANGE(CLCV 0000, CLCV 9999), RANGE(CLSS 0000, CLSS 9999), RANGE(LATN 0000, LATN 9999), RANGE(GREK 0000, GREK 9999), PLACEMENT("Relevant course in another field approved by the DUS")]
+    ]
+] : "Senior Tutorial: two terms (CLCV 4998 and 4999), or one term plus an additional course" : 1;

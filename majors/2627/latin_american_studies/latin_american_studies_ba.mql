@@ -1,30 +1,18 @@
-SELECT 1 FROM [
-  DIST_DEPT("L3", "SPAN"),
-  DIST_DEPT("L3", "PORT"),
-  PLACEMENT("Equivalent Placement or Credit")
-] : "Prerequisites" : 1;
+// Latin American Studies B.A. -- 12 term courses beyond the prerequisite, including the senior requirement.
+// Courses outside the program's listings count if at least a third of the syllabus concerns the region (DUS approval).
+$last = RANGE(LAST 0000, LAST 9999);
+$latam = PLACEMENT("Course with Latin American content approved by the DUS");
 
-SELECT 8 FROM [
-  PLACEMENT("LAST Approved Course"),
-  TAG("YC PLSC Comparative Govt"),
-  TAG("YC ANTH Sociocultural"),
-  TAG("YC ECON Development"),
-  TAG("YC HIST Latin America"),
-  TAG("YC SPAN Taught in Spanish"),
-  TAG("YC HSAR The Americas"),
-  TAG("YC FILM World Cinema")
-] : "Core Classes" : 8;
+SELECT 1 FROM [DIST_DEPT("L3", "SPAN"), DIST_DEPT("L3", "PORT"), RANGE(SPAN 1300, SPAN 9999), RANGE(PORT 1300, PORT 9999), PLACEMENT("Equivalent placement at the L3 level in Spanish or Portuguese")] : "Prerequisite: Spanish or Portuguese at the L3 level" : 1;
 
-SELECT 3 FROM [
-  TAG("YC HUMS Area Literature"),
-  TAG("YC HUMS Area History"),
-  TAG("YC HUMS Area Arts"),
-  TAG("YC SOCY InequalityRaceSociety"),
-  TAG("YC ECON International"),
-  TAG("YC EVST Core Human/Social Sci")
-] : "Electives" : 3;
+SELECT 1 FROM [LAST 1100, PLACEMENT("Introductory course approved by the DUS")] : "One introductory course" : 2;
+SELECT 2 FROM [RANGE(ANTH 0000, ANTH 9999), RANGE(ECON 0000, ECON 9999), RANGE(PLSC 0000, PLSC 9999), RANGE(ANTH 0000, ANTH 9999), RANGE(ECON 0000, ECON 9999), RANGE(PLSC 0000, PLSC 9999), $latam] : "Latin American content: two social science courses (anthropology, economics, or political science)" : 2;
+SELECT 2 FROM [TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), $latam] : "Latin American content: two history courses" : 2;
+SELECT 2 FROM [RANGE(SPAN 2000, SPAN 9999), RANGE(SPAN 2000, SPAN 9999), RANGE(PORT 2000, PORT 9999), RANGE(PORT 2000, PORT 9999), $latam] : "Latin American content: two Spanish American or Brazilian literature courses beyond the language requirement" : 2;
+SELECT 1 FROM [TAG("YC HSAR The Americas"), RANGE(ARCH 0000, ARCH 9999), RANGE(FILM 0000, FILM 9999), RANGE(MUSI 0000, MUSI 9999), RANGE(TDPS 0000, TDPS 9999), $latam] : "Latin American content: one course in art, architecture, film and media studies, music, or theater studies" : 2;
+SELECT 3 FROM [$last, $last, $last, $latam, $latam, $latam] : "Three additional electives" : 4;
 
-SELECT 1 FROM [
-  CLASS(LAST 4491),
-  CLASS(LAST 4492)
-] : "Senior Requirement" : 1;
+SELECT 1 FROM [DIST_DEPT("L5", "SPAN"), DIST_DEPT("L5", "PORT")] : "One course taught in Spanish or Portuguese at the L5 level" : 2;
+SELECT 3 FROM [PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS"), PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS"), PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS")] : "Three seminars or upper-level courses in the junior and senior years" : 3;
+
+SELECT 1 FROM [LAST 4491, LAST 4492] : "Senior essay (LAST 4491) or senior project (LAST 4492)" : 1;

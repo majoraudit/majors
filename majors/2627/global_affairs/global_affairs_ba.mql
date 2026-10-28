@@ -1,0 +1,24 @@
+// Global Affairs B.A. -- 14 courses including the eight introductory courses and the senior requirement,
+// plus an L4 modern-language requirement.
+$hist = RANGE(HIST 0000, HIST 9999);
+$elective = TAG("YC GLBL Elective");
+
+SELECT 1 FROM [ECON 1108, ECON 1110, ECON 1115] : "Introductory: microeconomics" : 1;
+SELECT 1 FROM [ECON 1111, ECON 1116] : "Introductory: macroeconomics" : 1;
+SELECT 2 FROM [
+    SELECT 1 FROM [PLSC 1113],
+    SELECT 1 FROM [PLSC 1413],
+    SELECT 1 FROM [PLSC 1327, PLSC 1335, PLSC 1352, DRST 0005, DRST 0006, PHIL 1178]
+] : "Introductory: two political science courses from different subdisciplines" : 1;
+SELECT 2 FROM [$hist, $hist] : "Introductory: two History courses (enrolled under the HIST number)" : 1;
+SELECT 1 FROM GLBL 2121 : "Introductory: GLBL 2121 (may not count as an elective)" : 1;
+SELECT 1 FROM [GLBL 2159, ECON 2259, ECON 2121, ECON 2122, TAG("YC GLBL Qualitative Methods")] : "Introductory: advanced course (game theory, intermediate micro/macro, or approved qualitative methods)" : 1;
+
+SELECT 1 FROM GLBL 2122 : "GLBL 2122 (may not count as an elective)" : 1;
+SELECT 1 FROM GLBL 3101 : "GLBL 3101" : 1;
+SELECT 3 FROM [$elective, $elective, $elective] : "Three Global Affairs electives" : 3;
+LIMIT 2 FROM [TAG("YC GLBL Senior Fellow Elective"), TAG("YC GLBL Senior Fellow Elective")] : "At most two electives taught by Senior Fellows" : 3;
+
+SELECT 1 FROM [GLBL 4499, GLBL 4500, PLACEMENT("Senior essay written in a substantive seminar")] : "Senior requirement: Capstone (GLBL 4499), GLBL 4500, or senior essay in a seminar" : 1;
+
+SELECT 1 FROM DIST("L4") : "Language requirement: an L4 course in a modern language other than English" : 2;

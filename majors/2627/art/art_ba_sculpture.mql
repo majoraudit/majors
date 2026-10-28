@@ -1,0 +1,19 @@
+// Art B.A. -- Sculpture concentration. 14 courses including prerequisites and the senior project.
+$intro = RANGE(ART 0001, ART 1999);
+$upper = RANGE(ART 2000, ART 9999);
+$hsar = RANGE(HSAR 0000, HSAR 9999);
+
+SELECT 1 FROM PLACEMENT("Favorable sophomore review of studio work") : "Prerequisite: sophomore review" : 1;
+SELECT 2 FROM [ART 1111, ART 1514] : "Prerequisite: Visual Thinking and Basic Drawing" : 1;
+SELECT 3 FROM [$intro, $intro, $intro] : "Prerequisite: three additional introductory courses (0001-1999)" : 2;
+
+// A sixth introductory course may count toward this requirement.
+SELECT 4 FROM [$upper, $upper, $upper, $upper, $intro] : "Four courses numbered 2000 or above" : 3;
+LIMIT 1 FROM $intro : "At most one additional introductory course counts toward the 2000-level requirement" : 3;
+
+SELECT 2 FROM [ART 1610, ART 1620, ART 1621, ART 1622, ART 1623] : "Sculpture: two introductory sculpture courses" : 1;
+SELECT 3 FROM [ART 2610, ART 3646, ART 3648, ART 3671, ART 4646] : "Sculpture: three intermediate/advanced sculpture courses" : 1;
+
+SELECT 1 FROM ART 3995 : "Junior Seminar" : 1;
+SELECT 2 FROM [$hsar, $hsar, PLACEMENT("DUS-approved equivalent of a history of art course"), PLACEMENT("DUS-approved equivalent of a history of art course")] : "Two courses in the history of art (DUS-approved equivalents permitted)" : 2;
+SELECT 2 FROM [ART 4995, ART 4996] : "Two-term senior project" : 1;

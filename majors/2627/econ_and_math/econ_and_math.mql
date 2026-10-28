@@ -1,5 +1,24 @@
-SELECT 3 FROM [SELECT 2 FROM [CLASS(MATH 1200), PLACEMENT("Upper-Level Math Course with MATH DUS Approval")], SELECT 1 FROM [CLASS(ECON 1110), CLASS(ECON 1115), PLACEMENT("Upper-Level Economics Course")], SELECT 1 FROM [CLASS(ECON 1111), CLASS(ECON 1116), PLACEMENT("Upper-Level Economics Course")]] : "Prerequisites" : 1;
-SELECT 7 FROM [SELECT 1 FROM [CLASS(ECON 2121), CLASS(ECON 2125)], SELECT 1 FROM [CLASS(ECON 2122), CLASS(ECON 2126)], SELECT 1 FROM [CLASS(ECON 3351), CLASS(ECON 4425)], SELECT 1 FROM [CLASS(ECON 3350), CLASS(ECON 4417), CLASS(ECON 4433)], SELECT 1 FROM [CLASS(ECON 2135), SELECT 2 FROM [CLASS(S&DS 2410), CLASS(S&DS 2420)]], CLASS(ECON 2136), RANGE(ECON 2120, ECON 9999)] : "ECON Core Courses" : 2;
-SELECT 2 FROM [SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)], SELECT 1 FROM [CLASS(MATH 2550), CLASS(MATH 2560)]] : "MATH Core Courses" : 2;
-SELECT 2 FROM [SELECT 1 FROM [RANGE(MATH 2250, MATH 2409), RANGE(MATH 2411, MATH 2419), RANGE(MATH 2421, MATH 4699), RANGE(MATH 4701, MATH 4999)], SELECT 1 FROM [RANGE(MATH 2250, MATH 2409), RANGE(MATH 2411, MATH 2419), RANGE(MATH 2421, MATH 4699), RANGE(MATH 4701, MATH 4999)]] : "MATH Electives" : 3;
-SELECT 1 FROM [CLASS(MATH 4800), CLASS(MATH 4810), TAG("YC ECON Theory Seminar")] : "Senior Requirement" : 1;
+// Economics and Mathematics B.A. -- 12 term courses beyond the prerequisites: 7 ECON (above 2000) and 5 MATH (2250-4690).
+// MATH 2410, 2420, and 4700 do not count; graduate MATH 5000-5999 may count, 6000+ may not.
+$mathel = [RANGE(MATH 2250, MATH 2409), RANGE(MATH 2411, MATH 2419), RANGE(MATH 2421, MATH 4690), RANGE(MATH 5000, MATH 5999)];
+$econel = RANGE(ECON 2000, ECON 9999);
+
+SELECT 1 FROM [MATH 1200, SELECT 3 FROM [MATH 3020, MATH 2250, MATH 2550]] : "Prerequisite: MATH 1200 (or MATH 3020 after MATH 2250 and 2550)" : 1;
+SELECT 1 FROM [ECON 1110, ECON 1115, PLACEMENT("Extra ECON course above 2000 beyond the twelve required")] : "Prerequisite: introductory microeconomics" : 1;
+SELECT 1 FROM [ECON 1111, ECON 1116, PLACEMENT("Extra ECON course above 2000 beyond the twelve required")] : "Prerequisite: introductory macroeconomics" : 1;
+
+SELECT 1 FROM [ECON 2125, ECON 2121] : "Intermediate microeconomics (ECON 2125 preferred)" : 1;
+SELECT 1 FROM [ECON 2126, ECON 2122] : "Intermediate macroeconomics (ECON 2126 preferred)" : 1;
+// A course may not fulfill a mathematical economics requirement and the senior requirement at the same time.
+SELECT 1 FROM [ECON 3351, ECON 4425] : "Mathematical economics: ECON 3351 or 4425" : 1;
+SELECT 1 FROM [ECON 3350, ECON 4433] : "Mathematical economics: ECON 3350 or 4433" : 1;
+SELECT 1 FROM [CLASS(ECON 2135), SELECT 2 FROM [S&DS 2410, S&DS 2420]] : "Econometrics: ECON 2135 (or S&DS 2410 and 2420, counting as one ECON course)" : 1;
+SELECT 1 FROM ECON 2136 : "Econometrics: ECON 2136" : 1;
+
+SELECT 1 FROM [MATH 2250, MATH 2260] : "Proof-based linear algebra (MATH 2250 or 2260)" : 1;
+SELECT 1 FROM [MATH 2550, MATH 2560] : "Real analysis (MATH 2550 or 2560)" : 1;
+
+SELECT 1 FROM [
+    SELECT 4 FROM [SELECT 1 FROM [MATH 4800, MATH 4810], $mathel, $mathel, $econel],
+    SELECT 4 FROM [TAG("YC ECON Theory Seminar"), $mathel, $mathel, $mathel]
+] : "Senior seminar with remaining electives: MATH 4800/4810 plus two MATH electives and one ECON elective, or an Economics theory seminar plus three MATH electives" : 2;

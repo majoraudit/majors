@@ -1,2 +1,13 @@
-SELECT 7 FROM [CLASS(AFAM 1160), CLASS(AFAM 1162), DIST_DEPT("Hu", "AFAM"), DIST_DEPT("So", "AFAM"), CLASS(AFAM 4310), CLASS(AFAM 4380), CLASS(AFAM 4391)] : "Core Classes" : 5;
-SELECT 5 FROM [RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999), RANGE(AFAM 1000, AFAM 9999)] : "Area of Focus Electives" : 2;
+// Black Studies B.A. -- 12 term courses: 7 core courses (including the senior requirement) and 5 focus-area electives.
+// The catalog lists these courses under BLST; the parser's department list only accepts the former AFAM code.
+SELECT 2 FROM [AFAM 1160, AFAM 1162] : "History sequence (either order)" : 1;
+SELECT 1 FROM [DIST_DEPT("HU", "AFAM")] : "Black Studies literature course in the humanities" : 2;
+SELECT 1 FROM [DIST_DEPT("SO", "AFAM")] : "Black Studies course in the social sciences" : 2;
+SELECT 1 FROM AFAM 4310 : "Junior seminar" : 1;
+
+// None of the core courses may count toward the area of focus.
+$focus = PLACEMENT("Area-of-focus course approved by the DUS");
+SELECT 5 FROM [RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), $focus, $focus, $focus, $focus, $focus] : "Five electives in an area of focus" : 3;
+
+SELECT 1 FROM AFAM 4380 : "Senior colloquium" : 1;
+SELECT 1 FROM AFAM 4391 : "Senior essay" : 1;

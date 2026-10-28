@@ -1,0 +1,21 @@
+// Engineering Sciences (Chemical) B.S. -- 12 term courses beyond the prerequisites, including the senior requirement,
+// chosen in consultation with the DUS.
+$engelective = [RANGE(CENG 0000, CENG 9999), RANGE(ENAS 0000, ENAS 9999), RANGE(BENG 0000, BENG 9999), RANGE(ECE 0000, ECE 9999), RANGE(ENVE 0000, ENVE 9999), RANGE(MENG 0000, MENG 9999), RANGE(CPSC 0000, CPSC 9999), PLACEMENT("Engineering elective approved by the DUS")];
+
+SELECT 2 FROM [MATH 1120, MATH 1150] : "Prerequisite: MATH 1120 and 1150" : 1;
+SELECT 1 FROM [ENAS 1510, MATH 1200] : "Prerequisite: ENAS 1510 or MATH 1200" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670]] : "Prerequisite: general chemistry" : 1;
+SELECT 2 FROM [CHEM 1340L, CHEM 1360L] : "Prerequisite: general chemistry laboratory" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], CLASS(PHYS 2600)] : "Prerequisite: physics" : 1;
+
+SELECT 1 FROM [ENAS 1300, CPSC 1001, CPSC 2000] : "Computing" : 1;
+SELECT 1 FROM ENAS 1940 : "Mathematics: ENAS 1940" : 1;
+SELECT 1 FROM [CHEM 1740, CHEM 2200] : "Chemistry: CHEM 1740 or 2200" : 1;
+SELECT 1 FROM CHEM 3320 : "Chemistry: CHEM 3320" : 1;
+
+SELECT 1 FROM [CENG 1500, CENG 2100] : "Chemical engineering: CENG 1500 or 2100" : 1;
+SELECT 5 FROM [CENG 3000, CENG 3010, SELECT 1 FROM [CENG 3140, MENG 3422], CENG 3150, CENG 4110] : "Chemical engineering: CENG 3000, 3010, 3140 (or MENG 3422), 3150, 4110" : 1;
+
+SELECT 1 FROM [$engelective] : "One engineering elective" : 3;
+
+SELECT 1 FROM [CENG 4160, CENG 4900] : "Senior research project (CENG 4160 or 4900)" : 1;

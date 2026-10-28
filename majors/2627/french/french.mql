@@ -1,99 +1,67 @@
-SELECT 1 FROM [CLASS(FREN 1500), PLACEMENT("Equivalent prerequisite approved by DUS")] : "Prerequisite" : 1;
+// French B.A. -- standard major (10 term courses numbered 1600 or above) or intensive major (12), each optionally
+// with the translation concentration; all totals include the senior essay or translation project.
+$fren = [RANGE(FREN 1600, FREN 9999), PLACEMENT("Course outside the department bearing on the student's principal interest, approved in advance by the DUS")];
+$groupb = RANGE_TAG(FREN 2000, FREN 9999, "YC FREN Taught in French");
+$trans = [FREN 3010, FREN 3012, PLACEMENT("Course in French translation approved by the DUS")];
+
+SELECT 1 FROM [FREN 1500, PLACEMENT("Equivalent of FREN 1500 approved by the DUS")] : "Prerequisite: FREN 1500 or equivalent" : 1;
 
 SELECT 1 FROM [
     SELECT 10 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 4 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 1 FROM [CLASS(FREN 4910)]
+        SELECT 1 FROM [FREN 1700, RANGE_TAG(FREN 2000, FREN 4999, "YC FREN Taught in French")],
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $fren,
+        $fren,
+        $fren,
+        $fren,
+        SELECT 1 FROM [FREN 4910]
+    ],
+    SELECT 12 FROM [
+        SELECT 1 FROM [FREN 1700, RANGE_TAG(FREN 2000, FREN 4999, "YC FREN Taught in French")],
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $fren,
+        $fren,
+        $fren,
+        $fren,
+        $fren,
+        SELECT 1 FROM [CLASS(FREN 4910), SELECT 2 FROM [FREN 4930, FREN 4940]]
     ],
     SELECT 10 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 4 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
-        SELECT 1 FROM [RANGE(FREN 1600 , FREN 9999)],
-        SELECT 1 FROM [CLASS(FREN 4920)]
+        SELECT 1 FROM [FREN 1700, RANGE_TAG(FREN 2000, FREN 4999, "YC FREN Taught in French")],
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $trans,
+        $trans,
+        $fren,
+        $fren,
+        SELECT 1 FROM [FREN 4920]
     ],
     SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 4 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 1 FROM [CLASS(FREN 4910)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 2 FROM [CLASS(FREN 4930), CLASS(FREN 4940)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
-        SELECT 2 FROM [RANGE(FREN 1600 , FREN 9999), RANGE(FREN 1600 , FREN 9999)],
-        SELECT 1 FROM [CLASS(FREN 4920)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 2 FROM [CLASS(FREN 4950), CLASS(FREN 4960)]
+        SELECT 1 FROM [FREN 1700, RANGE_TAG(FREN 2000, FREN 4999, "YC FREN Taught in French")],
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $groupb,
+        $trans,
+        $trans,
+        $fren,
+        $fren,
+        $fren,
+        SELECT 1 FROM [CLASS(FREN 4920), SELECT 2 FROM [FREN 4950, FREN 4960]]
     ]
-] : "French Major Plan" : 1;
+] : "Major program: standard (10 courses, 4 Group B at 2000+, FREN 4910), intensive (12 courses, 5 Group B, one- or two-term essay), or either with the translation concentration (two translation courses and a senior translation project)" : 2;
+
+SELECT 1 FROM [TAG("YC FREN Pre-1800")] : "Period requirement: one course dealing predominantly with materials before 1800" : 2;
+LIMIT 2 FROM [RANGE(FREN 1800, FREN 1999), RANGE(FREN 1800, FREN 1999)] : "At most two courses numbered FREN 1800-1999" : 3;
+LIMIT 2 FROM [TAG("YC FREN Taught in English"), TAG("YC FREN Taught in English")] : "At most two courses conducted entirely in English (Group C)" : 3;
+LIMIT 4 FROM [PLACEMENT("Course outside the Yale Department of French (at most two from other Yale departments)"), PLACEMENT("Course outside the Yale Department of French (at most two from other Yale departments)"), PLACEMENT("Course outside the Yale Department of French (at most two from other Yale departments)"), PLACEMENT("Course outside the Yale Department of French (at most two from other Yale departments)")] : "At most four courses from outside the department or study abroad" : 3;

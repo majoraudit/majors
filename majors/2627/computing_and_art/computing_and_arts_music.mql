@@ -1,4 +1,15 @@
-SELECT 1 FROM [CLASS(CPSC 1001)] : "Prerequisite" : 1;
-SELECT 6 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(CPSC 4310), CLASS(CPSC 4320), TAG("YC CPAR MUSI CS Elective")] : "Computer Science Courses" : 2;
-SELECT 6 FROM [SELECT 2 FROM [RANGE(MUSI 2100, MUSI 2199), RANGE(MUSI 2100, MUSI 2199), RANGE(MUSI 3100, MUSI 3199), RANGE(MUSI 3100, MUSI 3199), RANGE(MUSI 4100, MUSI 4199), RANGE(MUSI 4100, MUSI 4199)], SELECT 3 FROM[RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 4100, MUSI 4299), RANGE(MUSI 4100, MUSI 4299), RANGE(MUSI 4100, MUSI 4299)], SELECT 1 FROM [RANGE(MUSI 2300, MUSI 2499), RANGE(MUSI 3300, MUSI 3499), RANGE(MUSI 4300, MUSI 4499)]] : "Music Courses" : 2;
-SELECT 2 FROM [CLASS(CPSC 4900), CLASS(ARCH 4910)] : "Senior Requirements" : 1;
+// Computing and the Arts B.A. -- Music concentration. 12 term courses beyond the prerequisites (6 CPSC, 6 in the arts), plus the two-term senior project.
+
+SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
+SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
+SELECT 1 FROM CPSC 2230 : "CPSC 2230" : 1;
+SELECT 2 FROM [CPSC 4310, CPSC 4320] : "CPSC 4310 and CPSC 4320" : 1;
+SELECT 1 FROM [TAG("YC CPAR MUSI CS Elective"), RANGE(CPSC 2000, CPSC 4899), RANGE(CPSC 4901, CPSC 9999)] : "One additional intermediate or advanced CPSC course (not CPSC 4900)" : 3;
+
+$g1 = [TAG("YC MUSI Intermediate Grp I"), TAG("YC MUSI Advanced Grp I")];
+$g2 = [TAG("YC MUSI Intermediate Grp II"), TAG("YC MUSI Advanced Grp II")];
+SELECT 2 FROM [$g1, $g1] : "Two courses from Group I (Music Theory)" : 2;
+SELECT 3 FROM [$g1, $g1, $g1, $g2, $g2, $g2] : "Three additional courses from Group I or Group II (Creative Practices)" : 3;
+SELECT 1 FROM [TAG("YC MUSI Intermediate Grp III"), TAG("YC MUSI Advanced Grp III"), TAG("YC MUSI Intermediate Grp IV"), TAG("YC MUSI Advanced Grp IV")] : "One course from Group III (Western Art Music) or Group IV (World and Popular Music)" : 2;
+
+SELECT 2 FROM [CPSC 4900, SELECT 1 FROM [RANGE(MUSI 4996, MUSI 4999)]] : "Two-term senior project (CPSC 4900 and one of MUSI 4996-4999)" : 1;

@@ -1,3 +1,14 @@
-SELECT 4 FROM [RANGE(ARBC 1000 , ARBC 4999), RANGE(HEBR 1000 , HEBR 4999), RANGE(PERS 1000 , PERS 4999), RANGE(TKSH 1000 , TKSH 4999)] : "Languages" : 1;
-SELECT 7 FROM [RANGE(NELC 1000 , NELC 4999)] : "NELC Courses" : 2;
-SELECT 1 FROM [CLASS(NELC 4920), CLASS(NELC 4930)] : "Senior Requirement" : 3;
+// Near Eastern Languages and Civilizations B.A. -- Breadth concentration. 12 term courses including the senior requirement.
+$lang = [RANGE(ARBC 0000, ARBC 9999), RANGE(HEBR 0000, HEBR 9999), RANGE(PERS 0000, PERS 9999), RANGE(TKSH 0000, TKSH 9999), RANGE(AKKD 0000, AKKD 9999), RANGE(EGYP 0000, EGYP 9999), RANGE(ARMN 0000, ARMN 9999), RANGE(OTTM 0000, OTTM 9999), PLACEMENT("Other Near Eastern language course approved by the DUS")];
+$nelc = [RANGE(NELC 0000, NELC 4919), RANGE(NELC 4931, NELC 9999), PLACEMENT("Course outside the department with substantial Near Eastern content approved by the DUS")];
+$found = TAG("YC NELC Foundations Course");
+
+SELECT 4 FROM [$lang, $lang, $lang, $lang] : "Four term courses in one or more Near Eastern languages" : 2;
+SELECT 2 FROM [$found, $found] : "Two NELC Foundations courses" : 2;
+SELECT 1 FROM TAG("YC NELC Ancient Near East") : "Elective on the ancient Near East" : 2;
+SELECT 1 FROM TAG("YC NELC Medieval Near East") : "Elective on the medieval Near East" : 2;
+SELECT 1 FROM TAG("YC NELC Modern Middle East") : "Elective on the modern Middle East" : 2;
+SELECT 2 FROM [$nelc, $nelc] : "Two additional NELC electives (five in total)" : 3;
+LIMIT 2 FROM [PLACEMENT("Course from outside the department"), PLACEMENT("Course from outside the department")] : "No more than two courses from outside the department" : 4;
+
+SELECT 1 FROM [CLASS(NELC 4920), CLASS(NELC 4930), SELECT 2 FROM [NELC 4920, NELC 4930], PLACEMENT("Expanded upper-level seminar research paper approved in advance by the instructor and the DUS")] : "Senior project (NELC 4920 and/or 4930)" : 1;

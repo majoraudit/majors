@@ -1,4 +1,36 @@
-SELECT 6 FROM [SELECT 4 FROM [SELECT 1 FROM[CLASS(BIOL 1010), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1020), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1030), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1040), PLACEMENT("Satisfactory Yale Bio Placement Test Score")]],SELECT 1 FROM [SELECT 2 FROM [SELECT 1 FROM[CLASS(CHEM 1610), PLACEMENT("Equivalent Qualification")], SELECT 1 FROM[CLASS(CHEM 1650), PLACEMENT("Equivalent Qualification")]], SELECT 2 FROM [SELECT 1 FROM[CLASS(CHEM 1630), PLACEMENT("Equivalent Qualification")], SELECT 1 FROM[CLASS(CHEM 1670), PLACEMENT("Equivalent Qualification")]]], CLASS(CHEM 1340L), CLASS(CHEM 1360L), SELECT 1 FROM [CLASS(MATH 1150), CLASS(MATH 1160), CLASS(MATH 1200), CLASS(S&DS 1000), CLASS(S&DS 2300), PLACEMENT("Equivalent Qualification")], SELECT 4 FROM [SELECT 0-2 FROM [SELECT 1 FROM [CLASS(MATH 1150), CLASS(MATH 1160)], SELECT 1 FROM [CLASS(MATH 1180), CLASS(MATH 1200)], SELECT 1 FROM [CLASS(MATH 2220), CLASS(MATH 2250)], CLASS(MATH 2350), CLASS(MATH 2410), CLASS(MATH 2420), CLASS(MATH 2440), CLASS(MATH 2460), CLASS(MATH 2470), CLASS(MATH 2550), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(S&DS 1000), CLASS(S&DS 2200), CLASS(S&DS 2300), CLASS(S&DS 2380), CLASS(S&DS 2400), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(CPSC 1001), CLASS(CPSC 1230), CLASS(CPSC 2010), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [SELECT 1 FROM [CLASS(CHEM 1740), CLASS(CHEM 2200)], SELECT 1 FROM [CLASS(CHEM 1750), CLASS(CHEM 2210)], CLASS(CHEM 2220L), CLASS(CHEM 2230L), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [SELECT 1 FROM [CLASS(PHYS 1700), CLASS(PHYS 1800)], SELECT 1 FROM [CLASS(PHYS 1710), CLASS(PHYS 1810)], PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(EPS 1100), CLASS(EPS 2120), CLASS(EPS 2200), CLASS(EPS 2220), CLASS(EPS 2320), CLASS(EPS 2400), CLASS(EPS 2550), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")]]] : "Prerequisites" : 1;
-SELECT 3 FROM [CLASS(EEB 2220), CLASS(EEB 2225), SELECT 1 FROM [SELECT 2 FROM [RANGE(EEB 2246, EEB 2272), RANGE(EEB 2246L, EEB 2272L)], SELECT 2 FROM [CLASS(EEB 3326), CLASS(EEB 3327L)], SELECT 2 FROM [PLACEMENT("DUS Approved Course"), PLACEMENT("DUS Approved Course")]]] : "Lecture Courses and Laboratory" : 2;
-SELECT 2 FROM [PLACEMENT("DUS Approved Class"), PLACEMENT("DUS Approved Seminar or Lecture")] : "Electives" : 3;
-SELECT 1 FROM [SELECT 2 FROM [CLASS(EEB 4475), CLASS(EEB 4476)], SELECT 2 FROM [CLASS(EEB 4495), CLASS(EEB 4496)]] : "Senior Requirement" : 1;
+// Ecology and Evolutionary Biology B.S. -- Biodiversity and the Environment concentration. 5.5 course credits beyond the prerequisites, plus the senior requirement.
+$math = [MATH 1150, MATH 1160, MATH 1180, MATH 1200, MATH 2220, MATH 2250, MATH 2350, MATH 2410, MATH 2420, MATH 2440, MATH 2460, MATH 2470, MATH 2550];
+$sds = [RANGE(S&DS 1000, S&DS 1060), S&DS 2200, S&DS 2300, S&DS 2380, S&DS 2400];
+$cpsc = [CPSC 1001, CPSC 1230, CPSC 2010];
+$chem = [CHEM 1740, CHEM 2200, CHEM 1750, CHEM 2210, CHEM 2220L, CHEM 2230L];
+$phys = [PHYS 1700, PHYS 1800, PHYS 1710, PHYS 1810];
+$eps = [EPS 1100, EPS 2120, EPS 2200, EPS 2220, EPS 2320, EPS 2400, EPS 2550];
+$accel = PLACEMENT("Acceleration credit or advanced course accepted in place of the prerequisite");
+
+SELECT 4 FROM [SELECT 1 FROM [BIOL 1010, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1020, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1030, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1040, PLACEMENT("Biology placement examination")]] : "Prerequisite: BIOL 1010-1040" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670], $accel] : "Prerequisite: two-term general chemistry lecture sequence" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1340L, CHEM 1360L], $accel] : "Prerequisite: general chemistry laboratories" : 1;
+SELECT 1 FROM [MATH 1150, MATH 1160, MATH 1200, RANGE(S&DS 1000, S&DS 1060), S&DS 2300, $accel] : "Prerequisite: one term of mathematics or statistics" : 1;
+// Four or five courses totaling four credits; laboratories are half-credit.
+SELECT 4-5 FROM [$math, $sds, $cpsc, $chem, $phys, $eps, $accel, $accel] : "Prerequisite: additional quantitative and physical science courses totaling four credits" : 1;
+LIMIT 2 FROM $math : "No more than two additional prerequisites from Mathematics" : 1;
+LIMIT 2 FROM $sds : "No more than two additional prerequisites from Statistics and Data Science" : 1;
+LIMIT 2 FROM $cpsc : "No more than two additional prerequisites from Computer Science" : 1;
+LIMIT 2 FROM $chem : "No more than two additional prerequisites from Chemistry" : 1;
+LIMIT 2 FROM $phys : "No more than two additional prerequisites from Physics" : 1;
+LIMIT 2 FROM $eps : "No more than two additional prerequisites from Earth and Planetary Sciences" : 1;
+
+SELECT 2 FROM [EEB 2220, EEB 2225] : "Biodiversity and the Environment: EEB 2220 and 2225" : 1;
+SELECT 1 FROM [
+    SELECT 2 FROM [RANGE(EEB 2246, EEB 2272), TAG("YC E&EB Organismal Lec/Labs")],
+    SELECT 2 FROM [EEB 3326, EEB 3327L],
+    SELECT 2 FROM [MCDB 2900, MCDB 2910L],
+    PLACEMENT("Other organismal diversity lecture course with laboratory approved by the DUS")
+] : "Organismal diversity lecture course with associated laboratory (EEB 2246-2272, or EEB 3326 and 3327L)" : 2;
+
+// Residential College Seminars may not count. Other science, MATH, S&DS, or CPSC courses with DUS permission.
+$elective = [RANGE(EEB 2000, EEB 9999), RANGE(MCDB 2000, MCDB 9999), RANGE(MB&B 2000, MB&B 9999), PLACEMENT("Research course or laboratory in a biological sciences department or the School of Medicine"), PLACEMENT("Science, mathematics, statistics, or computer science course approved by the DUS")];
+SELECT 2 FROM [$elective, $elective] : "Two electives (two credits)" : 3;
+SELECT 1 FROM [PLACEMENT("One of the electives is a lecture or seminar course")] : "At least one elective must be a lecture or seminar" : 3;
+
+SELECT 1 FROM [SELECT 2 FROM [EEB 4475, EEB 4476], SELECT 2 FROM [EEB 4495, EEB 4496]] : "Senior requirement: two terms of original research (EEB 4475 and 4476, or EEB 4495 and 4496)" : 1;

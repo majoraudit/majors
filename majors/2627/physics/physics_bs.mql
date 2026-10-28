@@ -1,5 +1,17 @@
-SELECT 1 FROM [CLASS(PHYS 4000), RANGE(MATH 2000 , MATH 4999), RANGE(ENAS 1500 , ENAS 4999)] : "Advanced Math" : 1;
-SELECT 3 FROM [CLASS(PHYS 4010), CLASS(PHYS 4020), SELECT 1 FROM [CLASS(PHYS 4390), CLASS(PHYS 4400)]] : "Core Physics" : 2;
-SELECT 1 FROM [CLASS(PHYS 2060L)] : "Laboratory" : 3;
-SELECT 3 FROM [RANGE(PHYS 3000 , PHYS 4999)] : "Advanced Electives" : 4;
-SELECT 1 FROM [CLASS(PHYS 4710), CLASS(PHYS 4720)] : "Senior Requirement" : 5;
+// Physics B.S. -- 8.5 course credits beyond the prerequisites, including the senior requirement.
+SELECT 1 FROM [
+    SELECT 4 FROM [PHYS 1700, PHYS 1710, MATH 1120, MATH 1150],
+    SELECT 4 FROM [PHYS 1800, PHYS 1810, MATH 1150, MATH 1200],
+    SELECT 4 FROM [PHYS 2000, PHYS 2010, MATH 1200, SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260]],
+    SELECT 3 FROM [PHYS 2600, PHYS 2610, SELECT 1 FROM [MATH 1200, ENAS 1510, PHYS 4000, PLACEMENT("Equivalent mathematics corequisite")]]
+] : "Prerequisite: introductory physics sequence with its mathematics corequisites" : 1;
+SELECT 1 FROM [CLASS(PHYS 2050L), SELECT 2 FROM [PHYS 1650L, PHYS 1660L]] : "Prerequisite: PHYS 2050L, or PHYS 1650L and 1660L" : 1;
+
+SELECT 1 FROM [PHYS 4000, PLACEMENT("Mathematics course at or above the level of PHYS 4000")] : "Mathematics at the level of PHYS 4000 or above" : 1;
+SELECT 2 FROM [PHYS 4010, PHYS 4020] : "Advanced classical physics: PHYS 4010 and 4020 (PHYS 4010 first)" : 1;
+SELECT 1 FROM [PHYS 4390, PHYS 4400] : "Quantum mechanics: PHYS 4390 or 4400" : 1;
+SELECT 1 FROM [PHYS 2060L, PLACEMENT("Equivalent laboratory course")] : "Laboratory: PHYS 2060L or equivalent" : 1;
+$adv = [RANGE(PHYS 3000, PHYS 4709), RANGE(PHYS 4721, PHYS 9999), PLACEMENT("Advanced science, engineering, or mathematics course approved by the DUS")];
+SELECT 3 FROM [$adv, $adv, $adv, PHYS 4450L] : "Three advanced electives approved by the DUS (3000+, e.g., PHYS 4450L)" : 3;
+
+SELECT 1 FROM [PHYS 4710, PHYS 4720, PLACEMENT("Equivalent one-term research project")] : "Senior requirement: one term of independent research (PHYS 4710 or 4720)" : 1;

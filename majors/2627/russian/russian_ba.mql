@@ -1,0 +1,17 @@
+// Russian B.A. -- 11 term courses (12 credits) beyond the prerequisite, including the senior essay.
+// Some courses may fulfill more than one requirement; students meeting language proficiency without coursework
+// take additional courses to reach eleven.
+$russ = RANGE(RUSS 0000, RUSS 9999);
+
+SELECT 1 FROM [RUSS 1400, RUSS 1420, RUSS 1450, PLACEMENT("RUSS S140 or placement examination")] : "Prerequisite: second-year Russian" : 1;
+
+SELECT 2 FROM [SELECT 1 FROM [RUSS 1500, PLACEMENT("Approved summer or study abroad equivalent of RUSS 1500")], SELECT 1 FROM [RUSS 1510, PLACEMENT("Approved summer or study abroad equivalent of RUSS 1510")]] : "Third-year Russian: RUSS 1500 and 1510" : 1;
+SELECT 2 FROM [SELECT 1 FROM [RUSS 1600, PLACEMENT("Approved summer or study abroad equivalent of RUSS 1600")], SELECT 1 FROM [RUSS 1610, PLACEMENT("Approved summer or study abroad equivalent of RUSS 1610")]] : "Fourth-year Russian: RUSS 1600 and 1610" : 1;
+SELECT 1 FROM [RANGE(RUSS 0001, RUSS 0999), RANGE(RUSS 2000, RUSS 4899), PLACEMENT("Russian literature in translation course approved by the DUS")] : "Russian literature in translation: 19th century or earlier" : 2;
+SELECT 1 FROM [RANGE(RUSS 0001, RUSS 0999), RANGE(RUSS 2000, RUSS 4899), PLACEMENT("Russian literature in translation course approved by the DUS")] : "Russian literature in translation: 20th century or later" : 2;
+SELECT 1 FROM [RANGE(RUSS 1700, RUSS 1900)] : "One content course taught in Russian (RUSS 1700-1900)" : 2;
+SELECT 1 FROM [RANGE(RSEE 0000, RSEE 9999), TAG("YC HIST Europe"), PLACEMENT("Course in Russian, East European, or Eurasian history or social sciences approved by the DUS")] : "One course in Russian, East European, or Eurasian history or social sciences" : 2;
+SELECT 3 FROM [$russ, $russ, $russ, RANGE(RSEE 0000, RSEE 9999), PLACEMENT("Yale summer program in Russian culture (RUSS S241, S242, or S243)")] : "Electives as needed to reach eleven courses" : 4;
+
+// Only one of RUSS 4900 and 4910 counts, except as a twelfth course for double majors.
+SELECT 1 FROM [RUSS 4900, RUSS 4910] : "Senior essay (RUSS 4900 or 4910; primary sources read in Russian)" : 1;

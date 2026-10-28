@@ -1,32 +1,15 @@
-SELECT 3 FROM [
-  CLASS(MATH 1200),
-  SELECT 1 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810), RANGE(PHYS 1800 , PHYS 1999)],
-  CLASS(PHYS 2050L)
-] : "Prerequisites" : 3;
+// Mathematics and Physics B.S. -- 15 term courses (14.5 credits) beyond the prerequisites, including the senior requirement.
+// Math courses must carry an undergraduate MATH number; graduate MATH 5000-5999 may count as electives, 6000+ may not.
+$math = [RANGE(MATH 2220, MATH 4690), RANGE(MATH 5000, MATH 5999)];
+$phys = [RANGE(PHYS 3000, PHYS 9999), PLACEMENT("Advanced physics course chosen in consultation with the major adviser")];
 
-SELECT 12 FROM [
-  CLASS(PHYS 2060L),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(PHYS 3000 , PHYS 4999),
-  RANGE(PHYS 3000 , PHYS 4999),
-  RANGE(PHYS 3000 , PHYS 4999),
-  RANGE(PHYS 3000 , PHYS 4999),
-  RANGE(PHYS 3000 , PHYS 4999)
-] : "Core Classes" : 12;
+SELECT 1 FROM [MATH 1200, SELECT 3 FROM [MATH 3020, MATH 2250, MATH 2550]] : "Prerequisite: MATH 1200 (or MATH 3020, which then does not count toward the math courses)" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610], SELECT 2 FROM [PHYS 1700, PHYS 1710]] : "Prerequisite: introductory physics lecture sequence (PHYS 1700, 1710 with Physics DUS permission)" : 1;
+SELECT 1 FROM [PHYS 2050L, PHYS 1650L] : "Prerequisite: PHYS 2050L (PHYS 1650L with Physics DUS permission)" : 1;
 
-SELECT 2 FROM [
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(PHYS 3000 , PHYS 4999),
-  RANGE(PHYS 3000 , PHYS 4999)
-] : "Electives" : 2;
+SELECT 1 FROM PHYS 2060L : "PHYS 2060L (half credit)" : 1;
+SELECT 6 FROM [$math, $math, $math, $math, $math, $math] : "Six mathematics courses numbered 2220-4690" : 3;
+SELECT 5 FROM [$phys, $phys, $phys, $phys, $phys] : "Five advanced physics courses (six including the senior project)" : 3;
+SELECT 2 FROM [$math, $math, $phys, $phys] : "Two additional mathematics or physics courses" : 4;
 
-SELECT 1 FROM [
-  CLASS(PHYS 4710),
-  CLASS(PHYS 4720)
-] : "Senior Requirement" : 1;
+SELECT 1 FROM [PHYS 4710, PHYS 4720] : "Senior project (PHYS 4710 or 4720) acceptable to both departments" : 1;

@@ -1,9 +1,20 @@
-SELECT 1 FROM [CLASS(PHYS 2060L)] : "Physics Lab" : 1;
-SELECT 1 FROM [CLASS(PHYS 4000)] : "Advanced Math in Physics" : 2;
-SELECT 1 FROM [CLASS(PHYS 4390), CLASS(PHYS 4400)] : "Quantum Mechanics" : 3;
-SELECT 5 FROM [RANGE(PHYS 3000 , PHYS 4999)] : "Additional Advanced Physics" : 4;
-SELECT 2 FROM [CLASS(PHIL 1125), CLASS(PHIL 1126)] : "History of Philosophy Intro" : 5;
-SELECT 1 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Logic Above Intro Level" : 6;
-SELECT 1 FROM [RANGE(PHIL 3000 , PHIL 4999)] : "Philosophy Seminar" : 7;
-SELECT 2 FROM [RANGE(PHIL 1000 , PHIL 4999), RANGE(HSHM 1000 , HSHM 4999)] : "Additional PHIL/HSHM" : 8;
-SELECT 1 FROM [CLASS(PHYS 4710), CLASS(PHYS 4720)] : "Senior Requirement (B.S.)" : 9;
+// Physics and Philosophy B.S. -- 15 courses (14.5 credits) beyond the prerequisites, including the senior requirement.
+$physadv = [RANGE(PHYS 3000, PHYS 4709), RANGE(PHYS 4721, PHYS 9999), PLACEMENT("Advanced physics course approved by the DUS")];
+$philhshm = [RANGE(PHIL 0000, PHIL 9999), RANGE(HSHM 0000, HSHM 9999)];
+
+SELECT 1 FROM MATH 1200 : "Prerequisite: MATH 1200" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Prerequisite: introductory physics sequence (PHYS 1700, 1710 or higher)" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1650L, PHYS 1660L], CLASS(PHYS 2050L)] : "Prerequisite: PHYS 1650L and 1660L, or PHYS 2050L" : 1;
+
+SELECT 1 FROM PHYS 2060L : "PHYS 2060L" : 1;
+SELECT 1 FROM [PHYS 4000, PLACEMENT("Equivalent of PHYS 4000 approved by the DUS")] : "PHYS 4000 or equivalent" : 1;
+SELECT 1 FROM [PHYS 4390, PHYS 4400] : "Quantum mechanics: PHYS 4390 or 4400" : 1;
+// Only one of PHYS 4710/4720 may count toward the physics courses.
+SELECT 5 FROM [$physadv, $physadv, $physadv, $physadv, $physadv, SELECT 1 FROM [PHYS 4710, PHYS 4720]] : "Five additional advanced physics courses numbered 3000 or higher" : 3;
+
+SELECT 2 FROM [PHIL 1125, PHIL 1126] : "PHIL 1125 and PHIL 1126" : 1;
+SELECT 1 FROM [RANGE_TAG(PHIL 1116, PHIL 9999, "YC PHIL Logic"), PLACEMENT("Logic course above the introductory level approved by the DUS")] : "One course in logic above the introductory level" : 2;
+SELECT 1 FROM [RANGE(PHIL 3000, PHIL 4489), PLACEMENT("Philosophy seminar selected with the approval of the DUSs")] : "One philosophy seminar" : 2;
+SELECT 2 FROM [$philhshm, $philhshm] : "Two additional courses in Philosophy or HSHM (six in total)" : 3;
+
+SELECT 1 FROM [CLASS(PHYS 4710), CLASS(PHYS 4720), SELECT 2 FROM [PHYS 4710, PHYS 4720]] : "Senior requirement: PHYS 4710 and/or 4720" : 1;

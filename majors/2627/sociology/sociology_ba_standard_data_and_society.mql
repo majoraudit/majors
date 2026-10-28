@@ -1,0 +1,17 @@
+// Sociology B.A. -- Data and Society concentration, non-intensive (standard) senior requirement. 13 term courses including the senior requirement.
+// No more than two introductory courses in any department or program may count toward the major.
+$socy = RANGE(SOCY 0000, SOCY 9999);
+$outside = PLACEMENT("Concentration-relevant course from outside Sociology approved by the DUS");
+
+SELECT 1 FROM [RANGE(SOCY 1000, SOCY 1999)] : "One introductory sociology course (1000 level)" : 2;
+SELECT 1 FROM SOCY 1000 : "Gateway course (SOCY 1000)" : 2;
+SELECT 1 FROM [SOCY 2001, SOCY 2002] : "Sociological theory (SOCY 2001 or 2002)" : 1;
+SELECT 1 FROM SOCY 2100 : "Research design (SOCY 2100), usually spring of junior year" : 1;
+SELECT 1 FROM [S&DS 1000, S&DS 1100, S&DS 3630, GLBL 2121, PLACEMENT("Introductory statistics course approved by the DUS")] : "One introductory statistics course" : 2;
+SELECT 1 FROM [SOCY 5610, SOCY 5620, PLACEMENT("Intermediate or advanced statistics course approved by the DUS")] : "One intermediate or advanced statistics course" : 2;
+SELECT 2 FROM [TAG("YC SOCY Sociological Methods"), TAG("YC SOCY Sociological Methods"), PLACEMENT("Quantitative methods course approved by the DUS"), PLACEMENT("Quantitative methods course approved by the DUS")] : "Two quantitative methods courses" : 2;
+SELECT 1 FROM PLACEMENT("One semester of independent study as a research assistant on a sociological topic, ideally with Sociology faculty") : "Independent study as a research assistant" : 2;
+SELECT 2 FROM [SOCY 3203, SOCY 2169, $socy, $socy, $outside, $outside] : "Two electives connected to the data and society concentration" : 4;
+LIMIT 4 FROM [$outside, $outside, $outside, $outside] : "Up to 4 concentration-relevant courses from outside Sociology (DUS approval)" : 4;
+
+SELECT 2 FROM [SOCY 4100, RANGE(SOCY 3000, SOCY 3999)] : "Senior requirement (non-intensive): senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating data-intensive approaches to social science" : 1;

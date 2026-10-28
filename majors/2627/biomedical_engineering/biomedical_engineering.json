@@ -17,6 +17,9 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/biomedical-engineering/",
     "websiteLink": "https://engineering.yale.edu/academic-study/departments/biomedical-engineering",
     "specializations": [
-        "african_american_studies_ba.mql"
+        "biomedical_engineering_bs_bioimaging.mql",
+        "biomedical_engineering_bs_biomechanics_and_mechanobiology.mql",
+        "biomedical_engineering_bs_biomolecular_engineering.mql",
+        "biomedical_engineering_bs_systems_biology.mql"
     ]
 }

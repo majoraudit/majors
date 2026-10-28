@@ -1,31 +1,21 @@
-SELECT 5 FROM [
-    CLASS(CPSC 2010),
-    SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)],
-    CLASS(CPSC 2230),
-    CLASS(CPSC 3230),
-    SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]
-] : "Core Classes" : 1;
+// Computer Science B.S./M.S. (simultaneous) -- 12 term courses taken for letter grades, including the senior project.
+$elective = TAG("YC CPSC Elective");
+$outside = PLACEMENT("Advanced course in another department involving computer science, approved by the DUS");
 
-SELECT 6 FROM [
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999)
-] : "CS Electives (Intermediate/Advanced)" : 2;
+SELECT 1 FROM CPSC 2010 : "Core: CPSC 2010" : 1;
+SELECT 1 FROM [CPSC 2020, MATH 2440] : "Core: discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
+SELECT 1 FROM CPSC 2230 : "Core: data structures (CPSC 2230)" : 1;
+// Students who take CPSC 3230 instead of CPSC 3231 and 3232 take one additional elective.
+SELECT 1 FROM [SELECT 2 FROM [CPSC 3231, CPSC 3232], SELECT 2 FROM [CPSC 3230, $elective]] : "Core: systems programming and computer architecture (CPSC 3231 and 3232, or CPSC 3230 plus an extra elective)" : 1;
+SELECT 1 FROM [CPSC 3650, CPSC 3660] : "Core: algorithms (CPSC 3650 or 3660)" : 1;
+LIMIT 1 FROM [CPSC 3650, CPSC 3660] : "Only one of CPSC 3650 or 3660 may count" : 1;
 
-SELECT 1 FROM [
-    CLASS(CPSC 4900)
-] : "Senior Project" : 3;
+SELECT 5 FROM [TAG("YC CPSC Elective"), TAG("YC CPSC Elective"), TAG("YC CPSC Elective"), TAG("YC CPSC Elective"), TAG("YC CPSC Elective"), $outside, $outside] : "5 intermediate or advanced Computer Science electives" : 2;
+LIMIT 2 FROM [$outside, $outside] : "At most 2 advanced courses from other departments" : 2;
 
-SELECT 8 FROM [
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999)
-] : "Graduate Courses (Total 8)" : 4;
+SELECT 1 FROM CPSC 4900 : "Senior project" : 1;
+
+// Simultaneous B.S./M.S. (available only through the Class of 2029); graduate courses must earn Honors, High Pass, or Pass,
+// with at least two Honors and an overall High Pass average.
+SELECT 8 FROM [RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(CPSC 5000, CPSC 9999)] : "Graduate courses for the M.S." : 3;
+SELECT 1 FROM PLACEMENT("Admission to the simultaneous degree program (application by the end of the fifth term), approved by the DUS and DGS") : "M.S.: program admission" : 1;

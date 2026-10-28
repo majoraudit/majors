@@ -1,0 +1,14 @@
+// Women's, Gender, and Sexuality Studies B.A. -- 12 term courses including the senior requirement.
+// The area of focus draws mostly on program offerings; substitutions require written DUS permission.
+$wgss = RANGE(WGSS 0000, WGSS 9999);
+$focus = [$wgss, PLACEMENT("Area-of-focus course from another department approved by the DUS")];
+
+SELECT 2 FROM [WGSS 2205, WGSS 2206, WGSS 2207, WGSS 3340] : "Two intermediate courses (WGSS 2205, 2206, 2207, or 3340)" : 1;
+SELECT 1 FROM PLACEMENT("Methodology course relevant to the area of focus and senior essay, approved by the DUS") : "One methodology course (by the junior year)" : 2;
+SELECT 1 FROM [RANGE(WGSS 3350, WGSS 4489), RANGE(WGSS 4492, WGSS 9999)] : "Area of focus: at least one upper-level WGSS seminar numbered 3350 or above" : 2;
+SELECT 6 FROM [$focus, $focus, $focus, $focus, $focus, $focus] : "Area of focus: six additional courses (seven in total)" : 3;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [WGSS 4490, WGSS 4491],
+    SELECT 2 FROM [PLACEMENT("Single-term senior essay (30+ pages) in an approved upper-level WGSS seminar"), $wgss]
+] : "Senior requirement: WGSS 4490 and 4491, or a single-term senior essay in an upper-level seminar plus one additional WGSS course" : 1;

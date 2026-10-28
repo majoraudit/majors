@@ -1,0 +1,20 @@
+// Architecture B.A. -- History, Theory, Criticism of Architecture, and Urbanism concentration.
+// 15 course credits including prerequisites and the senior requirement.
+$histtheory = TAG("YC ARCH History & Theory");
+$urbanism = TAG("YC ARCH Urbanism & Landscap");
+$materials = TAG("YC ARCH Materials & Design");
+$structures = [TAG("YC ARCH Structures & Computation"), ARCH 1400, MATH 1120, MATH 1150, MATH 1200, PHYS 1800, PHYS 2000];
+
+SELECT 1 FROM ARCH 1001 : "Prerequisite: ARCH 1001" : 1;
+SELECT 1 FROM ARCH 2000 : "Prerequisite: ARCH 2000" : 1;
+SELECT 1 FROM [ARCH 2600, ARCH 2601] : "Prerequisite: ARCH 2600 or 2601" : 1;
+SELECT 1 FROM PLACEMENT("Advanced technology, library, and shop orientation sessions completed") : "Required orientations" : 1;
+
+SELECT 1 FROM ARCH 3000 : "Core: design studio ARCH 3000 (fall of junior year)" : 1;
+SELECT 1 FROM [ARCH 3001, ARCH 3305, ARCH 3309, PLACEMENT("Second design studio, urban laboratory, or elective approved by the DUS")] : "Core: second studio or urban laboratory (spring of junior year)" : 1;
+SELECT 2 FROM [ARCH 2001, ARCH 2003] : "Core: history of architecture surveys" : 1;
+
+SELECT 4 FROM [$histtheory, $histtheory, $histtheory, $histtheory, PLACEMENT("History/theory elective approved by the DUS"), PLACEMENT("History/theory elective approved by the DUS")] : "Four electives in history and theory of architecture and the city" : 2;
+SELECT 1 FROM [$urbanism, $materials, $structures, PLACEMENT("Other relevant elective approved by the DUS")] : "One elective in urbanism and landscape, materials and design, or structures and computation" : 3;
+
+SELECT 2 FROM [ARCH 4900, ARCH 4901] : "Senior requirement: ARCH 4900 and 4901 (senior essay or project)" : 1;

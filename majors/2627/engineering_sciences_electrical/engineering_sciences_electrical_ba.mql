@@ -1,0 +1,18 @@
+// Engineering Sciences (Electrical) B.A. -- 8 technical term courses beyond the prerequisites, including the senior requirement.
+$elective = [CPSC 3650, CPSC 3660, MENG 3020L, MENG 2050, MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
+$elective4 = [MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
+$es = [$elective, RANGE(ECE 0000, ECE 9999), PLACEMENT("Elective approved by the DUS")];
+
+SELECT 1 FROM [MATH 1120, PLACEMENT("Acceleration credit or placement beyond MATH 1120")] : "Prerequisite: MATH 1120 (if needed)" : 1;
+SELECT 1 FROM [MATH 1150, PLACEMENT("Acceleration credit or placement beyond MATH 1150")] : "Prerequisite: MATH 1150 (if needed)" : 1;
+SELECT 1 FROM [ENAS 1510, MATH 1200, MATH 2220, MATH 2250, MATH 2260, MATH 2550, MATH 2560] : "Prerequisite: ENAS 1510 or MATH 1200 or higher" : 1;
+SELECT 1 FROM [ENAS 1300, CPSC 2010, PLACEMENT("More advanced programming course approved by the DUS (CPSC 1001 does not count)")] : "Prerequisite: ENAS 1300 or higher" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010]] : "Prerequisite: PHYS 1700, 1710 or PHYS 1800, 1810 or higher" : 1;
+
+SELECT 1 FROM [ENAS 1940, MATH 2220, MATH 2250, MATH 2260] : "ENAS 1940, MATH 2220, MATH 2250, or MATH 2260" : 1;
+SELECT 3 FROM [ECE 2000, ECE 2011, ECE 2020] : "ECE 2000, 2011, and 2020" : 1;
+
+// Three electives with a one-term senior project; two with ECE 4710 and 4721.
+SELECT 2-3 FROM [$es, $es, $es] : "Two or three approved electives" : 3;
+
+SELECT 1 FROM [CLASS(ECE 4710), CLASS(ECE 4721), SELECT 2 FROM [ECE 4710, ECE 4721]] : "Senior requirement: research or design project (ECE 4710 and/or 4721)" : 1;

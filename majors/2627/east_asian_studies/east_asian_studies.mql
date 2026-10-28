@@ -1,4 +1,21 @@
-SELECT 1 FROM [PLACEMENT("L2 East Asian Language Course"), PLACEMENT("Equivalent Qualification")] : "Prerequisites" : 1;
-SELECT 6 FROM [PLACEMENT("L4 East Asian Language Course"), PLACEMENT("L5 Course with Readings in East Asian Language"), PLACEMENT("L5 Course with Readings in East Asian Language"), RANGE(CHNS 0000, CHNS 9999), RANGE(CHNS 0000, CHNS 9999), RANGE(CHNS 0000, CHNS 9999), RANGE(JAPN 0000, JAPN 9999), RANGE(JAPN 0000, JAPN 9999), RANGE(JAPN 0000, JAPN 9999), RANGE(KREN 0000, KREN 9999), RANGE(KREN 0000, KREN 9999), RANGE(KREN 0000, KREN 9999)] : "East Asian Language Courses" : 2;
-SELECT 4 FROM [PLACEMENT("Course in Area of Focus"), PLACEMENT("Course in Area of Focus"), PLACEMENT("Course in Area of Focus"), SELECT 1 FROM[SELECT 3 FROM [PLACEMENT("Seminar Course in Area of Focus"), PLACEMENT("Seminar Course in Area of Focus"), PLACEMENT("Premodern Period Course in Area of Focus")], SELECT 3 FROM [PLACEMENT("Premodern Period Seminar Course in Area of Focus"), PLACEMENT("Seminar Course in Area of Focus"), PLACEMENT("Course in Area of Focus")]], PLACEMENT("Course outside Area of Focus")] : "Area of Focus Courses" : 2;
-SELECT 1 FROM [PLACEMENT("Senior Seminar with Thesis"), CLASS(EAST 4900), SELECT 2 FROM [CLASS(EAST 4910), CLASS(EAST 4920)]] : "Senior Requirement" : 1;
+// East Asian Studies B.A. -- 13 course credits beyond the prerequisite, including the senior requirement.
+// Up to six credits may come from a preapproved study abroad program. Areas of focus: China, Japan, or Korea.
+$lang = [RANGE(CHNS 0000, CHNS 9999), RANGE(JAPN 0000, JAPN 9999), RANGE(KREN 0000, KREN 9999), PLACEMENT("Content course on East Asia replacing language credit for students who placed out of L5 (DUS approval)")];
+$focus = PLACEMENT("Course in the country or area of focus approved by the DUS");
+
+SELECT 1 FROM [DIST_DEPT("L2", "CHNS"), DIST_DEPT("L2", "JAPN"), DIST_DEPT("L2", "KREN"), PLACEMENT("L2-level proficiency in an East Asian language taught at Yale, or equivalent")] : "Prerequisite: L2 level of an East Asian language" : 1;
+
+SELECT 6 FROM [$lang, $lang, $lang, $lang, $lang, $lang] : "Six course credits in East Asian language courses" : 2;
+SELECT 2 FROM [DIST_DEPT("L5", "CHNS"), DIST_DEPT("L5", "JAPN"), DIST_DEPT("L5", "KREN"), DIST_DEPT("L5", "CHNS"), DIST_DEPT("L5", "JAPN"), DIST_DEPT("L5", "KREN"), PLACEMENT("Placed out of L5 study; replaced with East Asia content course (DUS approval)"), PLACEMENT("Placed out of L5 study; replaced with East Asia content course (DUS approval)")] : "Two language credits at the L5 level" : 2;
+
+// Six credits in the area of focus, including the senior requirement below.
+SELECT 1 FROM PLACEMENT("Area-of-focus course in the premodern period") : "Area of focus: one premodern course" : 2;
+SELECT 2 FROM [PLACEMENT("Seminar in the area of focus, completed before the senior requirement term"), PLACEMENT("Seminar in the area of focus, completed before the senior requirement term")] : "Area of focus: two seminars (completed before the senior requirement)" : 2;
+SELECT 2 FROM [$focus, $focus] : "Area of focus: two additional courses" : 3;
+SELECT 1 FROM PLACEMENT("Course on East Asia outside the country or area of focus") : "One course on East Asia outside the area of focus" : 3;
+
+SELECT 1 FROM [
+    PLACEMENT("Seminar related to the area of focus culminating in a senior thesis using East Asian-language materials"),
+    CLASS(EAST 4900),
+    SELECT 2 FROM [EAST 4910, EAST 4920]
+] : "Senior requirement: senior seminar thesis, EAST 4900, or EAST 4910 and 4920" : 1;

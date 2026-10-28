@@ -1,23 +1,18 @@
-SELECT 2 FROM [CLASS(ERAM 2000), CLASS(ERAM 3000)] : "Required Courses" : 2;
+// Ethnicity, Race, and Migration B.A. -- 12 course credits including the senior requirement.
+$erm = RANGE(ER&M 0000, ER&M 9999);
+$interest = [$erm, PLACEMENT("Area-of-interest course approved by the DUS")];
+$related = [$erm, PLACEMENT("Course in another department with ethnicity, race, and migration content approved by the DUS")];
 
-SELECT 6 FROM [
-    SELECT 1 FROM [TAG("YC ERAM Methods Course")],
-    TAG("YC ERAM Area Course"),
-    TAG("YC ERAM Area Course"),
-    TAG("YC ERAM Area Course"),
-    TAG("YC ERAM Area Course"),
-    TAG("YC ERAM Area Course")
-] : "Area of Interest Courses" : 3;
+SELECT 1 FROM ER&M 2000 : "Introductory course (ER&M 2000)" : 1;
+SELECT 1 FROM ER&M 3000 : "Junior seminar (ER&M 3000)" : 1;
 
-SELECT 2 FROM [
-    TAG("YC ERAM Content Course Approved"),
-    TAG("YC ERAM Content Course Approved")
-] : "Additional ERAM Content Courses" : 3;
+// Area-of-interest courses do not include the senior essay or project.
+SELECT 1 FROM [TAG("YC ER&M Methods Course")] : "Area of interest: one methods course" : 2;
+SELECT 5 FROM [$interest, $interest, $interest, $interest, $interest] : "Area of interest: five additional courses (six in total)" : 3;
+SELECT 2 FROM [$related, $related] : "Two additional courses with ER&M content" : 4;
+LIMIT 2 FROM [PLACEMENT("Course in another department approved by the DUS"), PLACEMENT("Course in another department approved by the DUS")] : "At most two courses from other departments" : 4;
 
 SELECT 1 FROM [
-    SELECT 2 FROM [CLASS(ERAM 4091), CLASS(ERAM 4092)],
-    SELECT 2 FROM [
-        TAG("YC ERAM Upper Level Seminar With Senior Essay"),
-        TAG("YC ERAM Upper Level Seminar")
-    ]
-] : "Senior Requirement" : 1;
+    SELECT 2 FROM [ER&M 4091, ER&M 4092],
+    SELECT 2 FROM [PLACEMENT("Upper-level ER&M seminar with a 20-25 page senior paper approved by the instructor"), RANGE(ER&M 3001, ER&M 4090)]
+] : "Senior requirement: ER&M 4091 and 4092, or two upper-level seminars (one with a senior paper)" : 1;

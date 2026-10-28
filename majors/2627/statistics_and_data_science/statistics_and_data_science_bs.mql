@@ -1,0 +1,25 @@
+// Statistics and Data Science B.S. -- 14 term courses beyond the prerequisite, including the senior requirement.
+// Discipline-area lists are the catalog's examples; other courses may count with DUS approval. A course counts once.
+$core = [S&DS 2380, S&DS 2410, S&DS 2420, S&DS 3120, S&DS 3510, PLACEMENT("Core probability and statistics course approved by the DUS")];
+$comp = [S&DS 2200, S&DS 2300, S&DS 2620, S&DS 2650, S&DS 4250, CPSC 1001, CPSC 2010, ENAS 1300, PLACEMENT("Computational skills course approved by the DUS")];
+$methods = [S&DS 3120, S&DS 3170, S&DS 3610, S&DS 3630, S&DS 3650, S&DS 4300, S&DS 4310, S&DS 4680, ECE 4000, CPSC 4460, CPSC 4520, CPSC 4770, PLACEMENT("Methods of data science course approved by the DUS")];
+$math = [S&DS 3640, S&DS 4000, S&DS 4100, S&DS 4110, CPSC 3650, CPSC 3660, CPSC 4690, MATH 2220, MATH 2250, MATH 2260, MATH 2440, MATH 2550, MATH 2560, MATH 2600, MATH 3020];
+$bigdata = [CPSC 2230, CPSC 3230, CPSC 4240];
+$context = [ANTH 3476, EVST 3620, GLBL 3191, GLBL 3195, LING 3290, LING 2340, LING 3800, PSYC 2658, PLACEMENT("Data science in context course approved by the DUS")];
+$appmethods = [CPSC 4530, CPSC 4700, CPSC 4750, ECON 2136, ECON 4420, ECE 4450, S&DS 3520, LING 2270, PLACEMENT("Methods in application areas course approved by the DUS")];
+
+SELECT 1 FROM [MATH 1200, ENAS 1510, MATH 3020, PLACEMENT("Equivalent multivariable calculus")] : "Prerequisite: multivariable calculus" : 1;
+
+SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260, PLACEMENT("Another Mathematical Foundations course for students who learned linear algebra elsewhere")] : "Mathematical foundations: linear algebra (MATH 2220, 2250, or 2260)" : 1;
+SELECT 2 FROM [S&DS 2420, $core] : "Core probability and statistics: two courses, including S&DS 2420" : 2;
+SELECT 1 FROM S&DS 2420 : "B.S.: S&DS 2420" : 1;
+SELECT 2 FROM [$comp, $comp] : "Computational skills: two courses" : 2;
+SELECT 2 FROM [S&DS 3650, $methods] : "Methods of data science: two courses, including S&DS 3650" : 2;
+SELECT 1 FROM S&DS 3650 : "B.S.: S&DS 3650" : 1;
+SELECT 1 FROM [$math] : "B.S.: one additional Mathematical Foundations and Theory course" : 2;
+$el = [$core, $comp, $methods, $math, $bigdata, $context, $appmethods];
+SELECT 3 FROM [$el, $el, $el] : "Three electives from any discipline area (DUS approval)" : 4;
+$bsel = [$core, $comp, $methods, $math, $bigdata];
+SELECT 2 FROM [$bsel, $bsel] : "B.S.: two additional electives (not Data Science in Context or Methods in Application Areas; DUS approval)" : 4;
+
+SELECT 1 FROM [S&DS 4910, S&DS 4920] : "Senior requirement: individual research project (S&DS 4910 or 4920, not both)" : 1;

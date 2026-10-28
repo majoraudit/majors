@@ -12,5 +12,7 @@
     "dus": [["Maria Doerfler", "maria.doerfler@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/religious-studies/",
     "websiteLink": "https://religiousstudies.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "religious_studies_ba.mql"
+    ]
 }

@@ -12,5 +12,7 @@
     "dus": [["Veronica Waweru", "veronica.waweru@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/african-studies/",
     "websiteLink": "https://www.yale.edu/macmillan/african",
-    "specializations": []
+    "specializations": [
+        "african_studies_ba.mql"
+    ]
 }

@@ -1,20 +1,14 @@
-SELECT 3 FROM [
-  CLASS(ENVE 1200),
-  CLASS(ENVE 3600),
-  SELECT 1 FROM [CLASS(ENVE 3730), CLASS(ENVE 3770)]
-] : "Core Courses" : 2;
+// Engineering Sciences (Environmental) B.A. -- 9 term course credits beyond the prerequisites, including the senior requirement.
+SELECT 2 FROM [MATH 1120, MATH 1150] : "Prerequisite: MATH 1120 and 1150" : 1;
+SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670]] : "Prerequisite: two-term lecture sequence in chemistry" : 1;
+SELECT 2 FROM [PHYS 1700, PHYS 1710] : "Prerequisite: PHYS 1700 and 1710" : 1;
 
-SELECT 5 FROM [
-  DEPT("ENVE"),
-  DEPT("CENG"),
-  DEPT("MENG"),
-  DEPT("ECE"),
-  DEPT("BENG"),
-  DEPT("EVST"),
-  DEPT("ENAS")
-] : "Approved Electives" : 3;
+SELECT 2 FROM [ENVE 1200, ENVE 3600] : "ENVE 1200 and ENVE 3600" : 1;
+SELECT 1 FROM [ENVE 3730, ENVE 3770] : "ENVE 3730 or 3770" : 1;
 
-SELECT 1 FROM [
-  CLASS(ENVE 4160),
-  CLASS(ENVE 4900)
-] : "Senior Requirement" : 1;
+// Electives may build toward an optional emphasis: Climate and Energy; Environmental Science and Technology;
+// Sustainability and Policy; or Self-designed.
+$elective = PLACEMENT("Elective chosen in consultation with the DUS");
+SELECT 5 FROM [$elective, $elective, $elective, $elective, $elective] : "Five electives approved by the DUS" : 3;
+
+SELECT 1 FROM [ENVE 4160, ENVE 4900] : "Senior requirement (ENVE 4160 or 4900)" : 1;

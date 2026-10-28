@@ -1,43 +1,19 @@
-SELECT 10 FROM [
-  TAG("YC MMES Survey Course"),
-  TAG("YC MMES Survey Course"),
-  SELECT 1 FROM [
-    DIST_DEPT("L5", "ARBC"),
-    DIST_DEPT("L5", "HEBR"),
-    DIST_DEPT("L5", "PERS"),
-    DIST_DEPT("L5", "TURK")
-  ],
-  TAG("YC HIST Middle East"),
-  TAG("YC HIST Preindustrial"),
-  TAG("YC MMES Adv Seminar"),
-  TAG("YC MMES Adv Seminar")
-] : "Core Classes" : 10;
+// Modern Middle East Studies B.A. -- 12 term courses including the senior requirement.
+// With DUS approval, up to two Middle Eastern language courses below L5 may count toward the distribution requirements.
+$dist = [TAG("YC MMES Distribution Course"), PLACEMENT("Middle Eastern language course below L5 counted with DUS approval")];
+$sem = TAG("YC MMES Adv Seminar");
 
-SELECT 2 FROM [
-  DIST_DEPT("L4", "ARBC"),
-  DIST_DEPT("L3", "ARBC"),
-  DIST_DEPT("L2", "ARBC"),
-  DIST_DEPT("L1", "ARBC"),
-
-  DIST_DEPT("L4", "HEBR"),
-  DIST_DEPT("L3", "HEBR"),
-  DIST_DEPT("L2", "HEBR"),
-  DIST_DEPT("L1", "HEBR"),
-  
-  DIST_DEPT("L4", "PERS"),
-  DIST_DEPT("L3", "PERS"),
-  DIST_DEPT("L2", "PERS"),
-  DIST_DEPT("L1", "PERS"),
-  
-  DIST_DEPT("L4", "TURK"),
-  DIST_DEPT("L3", "TURK"),
-  DIST_DEPT("L2", "TURK"),
-  DIST_DEPT("L1", "TURK")
-] : "Electives" : 2;
+SELECT 2 FROM [TAG("YC MMES Survey Course"), TAG("YC MMES Survey Course")] : "Two introductory survey courses on the Middle East (modern period)" : 2;
+SELECT 2 FROM [PLACEMENT("Course on a Middle Eastern region or country"), PLACEMENT("Course on a different Middle Eastern region or country")] : "Distribution: two courses on different Middle Eastern regions or countries" : 3;
+SELECT 2 FROM [PLACEMENT("Middle East course in one department or program"), PLACEMENT("Middle East course in a second department or program")] : "Distribution: two courses from two different departments or programs" : 3;
+SELECT 2 FROM [TAG("YC NELC Medieval Near East"), TAG("YC NELC Medieval Near East"), TAG("YC NELC Ancient Near East"), PLACEMENT("Course focused on the period before 1750")] : "Distribution: two courses focused on the period before 1750" : 3;
+SELECT 6 FROM [$dist, $dist, $dist, $dist, $dist, $dist] : "Six distribution courses in total (satisfying the three categories above)" : 4;
+LIMIT 2 FROM [PLACEMENT("Middle Eastern language course below L5"), PLACEMENT("Middle Eastern language course below L5")] : "At most two language courses below L5" : 4;
+SELECT 2 FROM [$sem, $sem] : "Two advanced seminars" : 2;
+SELECT 1 FROM [DIST_DEPT("L5", "ARBC"), DIST_DEPT("L5", "HEBR"), DIST_DEPT("L5", "PERS"), DIST_DEPT("L5", "TKSH")] : "One course at the L5 level in Arabic, Hebrew, Persian, or Turkish" : 2;
 
 SELECT 1 FROM [
-  CLASS(MMES 4491),
-  CLASS(MMES 4492),
-  CLASS(MMES 4493),
-  TAG("YC MMES Adv Seminar")
-] : "Senior Requirement" : 1;
+    CLASS(MMES 4491),
+    SELECT 2 FROM [MMES 4492, MMES 4493],
+    PLACEMENT("Senior essay written in an additional advanced seminar")
+] : "Senior essay (MMES 4491, MMES 4492 and 4493, or in an additional seminar)" : 1;

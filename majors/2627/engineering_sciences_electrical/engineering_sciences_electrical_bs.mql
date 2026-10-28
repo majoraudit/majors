@@ -1,22 +1,20 @@
-SELECT 6 FROM [
-  CLASS(ENAS 1940),
-  SELECT 1 FROM [CLASS(MATH 2220), CLASS(MATH 2250), CLASS(MATH 2260)],
-  CLASS(ECE 2000),
-  CLASS(ECE 2011),
-  CLASS(ECE 2020),
-  CLASS(ECE 2031)
-] : "Core Courses" : 2;
+// Engineering Sciences (Electrical) B.S. -- 13 technical term courses beyond the prerequisites, including the senior requirement.
+$elective = [CPSC 3650, CPSC 3660, MENG 3020L, MENG 2050, MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
+$elective4 = [MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
+$es = [$elective, PLACEMENT("Course with substantial electrical engineering content approved by the DUS")];
 
-SELECT 3 FROM [
-  RANGE(ECE 4000, ECE 4999)
-] : "ECE Electives" : 3;
+SELECT 1 FROM [MATH 1120, PLACEMENT("Acceleration credit or placement beyond MATH 1120")] : "Prerequisite: MATH 1120 (if needed)" : 1;
+SELECT 1 FROM [MATH 1150, PLACEMENT("Acceleration credit or placement beyond MATH 1150")] : "Prerequisite: MATH 1150 (if needed)" : 1;
+SELECT 1 FROM [ENAS 1510, MATH 1200, MATH 2220, MATH 2250, MATH 2260, MATH 2550, MATH 2560] : "Prerequisite: ENAS 1510 or MATH 1200 or higher" : 1;
+SELECT 1 FROM [ENAS 1300, CPSC 2010, PLACEMENT("More advanced programming course approved by the DUS (CPSC 1001 does not count)")] : "Prerequisite: ENAS 1300 or higher" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010]] : "Prerequisite: PHYS 1800, 1810 or higher" : 1;
 
-SELECT 2-3 FROM [
-  RANGE(ECE 3000, ECE 4999)
-] : "Additional ECE Electives" : 4;
+SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260] : "Linear algebra (MATH 2220, 2250, or 2260)" : 1;
+SELECT 1 FROM ENAS 1940 : "ENAS 1940" : 1;
+SELECT 4 FROM [ECE 2000, ECE 2011, ECE 2020, ECE 2031] : "ECE 2000, 2011, 2020, and 2031" : 1;
 
-SELECT 1-2 FROM [
-  CLASS(ECE 4710),
-  CLASS(ECE 4721),
-  CLASS(ECE 4811)
-] : "Senior Requirement" : 1;
+// Six electives with a one-term senior project; five with ECE 4710 and 4721 (one of which counts as an elective).
+SELECT 5-6 FROM [$es, $es, $es, $es, $es, $es] : "Five or six electives approved by the DUS" : 3;
+SELECT 3 FROM [$elective4, $elective4, $elective4] : "At least three electives at the 4000 level or above" : 3;
+
+SELECT 1 FROM [CLASS(ECE 4710), CLASS(ECE 4721), SELECT 2 FROM [ECE 4710, ECE 4721], PLACEMENT("ECE 4811 with permission of the instructor and the DUS")] : "Senior requirement: research or design project (ECE 4710 and/or 4721, or ECE 4811)" : 1;

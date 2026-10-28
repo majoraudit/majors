@@ -1,13 +1,17 @@
-SELECT 4 FROM [CLASS(CPSC 2010), CLASS(CPSC 2230), CLASS(CPSC 3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]] : "Core CS Classes" : 2;
-SELECT 1 FROM [CLASS(CPSC 4300), CLASS(CPSC 4400), CLASS(CPSC 4520), CLASS(CPSC 4550), CLASS(CPSC 4600), CLASS(CPSC 4630), CLASS(CPSC 4650), CLASS(CPSC 4680), CLASS(CPSC 4690), CLASS(CPSC 4860)] : "Advanced CPSC Course with Significant Mathematical Content" : 3;
-SELECT 1 FROM [TAG("YC CPSC&MATH Adv CS Elective")] : "CPSC Electives" : 4;
-SELECT 3 FROM [SELECT 1 FROM [CLASS(MATH 1200), RANGE(MATH 2250, MATH 4690), RANGE(MATH 5000, MATH 5999)], SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)], CLASS(MATH 2440)] : "Core Math Classes" : 2;
-SELECT 5 FROM [
-    SELECT 0-5 FROM [
-        RANGE(MATH 2250, MATH 4690)
-    ],
-    SELECT 0-5 FROM [
-        RANGE(MATH 5000, MATH 5999)
-    ]
-] : "Math Electives" : 4;
-SELECT 1 FROM [CLASS(CPSC 4900), CLASS(MATH 4750)] : "Senior Requirement" : 1;
+// Computer Science and Mathematics B.S. -- 14 term courses (6 CPSC, 8 MATH) plus the senior requirement.
+// Courses must carry a CPSC or MATH number respectively; no substitutions from other departments.
+$cpscadv = RANGE(CPSC 3000, CPSC 4899);
+$mathel = [RANGE(MATH 2250, MATH 4690), RANGE(MATH 5000, MATH 5999)];
+
+SELECT 3 FROM [CPSC 2010, CPSC 2230, CPSC 3230] : "CPSC 2010, 2230, and 3230" : 1;
+SELECT 1 FROM [CPSC 3650, CPSC 3660] : "Algorithms (CPSC 3650 or 3660; only one may count)" : 1;
+SELECT 1 FROM [CPSC 4300, CPSC 4400, CPSC 4520, CPSC 4550, CPSC 4600, CPSC 4630, CPSC 4650, CPSC 4680, CPSC 4690, CPSC 4860, PLACEMENT("Advanced CPSC course with significant mathematical content approved by the DUS")] : "Advanced CPSC course with significant mathematical content" : 2;
+SELECT 1 FROM [$cpscadv, RANGE(CPSC 4901, CPSC 9999)] : "One additional advanced CPSC course (not CPSC 4900)" : 3;
+
+SELECT 1 FROM [MATH 1200, MATH 3020] : "Multivariable calculus (MATH 1200, or MATH 3020 after MATH 2250 and 2550)" : 1;
+SELECT 1 FROM [MATH 2250, MATH 2260] : "Linear algebra (MATH 2250 or 2260)" : 1;
+SELECT 1 FROM MATH 2440 : "MATH 2440" : 1;
+// The 2250-4690 range excludes MATH 4700 and 4800-4890; graduate MATH 5000-5999 may count, 6000+ may not.
+SELECT 5 FROM [$mathel, $mathel, $mathel, $mathel, $mathel] : "Five additional MATH courses numbered 2250-4690" : 3;
+
+SELECT 1 FROM [CPSC 4900, MATH 4750] : "Senior project or essay acceptable to both departments" : 1;

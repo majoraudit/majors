@@ -12,5 +12,7 @@
     "dus": [["Joanna Fiduccia", "joanna.fiduccia@yale.edu"], ["Craig Buckley", "craig.buckley@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/history-of-art/",
     "websiteLink": "https://arthistory.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "history_of_art_ba.mql"
+    ]
 }

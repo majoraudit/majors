@@ -1,4 +1,15 @@
-SELECT 1 FROM [SELECT 2 FROM [CLASS(MATH 1100), CLASS(MATH 1110)], CLASS(MATH 1120), CLASS(MATH 1150), CLASS(MATH 1160), CLASS(ENAS 1510), CLASS(MATH 1180), CLASS(MATH 1200), RANGE(MATH 2000, MATH 9999)] : "Math Requirement" : 1;
-SELECT 5 FROM [SELECT 1 FROM [CLASS(ECON 1108), CLASS(ECON 1110), CLASS(ECON 1115), RANGE(ECON 1159, ECON 9999)], SELECT 1 FROM [CLASS(ECON 1111), CLASS(ECON 1116), RANGE(ECON 1159, ECON 9999)], SELECT 1 FROM [CLASS(ECON 2121), CLASS(ECON 2125)], SELECT 1 FROM [CLASS(ECON 2122), CLASS(ECON 2126)], SELECT 1 FROM [CLASS(ECON 1117), CLASS(ECON 2123), CLASS(ECON 2136)]] : "ECON Core Courses" : 2;
-SELECT 4 FROM [RANGE(ECON 1159, ECON 9999), RANGE(ECON 1159, ECON 9999), RANGE(ECON 1159, ECON 9999), SELECT 1 FROM [RANGE(ECON 1159, ECON 9999), PLACEMENT("Non-ECON Class with DUS Approval")]] : "Electives" : 3;
-SELECT 2 FROM [RANGE(ECON 4400, ECON 4491), RANGE(ECON 4400, ECON 4491)] : "Senior Requirement" : 1;
+// Economics B.A. -- 12 term courses, including the mathematics requirement and the senior requirement.
+// Students who place out of (or take Credit/D/Fail) introductory micro or macro take an additional elective instead.
+$elective = RANGE(ECON 2000, ECON 9999);
+
+SELECT 1 FROM [ECON 1108, ECON 1110, ECON 1115, $elective] : "Introductory microeconomics (or an additional elective if placed out)" : 1;
+SELECT 1 FROM [ECON 1111, ECON 1116, $elective] : "Introductory macroeconomics (or an additional elective if placed out)" : 1;
+SELECT 1 FROM [ECON 2121, ECON 2125] : "Intermediate microeconomics" : 1;
+SELECT 1 FROM [ECON 2122, ECON 2126] : "Intermediate macroeconomics" : 1;
+SELECT 1 FROM [ECON 1117, ECON 2123, ECON 2136] : "Econometrics" : 1;
+SELECT 1 FROM [MATH 1180, MATH 1200, SELECT 2 FROM [MATH 1100, MATH 1110], MATH 1120, MATH 1150, MATH 1160, ENAS 1510, RANGE(MATH 1201, MATH 9999)] : "Mathematics requirement (MATH 1180 or 1200 preferred)" : 1;
+
+SELECT 4 FROM [$elective, $elective, $elective, $elective, PLACEMENT("Non-ECON course related to economics approved by the DUS")] : "Four electives (ECON courses numbered 2000 or above)" : 3;
+LIMIT 1 FROM PLACEMENT("Non-ECON course related to economics approved by the DUS") : "At most one non-ECON elective" : 3;
+
+SELECT 2 FROM [RANGE(ECON 4400, ECON 4491), RANGE(ECON 4400, ECON 4491)] : "Senior requirement: two courses numbered ECON 4400-4491 (at least one in the senior year)" : 2;

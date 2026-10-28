@@ -1,0 +1,15 @@
+// Special Divisional Major (B.A. or B.S.) -- at least twelve advanced term courses and a senior project, in a program
+// designed by the student and approved by the Committee on Honors and Academic Standing. Course content is set by each
+// approved proposal, so the courses themselves are adviser- and Committee-approved placements.
+$advanced = PLACEMENT("Advanced course in the approved Special Divisional Major program (graduate courses, tutorials, or Residential College Seminars when approved)");
+
+SELECT 1 FROM PLACEMENT("Program proposal approved by the Committee on Honors and Academic Standing, with a primary adviser from the Yale College faculty") : "Approved program proposal" : 1;
+SELECT 1 FROM PLACEMENT("Preparation for the proposed advanced courses and senior project accepted by the advisers and the Committee") : "Prerequisite preparation" : 1;
+
+SELECT 12 FROM [$advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced, $advanced] : "At least twelve advanced term courses (not prerequisites or beginning language courses)" : 3;
+
+SELECT 1 FROM [
+    SELECT 2 FROM [SPEC 4910, SPEC 4920],
+    CLASS(SPEC 4910),
+    PLACEMENT("Written or oral examination, graduate course, or tutorial approved by the Committee as the senior project")
+] : "Senior project (typically SPEC 4910 and 4920)" : 1;

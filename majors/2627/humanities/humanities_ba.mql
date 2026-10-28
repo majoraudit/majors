@@ -1,0 +1,16 @@
+// Humanities B.A. -- 14 term courses including the senior essay.
+// No more than four of the six core courses may concern one world-historical tradition.
+SELECT 2 FROM [TAG("YC HUMS CoreSem Interpretation"), TAG("YC HUMS CoreSem Interpretation")] : "Core: two Interpretations seminars" : 1;
+SELECT 2 FROM [TAG("YC HUMS CoreSem Modernities"), TAG("YC HUMS CoreSem Modernities")] : "Core: two Modernities seminars" : 1;
+SELECT 2 FROM [TAG("YC HUMS CoreSem Traditions"), TAG("YC HUMS CoreSem Traditions")] : "Core: two Traditions lectures or seminars" : 1;
+
+SELECT 1 FROM [TAG("YC HUMS Area Literature"), PLACEMENT("Literature course approved by the DUS")] : "Area of study: literature" : 2;
+SELECT 1 FROM [TAG("YC HUMS Area Arts"), PLACEMENT("Visual, musical, or dramatic arts course approved by the DUS")] : "Area of study: visual, musical, or dramatic arts" : 2;
+SELECT 1 FROM [TAG("YC HUMS Area Science"), PLACEMENT("Science in the humanities course approved by the DUS")] : "Area of study: science in the humanities" : 2;
+SELECT 1 FROM [TAG("YC HUMS Area History"), PLACEMENT("Intellectual history and historical analysis course approved by the DUS")] : "Area of study: intellectual history and historical analysis" : 2;
+
+$focus = PLACEMENT("Elective complementing the student's area of focus, approved by the DUS");
+SELECT 3 FROM [$focus, $focus, $focus] : "Three electives in the area of focus" : 3;
+
+SELECT 1 FROM PLACEMENT("At least one intellectual journal entry submitted to the DUS each semester") : "Intellectual journal" : 1;
+SELECT 1 FROM HUMS 4910 : "One- or two-term senior essay (HUMS 4910)" : 1;

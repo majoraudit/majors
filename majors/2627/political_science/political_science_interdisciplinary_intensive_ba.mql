@@ -1,9 +1,24 @@
-SELECT 2 FROM [RANGE(PLSC 1000 , PLSC 1999)] : "Intro Courses" : 1
-SELECT 2 FROM [RANGE(PLSC 2000 , PLSC 2999)] : "Core Lectures" : 2
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Methodology / Formal Theory" : 3
-SELECT 7 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Interdisciplinary Concentration" : 4
-SELECT 4 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Outside Concentration Subfields" : 5
-SELECT 2 FROM [RANGE(PLSC 3000 , PLSC 4999)] : "Seminars" : 6
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Additional Intensive Elective" : 7
-SELECT 1 FROM [CLASS(PLSC 4900)] : "Junior Intensive Seminar" : 8
-SELECT 2 FROM [CLASS(PLSC 4901), CLASS(PLSC 4903)] : "Intensive Senior Essay" : 9
+// Political Science B.A. -- interdisciplinary concentration, intensive major. 15 term courses including the senior requirement.
+$plsc = RANGE(PLSC 0000, PLSC 9999);
+$seminar = [RANGE(PLSC 3000, PLSC 4899), PLACEMENT("Residential College Seminar taught by Political Science faculty")];
+$outside = PLACEMENT("Related course in another department (or DRST 0005/0006, or one outside Residential College Seminar) approved by the DUS");
+
+SELECT 2 FROM [TAG("YC PLSC Intro Courses"), TAG("YC PLSC Intro Courses"), RANGE(PLSC 1000, PLSC 1999), RANGE(PLSC 1000, PLSC 1999)] : "Two introductory courses (first digit 1)" : 2;
+SELECT 2 FROM [TAG("YC PLSC Core Lecture"), TAG("YC PLSC Core Lecture")] : "Two non-introductory core lectures" : 2;
+SELECT 1 FROM [TAG("YC PLSC Method &Formal Theory")] : "One course in the methodology and formal theory subfield" : 2;
+SELECT 2 FROM [$seminar, $seminar] : "Two seminars taught by Political Science faculty (at least one in the senior year)" : 2;
+
+$conc = [$plsc, $outside];
+SELECT 7 FROM [$conc, $conc, $conc, $conc, $conc, $conc, $conc] : "Seven courses in the interdisciplinary field of concentration (application approved by the DUS)" : 3;
+SELECT 2 FROM [
+    SELECT 2 FROM [TAG("YC PLSC American Govt"), TAG("YC PLSC American Govt")],
+    SELECT 2 FROM [TAG("YC PLSC Comparative Govt"), TAG("YC PLSC Comparative Govt")],
+    SELECT 2 FROM [TAG("YC PLSC Internatl Relations"), TAG("YC PLSC Internatl Relations")],
+    SELECT 2 FROM [TAG("YC PLSC Political Philosophy"), TAG("YC PLSC Political Philosophy")]
+] : "Outside the concentration: two courses in each of two subfields (international relations, American government, political philosophy, comparative politics)" : 2;
+LIMIT 2 FROM [$outside, $outside] : "At most 2 courses from other departments (DUS permission)" : 3;
+SELECT 1 FROM [$plsc, $outside] : "Intensive: one additional elective" : 4;
+
+SELECT 1 FROM PLSC 4900 : "Intensive: PLSC 4900 in the spring term of the junior year" : 1;
+SELECT 2 FROM [PLSC 4901, PLSC 4903] : "Senior requirement (intensive): yearlong senior essay in PLSC 4901 and 4903, within the concentration" : 1;
+SELECT 1 FROM PLACEMENT("Intensive major application approved by the DUS in the junior year") : "Intensive major admission" : 1;

@@ -1,0 +1,12 @@
+// South Asian Studies B.A. (second major only) -- 7 term courses numbered 2000 or above, plus the senior requirement
+// and the language requirement. Up to three study abroad credits and one relevant outside course may count (DUS approval).
+$sast = [RANGE(SAST 2000, SAST 4909), RANGE(SAST 4911, SAST 9999), PLACEMENT("Relevant South Asia course (2000+) in another department or study abroad approved by the DUS")];
+
+SELECT 7 FROM [$sast, $sast, $sast, $sast, $sast, $sast, $sast] : "Seven South Asian Studies courses numbered 2000 or above" : 3;
+SELECT 2 FROM [TAG("YC SAST Premodern South Asia"), TAG("YC SAST Premodern South Asia")] : "At least two courses on premodern South Asia" : 2;
+SELECT 2 FROM [PLACEMENT("South Asian Studies seminar"), PLACEMENT("South Asian Studies seminar")] : "At least two seminars" : 2;
+LIMIT 1 FROM PLACEMENT("Relevant course from another department or program") : "At most one course from another department or program by petition" : 3;
+
+SELECT 1 FROM [DIST_DEPT("L5", "HNDI"), DIST_DEPT("L5", "SKRT"), SELECT 2 FROM [PLACEMENT("L5 proficiency demonstrated by examination (Telugu, Tamil, or other approved language)"), $sast], PLACEMENT("Approved substitute language (e.g., Persian or Arabic) at the L5 level")] : "Language requirement: a South Asian language at the advanced (L5) level (an exam route requires one additional course)" : 1;
+
+SELECT 1 FROM [SAST 4910, PLACEMENT("Seminar culminating in a senior essay, approved by the DUS")] : "Senior requirement: senior essay in a seminar or SAST 4910" : 1;

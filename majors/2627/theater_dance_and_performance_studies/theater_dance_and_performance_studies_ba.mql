@@ -1,0 +1,17 @@
+// Theater, Dance, and Performance Studies B.A. -- 10 term courses beyond the prerequisites, including the senior requirement.
+// A course listed in several domains counts toward only one domain requirement for a given student.
+SELECT 2 FROM [TDPS 1000, TDPS 1001] : "Prerequisites: TDPS 1000 and TDPS 1001" : 1;
+
+SELECT 2 FROM [TAG("YC TDPS Artistic Practice"), TAG("YC TDPS Artistic Practice")] : "Two courses in the Artistic Practice domain" : 2;
+SELECT 2 FROM [TAG("YC TDPS Interarts"), TAG("YC TDPS Interarts")] : "Two courses in the Interarts domain" : 2;
+SELECT 2 FROM [TAG("YC TDPS Histories"), TAG("YC TDPS Histories")] : "Two courses in the Histories domain" : 2;
+SELECT 2 FROM [TAG("YC TDPS Performance Theory"), TAG("YC TDPS Performance Theory")] : "Two courses in the Performance Theory domain" : 2;
+// Excludes TDPS 1000, 1001, 4701, and 4900-4902; courses from other departments with a TDPS domain attribute count.
+SELECT 1 FROM [TAG("YC TDPS Elective"), RANGE(TDPS 1002, TDPS 4700), RANGE(TDPS 4702, TDPS 4899), RANGE(TDPS 4903, TDPS 9999)] : "One related TDPS elective" : 3;
+
+SELECT 1 FROM [
+    TDPS 4900,
+    TDPS 4901,
+    TDPS 4902,
+    PLACEMENT("Senior essay in an upper-level seminar, or a production seminar, approved by the DUS as the senior requirement")
+] : "Senior requirement: TDPS 4900, 4901 (with 15-25 page essay), 4902, or an approved seminar or production seminar" : 1;

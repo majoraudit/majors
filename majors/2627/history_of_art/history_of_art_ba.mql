@@ -1,0 +1,28 @@
+// History of Art B.A. -- 12 term courses including the senior requirement.
+// Only courses originating in History of Art fulfill the distribution requirements; one course may satisfy
+// both a geographical and a chronological category.
+$inter = [RANGE(HSAR 2000, HSAR 3490), RANGE(HSAR 3500, HSAR 4400), RANGE(HSAR 4402, HSAR 4497)];
+$seminar = [RANGE(HSAR 3500, HSAR 4400), RANGE(HSAR 4402, HSAR 4497)];
+
+SELECT 2 FROM [RANGE(HSAR 1000, HSAR 1999), RANGE(HSAR 1000, HSAR 1999)] : "Two introductory courses at the 1000 level" : 2;
+SELECT 4 FROM [$inter, $inter, $inter, $inter] : "Four intermediate and advanced courses (2000 and 3000 levels)" : 3;
+SELECT 2 FROM [$seminar, $seminar] : "Two seminars at the 3500-4497 level" : 2;
+SELECT 4 FROM [
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Africa & Pacific")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR The Americas")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Asia & Near East")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Europe")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Transregional")]
+] : "Distribution: four of the five geographical areas (among the six intermediate/advanced courses)" : 2;
+SELECT 4 FROM [
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Pre-800")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR 800-1400")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR 1400-1800")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Post-1800")],
+    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Transchronological")]
+] : "Distribution: four of the five chronological periods (among the six intermediate/advanced courses)" : 2;
+
+SELECT 1 FROM HSAR 4401 : "Methods seminar: HSAR 4401 (junior year)" : 1;
+SELECT 2 FROM [RANGE(HSAR 0000, HSAR 9999), RANGE(HSAR 0000, HSAR 9999), PLACEMENT("Course in a related department directly relevant to the major, approved by the DUS"), PLACEMENT("Course in a related department directly relevant to the major, approved by the DUS")] : "Two electives" : 4;
+
+SELECT 1 FROM [CLASS(HSAR 4499), PLACEMENT("Two-term senior essay approved by petition to the DUS and adviser")] : "Senior essay (HSAR 4499)" : 1;

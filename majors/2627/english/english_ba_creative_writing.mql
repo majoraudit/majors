@@ -1,0 +1,29 @@
+// English B.A. -- Creative Writing concentration. 15 courses including the senior requirement:
+// 4 creative writing courses and at least 11 literature courses (courses numbered 1030 or below count as literature).
+// Admission is by application at the end of the junior year; Residential College Seminars count only with DUS permission.
+$found = [ENGL 1025, ENGL 1026, ENGL 1027, ENGL 1028];
+$cw = TAG("YC ENGL Creative Writing");
+$engl = RANGE(ENGL 0000, ENGL 9999);
+$outside = PLACEMENT("Relevant upper-level course in another department (normally literature in translation or another language) approved by the DUS");
+
+SELECT 3 FROM [$found, SELECT 2 FROM [DRST 0001, DRST 0002], SELECT 2 FROM [ENGL 1029, ENGL 1030], PLACEMENT("Two overlapping upper-level courses substituted for one foundational course with DUS permission")] : "Three foundational courses from ENGL 1025-1028 (DRST 0001-0002 or ENGL 1029-1030 may replace one)" : 1;
+
+// Introductory courses do not fulfill the period requirements.
+SELECT 1 FROM [TAG("YC ENGL Medieval")] : "Historical period: Medieval" : 2;
+SELECT 1 FROM [TAG("YC ENGL Renaissance")] : "Historical period: Renaissance" : 2;
+SELECT 1 FROM [TAG("YC ENGL 18th/19th Century")] : "Historical period: 18th/19th century" : 2;
+SELECT 1 FROM [TAG("YC ENGL 20th/21st Century")] : "Historical period: 20th/21st century" : 2;
+
+SELECT 1 FROM [TAG("YC ENGL Junior Seminar")] : "Junior literature (non-creative writing) seminar" : 2;
+SELECT 1 FROM PLACEMENT("Meeting with a research librarian in the first term of the senior requirement") : "Library requirement" : 1;
+
+LIMIT 5 FROM [RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030)] : "At most five introductory courses (ENGL 1020 and 1023 count as introductory)" : 4;
+LIMIT 2 FROM [$outside, $outside] : "At most two courses from other departments" : 4;
+
+SELECT 1 FROM ENGL 4400 : "Creative writing: ENGL 4400 senior project tutorial" : 1;
+SELECT 2 FROM [RANGE_TAG(ENGL 4000, ENGL 4399, "YC ENGL Creative Writing"), RANGE_TAG(ENGL 4000, ENGL 4399, "YC ENGL Creative Writing"), RANGE_TAG(ENGL 4401, ENGL 4999, "YC ENGL Creative Writing"), RANGE_TAG(ENGL 4401, ENGL 4999, "YC ENGL Creative Writing")] : "Creative writing: two 4000-level application workshops (one in the genre of ENGL 4400)" : 2;
+SELECT 1 FROM [$cw] : "Creative writing: one designated creative writing course in another genre" : 2;
+
+SELECT 2 FROM [$engl, $engl, $outside, $outside] : "Two additional literature electives (to reach eleven literature courses)" : 4;
+
+SELECT 2 FROM [SELECT 1 FROM [TAG("YC ENGL Senior Seminar"), ENGL 4100], ENGL 4400] : "Senior requirement: senior seminar or one-term senior essay, and ENGL 4400" : 1;

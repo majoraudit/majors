@@ -1,3 +1,24 @@
-SELECT 7 FROM [RANGE(PHIL 1000 , PHIL 4999)] : "Philosophy Courses" : 1;
-SELECT 5 FROM [CLASS(PSYC 1100), RANGE(PSYC 1000 , PSYC 4999)] : "Psychology Courses" : 2;
-SELECT 1 FROM [RANGE(PHIL 3000 , PHIL 4999), CLASS(PHIL 4490), CLASS(PHIL 4491)] : "Senior Requirement" : 3;
+// Philosophy B.A. -- psychology concentration. 12 term courses (7 philosophy, 5 psychology) including the prerequisites
+// and the senior requirement.
+$phil = RANGE(PHIL 0000, PHIL 9999);
+$psyc = RANGE(PSYC 0000, PSYC 9999);
+$seminar = RANGE(PHIL 3000, PHIL 4489);
+
+SELECT 2 FROM [RANGE(PHIL 0000, PHIL 2999), RANGE(PHIL 0000, PHIL 2999), RANGE(PSYC 0000, PSYC 2999), RANGE(PSYC 0000, PSYC 2999), DRST 0003, DRST 0004] : "Prerequisite: two introductory or intermediate courses in philosophy or psychology" : 1;
+
+SELECT 2 FROM [PHIL 1125, PHIL 1126, DRST 0003, DRST 0004, TAG("YC PHIL History of Philosophy"), TAG("YC PHIL History of Philosophy")] : "Philosophy: two courses in the history of philosophy (usually PHIL 1125 and 1126, or DRST 0003 and 0004)" : 2;
+SELECT 1 FROM [PHIL 1115, TAG("YC PHIL Logic")] : "Philosophy: one course in logic (preferably by fall of junior year)" : 2;
+SELECT 2 FROM [$seminar, $seminar, PLACEMENT("Psychology seminar approved by the DUS")] : "Two seminars (one may be in Psychology with DUS approval)" : 2;
+SELECT 2 FROM [TAG("YC PHIL Intersctn PSYC/PHIL"), TAG("YC PHIL Intersctn PSYC/PHIL"), PLACEMENT("Intermediate/advanced course on the intersection of philosophy and psychology approved by the DUS")] : "Two intermediate or advanced courses on the intersection of philosophy and psychology" : 2;
+SELECT 1 FROM [RANGE_TAG(PHIL 3000, PHIL 4999, "YC PHIL Intersctn PSYC/PHIL"), PLACEMENT("Philosophy seminar on the intersection of philosophy and psychology approved by the DUS")] : "At least one intersection course must be a philosophy seminar" : 2;
+SELECT 7 FROM [$phil, $phil, $phil, $phil, $phil, $phil, $phil, DRST 0003, DRST 0004] : "Seven philosophy courses in total" : 4;
+
+SELECT 1 FROM [PSYC 1100, PLACEMENT("Equivalent of PSYC 1100 approved by the DUS")] : "Psychology: PSYC 1100 or equivalent" : 1;
+SELECT 4 FROM [$psyc, $psyc, $psyc, $psyc] : "Psychology: four additional psychology courses (five in total)" : 3;
+
+SELECT 1 FROM [
+    PLACEMENT("Third philosophy seminar taken for the senior requirement with additional work"),
+    CLASS(PHIL 4490),
+    CLASS(PHIL 4491),
+    SELECT 2 FROM [PHIL 4490, PHIL 4491]
+] : "Senior requirement: a third seminar, or a one- or two-term independent project (PHIL 4490, 4491)" : 1;

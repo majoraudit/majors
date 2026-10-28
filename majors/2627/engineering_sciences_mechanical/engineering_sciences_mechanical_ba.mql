@@ -1,0 +1,9 @@
+// Engineering Sciences (Mechanical) B.A. -- 8 approved course credits in engineering beyond the prerequisites, including the senior project.
+$meng = [TAG("YC MENG Eng Sci-Mech Crse"), RANGE(MENG 0000, MENG 4990), RANGE(MENG 4993, MENG 9999), PLACEMENT("Engineering course approved by the DUS")];
+SELECT 2 FROM [MATH 1120, MATH 1150] : "Prerequisite: MATH 1120 and 1150" : 1;
+SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Prerequisite: physics at least at the level of PHYS 1700, 1710" : 1;
+
+SELECT 7 FROM [$meng, $meng, $meng, $meng, $meng, $meng, $meng] : "Seven approved engineering courses" : 3;
+LIMIT 1 FROM [MENG 4991, MENG 4992] : "At most one Special Projects course (MENG 4991 or 4992) may count" : 3;
+
+SELECT 1 FROM [MENG 4991, MENG 4992, PLACEMENT("Upper-level design course taken in the senior year, chosen with the DUS")] : "Senior project" : 1;

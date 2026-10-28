@@ -1,6 +1,22 @@
-SELECT 2 FROM [RANGE(PLSC 1000 , PLSC 1999)] : "Intro Courses" : 1;
-SELECT 2 FROM [RANGE(PLSC 2000 , PLSC 2999)] : "Core Lectures" : 2;
-SELECT 2 FROM [RANGE(PLSC 3000 , PLSC 4999)] : "Seminars" : 3;
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Methodology / Formal Theory" : 4;
-SELECT 5 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Electives" : 5;
-SELECT 1 FROM [CLASS(PLSC 4900), CLASS(PLSC 4901)] : "Senior Requirement" : 6;
+// Political Science B.A. -- standard program, standard major. 12 term courses including the senior requirement.
+$plsc = RANGE(PLSC 0000, PLSC 9999);
+$seminar = [RANGE(PLSC 3000, PLSC 4899), PLACEMENT("Residential College Seminar taught by Political Science faculty")];
+$outside = PLACEMENT("Related course in another department (or DRST 0005/0006, or one outside Residential College Seminar) approved by the DUS");
+
+SELECT 2 FROM [TAG("YC PLSC Intro Courses"), TAG("YC PLSC Intro Courses"), RANGE(PLSC 1000, PLSC 1999), RANGE(PLSC 1000, PLSC 1999)] : "Two introductory courses (first digit 1)" : 2;
+SELECT 2 FROM [TAG("YC PLSC Core Lecture"), TAG("YC PLSC Core Lecture")] : "Two non-introductory core lectures" : 2;
+SELECT 1 FROM [TAG("YC PLSC Method &Formal Theory")] : "One course in the methodology and formal theory subfield" : 2;
+SELECT 2 FROM [$seminar, $seminar] : "Two seminars taught by Political Science faculty (at least one in the senior year)" : 2;
+SELECT 2 FROM [
+    SELECT 2 FROM [TAG("YC PLSC American Govt"), TAG("YC PLSC American Govt")],
+    SELECT 2 FROM [TAG("YC PLSC Comparative Govt"), TAG("YC PLSC Comparative Govt")],
+    SELECT 2 FROM [TAG("YC PLSC Internatl Relations"), TAG("YC PLSC Internatl Relations")],
+    SELECT 2 FROM [TAG("YC PLSC Political Philosophy"), TAG("YC PLSC Political Philosophy")]
+] : "Two courses in each of any two subfields (international relations, American government, political philosophy, comparative politics)" : 2;
+LIMIT 2 FROM [$outside, $outside] : "At most two courses from other departments by petition" : 3;
+
+SELECT 1 FROM [
+    PLACEMENT("Senior seminar taught by Political Science faculty"),
+    CLASS(PLSC 4900),
+    SELECT 2 FROM [PLSC 4900, PLSC 4901]
+] : "Senior requirement: senior seminar, one-term essay (PLSC 4900), or yearlong essay (PLSC 4900 and 4901)" : 1;

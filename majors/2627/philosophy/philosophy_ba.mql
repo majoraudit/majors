@@ -1,6 +1,24 @@
-SELECT 3 FROM [CLASS(PHIL 1125), CLASS(PHIL 1126), RANGE(PHIL 2000 , PHIL 4999)] : "History of Philosophy" : 1;
-SELECT 2 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Metaphysics & Epistemology" : 2;
-SELECT 2 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Ethics & Value Theory" : 3;
-SELECT 1 FROM [CLASS(PHIL 1115), RANGE(PHIL 2000 , PHIL 4999)] : "Logic" : 4;
-SELECT 2 FROM [RANGE(PHIL 3000 , PHIL 4999)] : "Advanced Seminars" : 5;
-SELECT 1 FROM [RANGE(PHIL 3000 , PHIL 4999), CLASS(PHIL 4490), CLASS(PHIL 4491)] : "Senior Requirement" : 6;
+// Philosophy B.A. -- standard major. 12 term courses including the prerequisites and the senior requirement.
+// No one course may count toward two group requirements; outside courses normally do not count toward groups.
+$phil = RANGE(PHIL 0000, PHIL 9999);
+$outside = PLACEMENT("Related course in another department approved by the DUS");
+$seminar = RANGE(PHIL 3000, PHIL 4489);
+
+SELECT 2 FROM [RANGE(PHIL 0000, PHIL 2999), RANGE(PHIL 0000, PHIL 2999), DRST 0003, DRST 0004] : "Prerequisite: two introductory or intermediate philosophy courses" : 1;
+
+SELECT 1 FROM [SELECT 2 FROM [PHIL 1125, PHIL 1126], SELECT 2 FROM [DRST 0003, DRST 0004]] : "History of philosophy: PHIL 1125 and 1126 (or DRST 0003 and 0004)" : 1;
+SELECT 1 FROM TAG("YC PHIL History of Philosophy") : "History of philosophy: a third course" : 2;
+SELECT 2 FROM [TAG("YC PHIL Metaphysics&Epistemol"), TAG("YC PHIL Metaphysics&Epistemol")] : "Two courses in metaphysics and epistemology" : 2;
+SELECT 2 FROM [TAG("YC PHIL Ethics & Value Theory"), TAG("YC PHIL Ethics & Value Theory")] : "Two courses in ethics and value theory" : 2;
+SELECT 1 FROM [PHIL 1115, TAG("YC PHIL Logic")] : "One course in logic (preferably by fall of junior year)" : 2;
+SELECT 2 FROM [$seminar, $seminar, PHIL 4490, PHIL 4491] : "Two advanced seminars at the 3000+ level (may also count toward group requirements)" : 2;
+
+SELECT 12 FROM [$phil, $phil, $phil, $phil, $phil, $phil, $phil, $phil, $phil, $phil, $phil, $phil, DRST 0003, DRST 0004, $outside, $outside] : "Twelve courses in total (Philosophy courses and up to two approved outside courses)" : 4;
+LIMIT 2 FROM [$outside, $outside] : "Normally no more than two courses from other departments" : 4;
+
+SELECT 1 FROM [
+    PLACEMENT("Third philosophy seminar taken for the senior requirement with additional work"),
+    CLASS(PHIL 4490),
+    CLASS(PHIL 4491),
+    SELECT 2 FROM [PHIL 4490, PHIL 4491]
+] : "Senior requirement: a third seminar, or a one- or two-term independent project (PHIL 4490, 4491)" : 1;

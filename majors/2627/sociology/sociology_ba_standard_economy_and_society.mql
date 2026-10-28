@@ -1,0 +1,16 @@
+// Sociology B.A. -- Economy and Society concentration, non-intensive (standard) senior requirement. 13 term courses including the senior requirement.
+// No more than two introductory courses in any department or program may count toward the major.
+$socy = RANGE(SOCY 0000, SOCY 9999);
+$outside = PLACEMENT("Concentration-relevant course from outside Sociology approved by the DUS");
+
+SELECT 1 FROM [RANGE(SOCY 1000, SOCY 1999)] : "One introductory sociology course (1000 level)" : 2;
+SELECT 1 FROM [SOCY 2001, SOCY 2002] : "Sociological theory (SOCY 2001 or 2002)" : 1;
+SELECT 1 FROM SOCY 2100 : "Research design (SOCY 2100), usually spring of junior year" : 1;
+SELECT 1 FROM [S&DS 1000, S&DS 1100, S&DS 1600, S&DS 2300, S&DS 3630, GLBL 2122, SOCY 2103, AMST 3304, PLACEMENT("Social science methodology course approved by the DUS")] : "One social science methodology course" : 2;
+// The microeconomics course counts toward the four courses allowed from outside the department.
+SELECT 1 FROM [ECON 2121, ECON 2125, PLACEMENT("Intermediate or advanced microeconomics course approved by the DUS")] : "One intermediate or advanced microeconomics course" : 2;
+SELECT 2 FROM [SOCY 2800, SOCY 3814, SOCY 3821, TAG("YC SOCY Economy & Sociology"), TAG("YC SOCY Economy & Sociology"), PLACEMENT("Intermediate/advanced course on inequality or economic sociology approved by the DUS")] : "Two intermediate or advanced courses on inequality or economic sociology" : 2;
+SELECT 4 FROM [$socy, $socy, $socy, $socy, $outside, $outside, $outside, $outside] : "Four electives relevant to the concentration" : 4;
+LIMIT 4 FROM [$outside, $outside, $outside, $outside] : "Up to 4 concentration-relevant courses from outside Sociology (DUS approval)" : 4;
+
+SELECT 2 FROM [SOCY 4100, RANGE(SOCY 3000, SOCY 3999)] : "Senior requirement (non-intensive): senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating markets, businesses, economic behavior, or inequality" : 1;

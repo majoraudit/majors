@@ -1,8 +1,21 @@
-SELECT 1 FROM [CLASS(ART 3995)] : "Core Class" : 1;
-SELECT 1 FROM [CLASS(ART 2766), CLASS(ART 3768)] : "Electives 1" : 2;
-SELECT 1 FROM [CLASS(ART 3769), CLASS(ART 3770)] : "Electives 2" : 3;
-SELECT 1 FROM [CLASS(ART 4768), CLASS(ART 4769)] : "Electives 3" : 4;
-SELECT 3 FROM [CLASS(ART 1732), CLASS(ART 2764), CLASS(ART 2765)] : "Electives 4" : 5;
-SELECT 2 FROM TAG("HSAR") : "Electives 5" : 6;
-SELECT 4 FROM [RANGE(ART 2000, ART 9999)] : "Electives 6" : 7;
-SELECT 2 FROM [CLASS(ART 4995), CLASS(ART 4996)]: "Senior Requirement" : 8;
+// Art B.A. -- Graphic Design concentration. 14 courses including prerequisites and the senior project.
+$intro = RANGE(ART 0001, ART 1999);
+$upper = RANGE(ART 2000, ART 9999);
+$hsar = RANGE(HSAR 0000, HSAR 9999);
+
+SELECT 1 FROM PLACEMENT("Favorable sophomore review of studio work") : "Prerequisite: sophomore review" : 1;
+SELECT 2 FROM [ART 1111, ART 1514] : "Prerequisite: Visual Thinking and Basic Drawing" : 1;
+SELECT 3 FROM [$intro, $intro, $intro] : "Prerequisite: three additional introductory courses (0001-1999)" : 2;
+
+// A sixth introductory course may count toward this requirement.
+SELECT 4 FROM [$upper, $upper, $upper, $upper, $intro] : "Four courses numbered 2000 or above" : 3;
+LIMIT 1 FROM $intro : "At most one additional introductory course counts toward the 2000-level requirement" : 3;
+
+SELECT 3 FROM [ART 1732, ART 2764, ART 2765] : "Graphic design: ART 1732, 2764, and 2765" : 1;
+SELECT 1 FROM [ART 2766, ART 3768] : "Graphic design: ART 2766 or 3768" : 1;
+SELECT 1 FROM [ART 3769, ART 3770] : "Graphic design: ART 3769 or 3770" : 1;
+SELECT 1 FROM [ART 4768, ART 4769] : "Graphic design: ART 4768 or 4769" : 1;
+
+SELECT 1 FROM ART 3995 : "Junior Seminar" : 1;
+SELECT 2 FROM [$hsar, $hsar, PLACEMENT("DUS-approved equivalent of a history of art course"), PLACEMENT("DUS-approved equivalent of a history of art course")] : "Two courses in the history of art (DUS-approved equivalents permitted)" : 2;
+SELECT 2 FROM [ART 4995, ART 4996] : "Two-term senior project" : 1;

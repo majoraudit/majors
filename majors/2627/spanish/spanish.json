@@ -12,5 +12,8 @@
     "dus": [["Aurelie Vialette", "aurelie.vialette@yale.edu"], ["Alex Gil", "alex.gil@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/spanish/",
     "websiteLink": "https://span-port.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "spanish_ba_standard.mql",
+        "spanish_ba_intensive.mql"
+    ]
 }

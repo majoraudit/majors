@@ -1,41 +1,22 @@
+// Film and Media Studies B.A. -- 12 term courses including the senior requirement.
+// The intensive major (approved by the Film and Media Studies Committee) completes both a senior essay and a senior project.
+$film = RANGE(FILM 0000, FILM 9999);
+$seniorsem = RANGE(FILM 4000, FILM 4999);
+
+SELECT 3 FROM [FILM 1501, FILM 1601, FILM 3201] : "Required courses: FILM 1501, 1601, and 3201" : 1;
+SELECT 1 FROM TAG("YC FILM World Cinema") : "Upper-level international (non-U.S.) or world cinema course" : 2;
+SELECT 1 FROM TAG("YC FILM Critical Studies") : "Upper-level critical studies course" : 2;
+SELECT 1 FROM TAG("YC FILM Production") : "Cinematic or digital time-based media production course" : 2;
+SELECT 4 FROM [$film, $film, $film, $film, PLACEMENT("Course in another department substituted with DUS permission")] : "Four electives" : 4;
+
+// Production/screenwriting projects also require FILM 4940 (0.5 credit), which does not count toward the twelve courses.
 SELECT 1 FROM [
-    SELECT 12 FROM [
-        SELECT 3 FROM [CLASS(FILM 1501), CLASS(FILM 1601), CLASS(FILM 3201)],
-        SELECT 3 FROM [
-            TAG("YC FILM National or World Cinema Upper Level"),
-            TAG("YC FILM Critical Studies Upper Level"),
-            TAG("YC FILM Production Course")
-        ],
-        SELECT 4 FROM [
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective")
-        ],
-        SELECT 1 FROM [
-            SELECT 2 FROM [TAG("YC FILM Senior Seminar"), TAG("YC FILM Senior Seminar")],
-            SELECT 2 FROM [CLASS(FILM 4910), CLASS(FILM 4920)],
-            SELECT 2 FROM [TAG("YC FILM Senior Seminar"), SELECT 1 FROM [CLASS(FILM 4910), CLASS(FILM 4920)]],
-            SELECT 2 FROM [CLASS(FILM 4870), CLASS(FILM 4880)],
-            SELECT 2 FROM [CLASS(FILM 4930), CLASS(FILM 4940)]
-        ]
-    ],
-    SELECT 13 FROM [
-        SELECT 3 FROM [CLASS(FILM 1501), CLASS(FILM 1601), CLASS(FILM 3201)],
-        SELECT 3 FROM [
-            TAG("YC FILM National or World Cinema Upper Level"),
-            TAG("YC FILM Critical Studies Upper Level"),
-            TAG("YC FILM Production Course")
-        ],
-        SELECT 4 FROM [
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective"),
-            TAG("YC FILM Elective")
-        ],
-        SELECT 1 FROM [
-            SELECT 3 FROM [CLASS(FILM 4550), CLASS(FILM 4560), SELECT 1 FROM [CLASS(FILM 4930), CLASS(FILM 4940)]],
-            SELECT 3 FROM [CLASS(FILM 4830), CLASS(FILM 4840), SELECT 1 FROM [CLASS(FILM 4930), CLASS(FILM 4940)]]
-        ]
-    ]
-] : "Film and Media Studies Major Plan" : 1;
+    SELECT 2 FROM [FILM 4910, FILM 4920],
+    SELECT 2 FROM [$seniorsem, SELECT 1 FROM [FILM 4910, FILM 4920]],
+    SELECT 2 FROM [$seniorsem, $seniorsem],
+    SELECT 3 FROM [FILM 4870, FILM 4880, FILM 4940],
+    SELECT 2 FROM [SELECT 1 FROM [SELECT 2 FROM [FILM 4550, FILM 4560], SELECT 2 FROM [FILM 4800, FILM 4810], SELECT 2 FROM [FILM 4550, FILM 4810], SELECT 2 FROM [FILM 4800, FILM 4560]], FILM 4940],
+    SELECT 2 FROM [SELECT 1 FROM [SELECT 2 FROM [FILM 4830, FILM 4840], SELECT 2 FROM [FILM 4800, FILM 4810], SELECT 2 FROM [FILM 4830, FILM 4810], SELECT 2 FROM [FILM 4800, FILM 4840]], FILM 4940],
+    SELECT 3 FROM [FILM 4800, FILM 4810, FILM 4940]
+] : "Senior requirement: senior essay (FILM 4910-4920, seminar plus one term, or two senior seminars) or production/screenwriting project with FILM 4940" : 1;
+SELECT 1 FROM PLACEMENT("Prospectus approved by a faculty adviser, submitted to the DUS by the end of reading week of junior year") : "Senior prospectus" : 1;

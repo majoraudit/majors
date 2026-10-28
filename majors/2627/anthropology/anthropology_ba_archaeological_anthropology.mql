@@ -1,0 +1,26 @@
+// Anthropology B.A. -- Concentration in Archaeological Anthropology -- 12 course credits including the senior requirement.
+$anth = RANGE(ANTH 0000, ANTH 9999);
+$adv = RANGE(ANTH 3000, ANTH 4999);
+$cognate = PLACEMENT("Cognate course in another department approved by the DUS");
+
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Biological")] : "Introductory/intermediate course: evolution of human and nonhuman primates (biological)" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Archaeology")] : "Introductory/intermediate course: archaeological study of human societies" : 1;
+SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Linguistic")] : "Introductory/intermediate course: social, cultural, and linguistic dimensions" : 1;
+
+// ANTH 4071, ANTH 4091, and a seminar used for the senior essay do not count here.
+SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999)] : "Three advanced ANTH courses (3000-4000 level), excluding senior essay work" : 2;
+LIMIT 3 FROM [$cognate, $cognate, $cognate] : "At most three cognate courses from other departments" : 2;
+
+// Remaining credits (ANTH 4071 counts here for the yearlong essay option).
+SELECT 5 FROM [$anth, $anth, $anth, $anth, $anth, $cognate, $cognate, $cognate] : "Anthropology electives or approved cognates" : 4;
+
+// Concentration requirements (six credits, overlapping with the major requirements above).
+SELECT 1 FROM [ANTH 1171, ANTH 1172] : "Archaeology: introductory survey course" : 1;
+SELECT 1 FROM ANTH 3116L : "Archaeology: foundational laboratory course" : 1;
+SELECT 1 FROM [TAG("YC ANTH Adv Lab/Data Analysis")] : "Archaeology: advanced laboratory or data analysis course" : 2;
+SELECT 1 FROM [TAG("YC ANTH Theory")] : "Archaeology: theory course" : 2;
+SELECT 1 FROM [RANGE_TAG(ANTH 3000, ANTH 4999, "YC ANTH Archaeology"), PLACEMENT("Archaeology seminar approved by the DUS")] : "Archaeology: seminar" : 2;
+SELECT 1 FROM PLACEMENT("Area-focused course approved by the DUS") : "Archaeology: area-focused course" : 3;
+SELECT 1 FROM PLACEMENT("Summer field school, or laboratory/museum work approved by the DUS") : "Archaeology: field experience (recommended)" : 5;
+
+SELECT 1 FROM [CLASS(ANTH 4091), SELECT 2 FROM [ANTH 4071, ANTH 4091], PLACEMENT("Alternative archaeology senior project format approved by the thesis adviser and DUS")] : "Senior essay pertinent to archaeology" : 1;

@@ -1,25 +1,13 @@
-SELECT 1 FROM [CLASS(CPSC 1001)] : "Prerequisite" : 1;
+// Computing and the Arts B.A. -- Architecture concentration. 12 term courses beyond the prerequisites (6 CPSC, 6 in the arts), plus the two-term senior project.
 
-SELECT 6 FROM [
-    CLASS(CPSC 2010),
-    SELECT 1 FROM [
-        CLASS(CPSC 2020),
-        CLASS(MATH 2440)
-    ],
-    CLASS(CPSC 2230),
-    SELECT 1 FROM [
-        CLASS(CPSC 3760),
-        CLASS(CPSC 4370),
-        CLASS(CPSC 4460),
-        CLASS(CPSC 4510),
-        CLASS(CPSC 4750),
-        CLASS(CPSC 4780),
-        CLASS(CPSC 4790),
-        CLASS(CPSC 4840)
-    ],
-    TAG("YC CPAR ARCH CS Elective")
-] : "Computer Science Courses" : 2;
+SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
+SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
+SELECT 1 FROM CPSC 2230 : "CPSC 2230" : 1;
+SELECT 2 FROM [CPSC 3760, CPSC 4370, CPSC 4460, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790, CPSC 4840] : "Two computer graphics/visualization courses" : 2;
+SELECT 1 FROM [TAG("YC CPAR ARCH CS Elective"), RANGE(CPSC 2000, CPSC 4899), RANGE(CPSC 4901, CPSC 9999)] : "One additional intermediate or advanced CPSC course (not CPSC 4900)" : 3;
 
-SELECT 6 FROM [CLASS(ARCH 1001), CLASS(ARCH 2000), SELECT 2 FROM [CLASS(ARCH 2001), CLASS(ARCH 2003), CLASS(ARCH 3304), CLASS(ARCH 3305)], PLACEMENT("Architecture Elective with DUS Approval"), PLACEMENT("Architecture Elective with DUS Approval")] : "Architecture Courses" : 2;
+SELECT 2 FROM [ARCH 1001, ARCH 2000] : "ARCH 1001 and ARCH 2000" : 1;
+SELECT 2 FROM [ARCH 2001, ARCH 2003, ARCH 3304, ARCH 3305] : "Two of ARCH 2001, 2003, 3304, 3305" : 2;
+SELECT 2 FROM [TAG("YC ARCH History & Theory"), TAG("YC ARCH History & Theory"), TAG("YC ARCH Urbanism & Landscap"), TAG("YC ARCH Urbanism & Landscap"), TAG("YC ARCH Materials & Design"), TAG("YC ARCH Materials & Design"), TAG("YC ARCH Structures & Computation"), TAG("YC ARCH Structures & Computation")] : "Two electives from the Architecture Design or History, Theory, Criticism, and Urbanism concentrations" : 3;
 
-SELECT 2 FROM [CLASS(CPSC 4900), RANGE(MUSI 4996, MUSI 4999)] : "Senior Requirements" : 1;
+SELECT 2 FROM [CPSC 4900, ARCH 4901] : "Two-term senior project (CPSC 4900 and ARCH 4901)" : 1;

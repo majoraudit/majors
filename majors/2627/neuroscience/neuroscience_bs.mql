@@ -1,9 +1,27 @@
-SELECT 2 FROM [CLASS(NSCI 1600), CLASS(NSCI 3200)] : "Core Classes" : 1;
-SELECT 1 FROM [CLASS(NSCI 2280L), CLASS(NSCI 2290L), CLASS(NSCI 2400), CLASS(NSCI 2580), CLASS(NSCI 2600), CLASS(NSCI 2700), CLASS(NSCI 3210L), CLASS(PSYC 2538)] : "Labs" : 2;
-SELECT 2 FROM TAG("YC NSCI Systems/Circuit/Behav") : "Tag 1 Elective" : 3;
-SELECT 2 FROM TAG("YC NSCI Molecular/Cell/Biol") : "Tag 2 Elective" : 4;
-SELECT 1 FROM TAG("YC NSCI Quantitative") : "Tag 3 Elective" : 5;
-SELECT 1 FROM TAG("YC NSCI NSCI Computational") : "Tag 4 Elective" : 6;
-SELECT 1 FROM TAG("YC NSCI Basic Allied Core") : "Tag 5 Elective" : 7;
-SELECT 2 FROM TAG("YC NSCI Other Allied") : "Tag 6 Elective" : 8;
-SELECT 2 FROM [CLASS(NSCI 4900), CLASS(NSCI 4910)] : "Senior Requirement" : 9;
+// Neuroscience B.S. -- at least 18.5 credits including the prerequisites (or substitutes), 15 lecture or seminar courses
+// (including the senior requirement), and one laboratory.
+$bioplace = PLACEMENT("BIOL module placed out (every two modules replaced by one MCDB core or 2000+ MCDB lecture/seminar)");
+$sys = TAG("YC NSCI Systems/Circuit/Behav");
+$mol = TAG("YC NSCI Molecular/Cell/Biol");
+$quant = TAG("YC NSCI Quantitative");
+$comp = TAG("YC NSCI Computational");
+$basic = TAG("YC NSCI Basic Allied Core");
+$other = TAG("YC NSCI Other Allied");
+$any = [$sys, $mol, $quant, $comp, $basic, $other];
+
+SELECT 4 FROM [SELECT 1 FROM [BIOL 1010, $bioplace], SELECT 1 FROM [BIOL 1020, $bioplace], SELECT 1 FROM [BIOL 1030, $bioplace], SELECT 1 FROM [BIOL 1040, $bioplace]] : "Prerequisite: BIOL 1010, 1020, 1030, and 1040" : 1;
+SELECT 1 FROM [S&DS 1000, S&DS 2200, S&DS 2300, S&DS 2380] : "Prerequisite: statistics (S&DS 1000, 2200, 2300, or 2380)" : 1;
+
+SELECT 2 FROM [NSCI 1600, NSCI 3200] : "Foundation courses: NSCI 1600 and 3200" : 1;
+SELECT 1 FROM [TAG("YC NSCI Neuroscience Lab"), NSCI 2280L, NSCI 2290L, NSCI 2400, NSCI 2580, NSCI 2600, NSCI 2700, NSCI 3210L, PSYC 2538] : "One neuroscience laboratory" : 2;
+
+// NSCI 4700 and 4710 (research before senior year) do not count toward any requirement.
+SELECT 2 FROM [$sys, $sys] : "Electives: at least two Systems/Circuits/Behavior core courses" : 2;
+SELECT 2 FROM [$mol, $mol] : "Electives: at least two Molecular/Cellular/Biological core courses" : 2;
+SELECT 1 FROM $quant : "Electives: at least one Quantitative core course" : 2;
+SELECT 1 FROM $comp : "Electives: at least one Computational core course" : 2;
+SELECT 1 FROM $basic : "Electives: at least one Basic Allied core course" : 2;
+SELECT 4 FROM [$any, $any, $any, $any] : "Electives: four additional courses from the core groupings (eleven in total)" : 3;
+LIMIT 2 FROM [$other, $other] : "No more than two Other Allied core courses" : 3;
+
+SELECT 2 FROM [NSCI 4900, NSCI 4910] : "Senior requirement: two terms of empirical research (NSCI 4900 and 4910)" : 1;
