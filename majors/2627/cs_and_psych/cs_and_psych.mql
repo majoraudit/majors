@@ -1,20 +1,82 @@
-// Computer Science and Psychology B.A. -- 14 term courses beyond the prerequisite (8 CPSC, 6 PSYC), plus the senior project.
-$ai = [RANGE(CPSC 4700, CPSC 4770), CPSC 4520, CPSC 4530, RANGE(CPSC 4810, CPSC 4890)];
-$cogsub = PLACEMENT("Cognitive psychology or cognitive science course (not counted toward PSYC) approved by both DUSs");
+// Computer Science and Psychology B.A.: fourteen term courses beyond the prerequisite (eight CPSC, six PSYC), plus the senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computer-science-psychology/
+// The DUS in each department approves the entire program.
+program cs_and_psych {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PSYC 1100, PLACEMENT("Score of 5 on the AP Psychology exam")] : "Prerequisite: PSYC 1100" : 1;
+fact ap_psychology "Score of 5 on the AP Psychology exam": placement { test: "AP Psychology", result: "5" };
 
-SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
-SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
-SELECT 2 FROM [CPSC 2230, CPSC 3230] : "CPSC 2230 and 3230" : 1;
-SELECT 1 FROM [CPSC 3650, CPSC 3660] : "Algorithms (CPSC 3650 or 3660; only one may count)" : 1;
-// CPSC 2800 and CPSC 4900 may not count; one relevant cognitive course may substitute with permission of both DUSs.
-SELECT 3 FROM [$ai, $ai, $ai, $cogsub] : "Three advanced computer science courses in artificial intelligence" : 2;
-LIMIT 1 FROM $cogsub : "At most one cognitive psychology/science substitution for an AI course" : 2;
+requirement prereq "Prerequisite: PSYC 1100" [prerequisite] {
+  slot from [PSYC 1100];
+}
 
-SELECT 1 FROM [S&DS 1000, S&DS 2300] : "Statistics (S&DS 1000 or 2300)" : 1;
-SELECT 1 FROM [RANGE(PSYC 2100, PSYC 2990)] : "Research methods course (PSYC 2100-2990)" : 2;
-SELECT 2 FROM [TAG("YC PSYC Social Science Core"), SELECT 1 FROM [TAG("YC PSYC Social Science"), TAG("YC PSYC Social Science Core")]] : "Two psychology courses from the social science point of view (at least one Core)" : 2;
-SELECT 2 FROM [TAG("YC PSYC Natural Science Core"), SELECT 1 FROM [TAG("YC PSYC Natural Science"), TAG("YC PSYC Natural Science Core")]] : "Two psychology courses from the natural science point of view (at least one Core)" : 2;
+effect ap_psychology_waiver "A 5 on AP Psychology waives PSYC 1100" when fact ap_psychology: waive prereq;
 
-SELECT 1 FROM [CPSC 4900, PSYC 4990] : "Senior project approved by both DUSs" : 1;
+requirement cs_core "CPSC 2010, 2230, and 3230" [computing] {
+  courses exactly 3 from [CPSC 2010, CPSC 2230, CPSC 3230];
+}
+
+requirement discrete "Discrete mathematics: CPSC 2020 (MATH 2440 may substitute)" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement algorithms "Algorithms: CPSC 3650 or 3660 (only one may count)" [computing] {
+  slot from [CPSC 3650, CPSC 3660];
+}
+
+requirement ai "Three advanced computer science courses in artificial intelligence (e.g., CPSC 4700-4770, 4520, 4530, 4810-4890)" [computing] {
+  courses at least 3
+    where course.subject = "CPSC"
+        and (course.number >= 4700 and course.number <= 4770 or course.code in ["CPSC4520", "CPSC4530"]
+             or course.number >= 4810 and course.number <= 4890)
+      or attempt.approved_for contains "ai";
+  constraint not_2800_4900 "CPSC 2800 and 4900 do not count": at most 0 attempts where course.code in ["CPSC2800", "CPSC4900"];
+  constraint cognitive_substitute "One cognitive psychology or cognitive science course may substitute, with permission of both DUSs":
+    at most 1 attempts where course.subject != "CPSC";
+}
+
+requirement statistics "Statistics: S&DS 1000 or 2300" [psychology] {
+  slot from [S&DS 1000, S&DS 2300];
+}
+
+requirement methods "Research methods: a course from PSYC 2100-2990" [psychology] {
+  slot where course.subject = "PSYC" and course.number >= 2100 and course.number <= 2990;
+}
+
+requirement social "Two psychology courses from the social science point of view, at least one designated Core" [psychology] {
+  courses at least 2 where course.attributes overlaps ["YC PSYC Social Science", "YC PSYC Social Science Core"];
+  constraint social_core "At least one designated Core": at least 1 attempts where course.attributes contains "YC PSYC Social Science Core";
+}
+
+requirement natural "Two psychology courses from the natural science point of view, at least one designated Core" [psychology] {
+  courses at least 2 where course.attributes overlaps ["YC PSYC Natural Science", "YC PSYC Natural Science Core"];
+  constraint natural_core "At least one designated Core": at least 1 attempts where course.attributes contains "YC PSYC Natural Science Core";
+}
+
+requirement senior "Senior project in CPSC 4900 or PSYC 4990, approved by the DUS in each department" [senior] {
+  slot from [CPSC 4900, PSYC 4990];
+}
+
+constraint one_algorithms "Only one of CPSC 3650 or 3660 counts toward the major" in program:
+  limit 1 attempts where course.code in ["CPSC3650", "CPSC3660"];
+
+constraint cs_letter "No Computer Science course taken Credit/D/Fail counts" in roles [computing]:
+  all where attempt.grading_mode = "letter";
+
+constraint psyc_crdf "At most one psychology course taken Credit/D/Fail counts" in roles [psychology]:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint psyc_2000_letter "No 2000-level psychology course taken Credit/D/Fail counts" in roles [psychology]:
+  limit 0 attempts where attempt.grading_mode = "crdf" and course.subject = "PSYC" and course.number >= 2000 and course.number <= 2999;
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint eight_cs "Eight courses in computer science" in roles [computing]:
+  total at least 8 attempts;
+
+constraint six_psyc "Six courses in psychology" in roles [psychology]:
+  total at least 6 attempts;

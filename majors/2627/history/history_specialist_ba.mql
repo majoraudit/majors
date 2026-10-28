@@ -1,47 +1,118 @@
-// History B.A. -- Specialist concentration. 12 course credits including the prerequisites and the senior requirement.
-$hist = RANGE(HIST 0000, HIST 9999);
-$outside = PLACEMENT("Course taught outside the department approved by the DUS (not for seminar or senior requirements)");
+// History B.A. (Specialist concentration): twelve course credits in History, including the prerequisites and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/history/
+// Courses may count toward regional, preindustrial, and seminar requirements at once (sharing rules below).
+program history_specialist_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [$hist, $hist] : "Prerequisite: two course credits in History" : 1;
+// A one-term essay (HIST 4997) needs one more full-credit course, which may be taken Credit/D/Fail.
+choice senior_length "Senior essay length": solver one of "two_term", "one_term";
 
-// The same course may count toward geographic, preindustrial, and seminar requirements.
-SELECT 2 FROM [TAG("YC HIST Preindustrial"), TAG("YC HIST Preindustrial")] : "Two preindustrial course credits (material before the mid-19th century)" : 2;
-SELECT 2 FROM [RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars"), RANGE_TAG(HIST 3000, HIST 3999, "YC HIST Departmental Seminars")] : "Two 3000-level departmental seminars" : 2;
-SELECT 1 FROM [
-    SELECT 5 FROM [TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa"), TAG("YC HIST Africa")],
-    SELECT 5 FROM [TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia"), TAG("YC HIST Asia")],
-    SELECT 5 FROM [TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe"), TAG("YC HIST Europe")],
-    SELECT 5 FROM [TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), TAG("YC HIST Latin America")],
-    SELECT 5 FROM [TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East"), TAG("YC HIST Middle East")],
-    SELECT 5 FROM [TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States"), TAG("YC HIST United States")],
-    SELECT 5 FROM [TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History"), TAG("YC HIST Cultural History")],
-    SELECT 5 FROM [TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism"), TAG("YC HIST Empires & Colonialism")],
-    SELECT 5 FROM [TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History"), TAG("YC HIST Environmental History")],
-    SELECT 5 FROM [TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals"), TAG("YC HIST Ideas & Intellectuals")],
-    SELECT 5 FROM [TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist"), TAG("YC HIST Intl & Diplomat Hist")],
-    SELECT 5 FROM [TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt"), TAG("YC HIST Pltcs, Law & Govt")],
-    SELECT 5 FROM [TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality"), TAG("YC HIST Race Gender&Sexuality")],
-    SELECT 5 FROM [TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context"), TAG("YC HIST Religion in Context")],
-    SELECT 5 FROM [TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine"), TAG("YC HIST Sci, Tech, & Medicine")],
-    SELECT 5 FROM [TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt"), TAG("YC HIST Soc Chng&Social Mvmnt")],
-    SELECT 5 FROM [TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy"), TAG("YC HIST The World Economy")],
-    SELECT 5 FROM [TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society"), TAG("YC HIST War & Society")],
-    SELECT 5 FROM [PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS"), PLACEMENT("Course in a student-designed specialization approved by a faculty adviser and the DUS")]
-] : "At least five (up to eight) course credits in one geographic region or thematic pathway" : 2;
-SELECT 2 FROM [PLACEMENT("History course outside the area of specialization"), PLACEMENT("History course outside the area of specialization")] : "At least two course credits outside the area of specialization" : 3;
-SELECT 3 FROM [
-    SELECT 1 FROM [TAG("YC HIST Africa")],
-    SELECT 1 FROM [TAG("YC HIST Asia")],
-    SELECT 1 FROM [TAG("YC HIST Europe")],
-    SELECT 1 FROM [TAG("YC HIST Latin America")],
-    SELECT 1 FROM [TAG("YC HIST Middle East")],
-    SELECT 1 FROM [TAG("YC HIST United States")]
-] : "Overall coursework must include at least three geographic regions" : 3;
+requirement prereq "Prerequisite: two course credits in History (Directed Studies history and philosophy count); these also count toward the major" [prerequisite] {
+  credits at least 2 where course.subject = "HIST" or course.code in ["DRST0003", "DRST0004", "DRST0005", "DRST0006"];
+}
 
-SELECT 8 FROM [$hist, $hist, $hist, $hist, $hist, $hist, $hist, $hist, $outside, $outside] : "Eight additional course credits toward the twelve" : 4;
-LIMIT 2 FROM [$outside, $outside] : "At most two non-departmental course credits" : 4;
+requirement preindustrial "Two preindustrial course credits (material before the mid-19th century, no later than 1900)" [core] {
+  credits at least 2 where course.attributes contains "YC HIST Preindustrial";
+}
 
-SELECT 1 FROM [
-    SELECT 2 FROM [HIST 4995, HIST 4996],
-    SELECT 2 FROM [HIST 4997, PLACEMENT("One additional full-credit course (may be taken Credit/D/Fail unless a departmental seminar)")]
-] : "Senior requirement: two-term essay or project (HIST 4995, 4996), or one-term essay (HIST 4997) plus one additional course" : 1;
+requirement seminars "Two 3000-level departmental seminars, not taken Credit/D/Fail" [core] {
+  courses at least 2
+    where course.subject = "HIST" and course.number >= 3000 and course.number <= 3999
+      and course.attributes contains "YC HIST Departmental Seminars" and attempt.source = "yale";
+  constraint seminar_letter "Departmental seminars may not be taken Credit/D/Fail": all where attempt.grading_mode = "letter";
+}
+
+requirement electives "Further History course credits toward the twelve (up to two non-departmental with DUS approval)" [elective] {
+  credits at least 0 where (course.subject = "HIST" or attempt.approved_for contains "outside_history");
+}
+
+requirement senior "Senior requirement: a two-term senior essay or project (HIST 4995 and 4996), or a one-term essay (HIST 4997) and one more course" [senior] {
+  children at least 1;
+  requirement senior_two_term "HIST 4995 and 4996" when senior_length = "two_term" { courses exactly 2 from [HIST 4995, HIST 4996]; }
+  requirement senior_one_term "HIST 4997, normally in the fall of senior year" when senior_length = "one_term" { slot from [HIST 4997]; }
+}
+
+requirement specialization "At least five (and up to eight) course credits in one geographic region or thematic pathway" [concentration] {
+  children at least 1;
+  requirement area_africa "Africa (Sub-Saharan)" { credits at least 5 where course.attributes contains "YC HIST Africa"; }
+  requirement area_asia "Asia" { credits at least 5 where course.attributes contains "YC HIST Asia"; }
+  requirement area_europe "Europe" { credits at least 5 where course.attributes contains "YC HIST Europe"; }
+  requirement area_latin_america "Latin America" { credits at least 5 where course.attributes contains "YC HIST Latin America"; }
+  requirement area_middle_east "Middle East/North Africa" { credits at least 5 where course.attributes contains "YC HIST Middle East"; }
+  requirement area_united_states "United States/Canada" { credits at least 5 where course.attributes contains "YC HIST United States"; }
+  requirement area_cultural "Cultural history" { credits at least 5 where course.attributes contains "YC HIST Cultural History"; }
+  requirement area_empires "Empires and colonialism" { credits at least 5 where course.attributes contains "YC HIST Empires & Colonialism"; }
+  requirement area_environmental "Environmental history" { credits at least 5 where course.attributes contains "YC HIST Environmental History"; }
+  requirement area_ideas "Ideas and intellectuals" { credits at least 5 where course.attributes contains "YC HIST Ideas & Intellectuals"; }
+  requirement area_international "International and diplomatic history" { credits at least 5 where course.attributes contains "YC HIST Intl & Diplomat Hist"; }
+  requirement area_politics "Politics, law, and government" { credits at least 5 where course.attributes contains "YC HIST Pltcs, Law & Govt"; }
+  requirement area_race_gender "Race, gender, and sexuality" { credits at least 5 where course.attributes contains "YC HIST Race Gender&Sexuality"; }
+  requirement area_religion "Religion in context" { credits at least 5 where course.attributes contains "YC HIST Religion in Context"; }
+  requirement area_science "Science, technology, and medicine" { credits at least 5 where course.attributes contains "YC HIST Sci, Tech, & Medicine"; }
+  requirement area_social_change "Social change and social movements" { credits at least 5 where course.attributes contains "YC HIST Soc Chng&Social Mvmnt"; }
+  requirement area_war "War and society" { credits at least 5 where course.attributes contains "YC HIST War & Society"; }
+  requirement area_world_economy "The world economy" { credits at least 5 where course.attributes contains "YC HIST The World Economy"; }
+  requirement area_designed "A specialization designed with a faculty adviser and the DUS" {
+    credits at least 5 where attempt.approved_for contains "specialization";
+  }
+}
+
+requirement outside_specialization "At least two course credits outside the area of specialization" [core] {
+  credits at least 2 where attempt.approved_for contains "outside_specialization" or course.subject = "HIST";
+}
+
+requirement regions_overall "Overall coursework includes at least three geographic regions" [core] {
+  children at least 3;
+  requirement regions_overall_africa "Africa (Sub-Saharan)" { credits at least 1 where course.attributes contains "YC HIST Africa"; }
+  requirement regions_overall_asia "Asia" { credits at least 1 where course.attributes contains "YC HIST Asia"; }
+  requirement regions_overall_europe "Europe" { credits at least 1 where course.attributes contains "YC HIST Europe"; }
+  requirement regions_overall_latin_america "Latin America" { credits at least 1 where course.attributes contains "YC HIST Latin America"; }
+  requirement regions_overall_middle_east "Middle East/North Africa" { credits at least 1 where course.attributes contains "YC HIST Middle East"; }
+  requirement regions_overall_united_states "United States/Canada" { credits at least 1 where course.attributes contains "YC HIST United States"; }
+}
+
+// Region coverage is a property of courses already counted elsewhere, so each region course may also count once there.
+share regions_overall_africa_share: regions_overall_africa, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share regions_overall_asia_share: regions_overall_asia, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share regions_overall_europe_share: regions_overall_europe, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share regions_overall_latin_america_share: regions_overall_latin_america, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share regions_overall_middle_east_share: regions_overall_middle_east, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share regions_overall_united_states_share: regions_overall_united_states, preindustrial, seminars, prereq, electives, outside_specialization, area_africa, area_asia, area_europe, area_latin_america, area_middle_east, area_united_states, area_cultural, area_empires, area_environmental, area_ideas, area_international, area_politics, area_race_gender, area_religion, area_science, area_social_change, area_war, area_world_economy, area_designed;
+share prereq_counts "Prerequisite courses also count toward the major": prereq, preindustrial, seminars, electives, outside_specialization;
+share area_africa_share: area_africa, preindustrial, seminars, prereq;
+share area_asia_share: area_asia, preindustrial, seminars, prereq;
+share area_europe_share: area_europe, preindustrial, seminars, prereq;
+share area_latin_america_share: area_latin_america, preindustrial, seminars, prereq;
+share area_middle_east_share: area_middle_east, preindustrial, seminars, prereq;
+share area_united_states_share: area_united_states, preindustrial, seminars, prereq;
+share area_cultural_share: area_cultural, preindustrial, seminars, prereq;
+share area_empires_share: area_empires, preindustrial, seminars, prereq;
+share area_environmental_share: area_environmental, preindustrial, seminars, prereq;
+share area_ideas_share: area_ideas, preindustrial, seminars, prereq;
+share area_international_share: area_international, preindustrial, seminars, prereq;
+share area_politics_share: area_politics, preindustrial, seminars, prereq;
+share area_race_gender_share: area_race_gender, preindustrial, seminars, prereq;
+share area_religion_share: area_religion, preindustrial, seminars, prereq;
+share area_science_share: area_science, preindustrial, seminars, prereq;
+share area_social_change_share: area_social_change, preindustrial, seminars, prereq;
+share area_war_share: area_war, preindustrial, seminars, prereq;
+share area_world_economy_share: area_world_economy, preindustrial, seminars, prereq;
+share area_designed_share: area_designed, preindustrial, seminars, prereq;
+
+constraint outside_limit "At most two course credits taught outside the department, with DUS approval (not seminars or the senior requirement)" in program:
+  limit 2 credits where course.subject != "HIST" and not course.code in ["DRST0003", "DRST0004", "DRST0005", "DRST0006"];
+
+constraint crdf_limit_two_term "At most two lecture or non-3000-level seminar credits taken Credit/D/Fail" when senior_length = "two_term" in program:
+  limit 2 credits where attempt.grading_mode = "crdf";
+
+constraint crdf_limit_one_term "One-term essay writers may also take their additional course Credit/D/Fail" when senior_length = "one_term" in program:
+  limit 3 credits where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Twelve course credits in History, including the prerequisites and the senior requirement" in program:
+  total at least 12 credits;

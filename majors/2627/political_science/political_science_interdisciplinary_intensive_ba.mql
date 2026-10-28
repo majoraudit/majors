@@ -1,24 +1,80 @@
-// Political Science B.A. -- interdisciplinary concentration, intensive major. 15 term courses including the senior requirement.
-$plsc = RANGE(PLSC 0000, PLSC 9999);
-$seminar = [RANGE(PLSC 3000, PLSC 4899), PLACEMENT("Residential College Seminar taught by Political Science faculty")];
-$outside = PLACEMENT("Related course in another department (or DRST 0005/0006, or one outside Residential College Seminar) approved by the DUS");
+// Political Science B.A. (interdisciplinary concentration, intensive major): fifteen term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/political-science/
+// Residential College Seminars taught by Political Science faculty count routinely; one taught outside the department,
+// one term of DRST 0005 or 0006, and courses in other departments count by petition (approvals).
+program political_science_interdisciplinary_intensive_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [TAG("YC PLSC Intro Courses"), TAG("YC PLSC Intro Courses"), RANGE(PLSC 1000, PLSC 1999), RANGE(PLSC 1000, PLSC 1999)] : "Two introductory courses (first digit 1)" : 2;
-SELECT 2 FROM [TAG("YC PLSC Core Lecture"), TAG("YC PLSC Core Lecture")] : "Two non-introductory core lectures" : 2;
-SELECT 1 FROM [TAG("YC PLSC Method &Formal Theory")] : "One course in the methodology and formal theory subfield" : 2;
-SELECT 2 FROM [$seminar, $seminar] : "Two seminars taught by Political Science faculty (at least one in the senior year)" : 2;
+fact intensive_approval "Intensive major application (adviser-signed form, plan of study, essay description) approved by the DUS in the junior year":
+  approval dus_approval { for: "intensive" };
 
-$conc = [$plsc, $outside];
-SELECT 7 FROM [$conc, $conc, $conc, $conc, $conc, $conc, $conc] : "Seven courses in the interdisciplinary field of concentration (application approved by the DUS)" : 3;
-SELECT 2 FROM [
-    SELECT 2 FROM [TAG("YC PLSC American Govt"), TAG("YC PLSC American Govt")],
-    SELECT 2 FROM [TAG("YC PLSC Comparative Govt"), TAG("YC PLSC Comparative Govt")],
-    SELECT 2 FROM [TAG("YC PLSC Internatl Relations"), TAG("YC PLSC Internatl Relations")],
-    SELECT 2 FROM [TAG("YC PLSC Political Philosophy"), TAG("YC PLSC Political Philosophy")]
-] : "Outside the concentration: two courses in each of two subfields (international relations, American government, political philosophy, comparative politics)" : 2;
-LIMIT 2 FROM [$outside, $outside] : "At most 2 courses from other departments (DUS permission)" : 3;
-SELECT 1 FROM [$plsc, $outside] : "Intensive: one additional elective" : 4;
+requirement intensive_admission "Admission to the intensive major" [senior] {
+  slot where attempt.approved_for contains "intensive";
+}
 
-SELECT 1 FROM PLSC 4900 : "Intensive: PLSC 4900 in the spring term of the junior year" : 1;
-SELECT 2 FROM [PLSC 4901, PLSC 4903] : "Senior requirement (intensive): yearlong senior essay in PLSC 4901 and 4903, within the concentration" : 1;
-SELECT 1 FROM PLACEMENT("Intensive major application approved by the DUS in the junior year") : "Intensive major admission" : 1;
+effect intensive_admitted when fact intensive_approval: waive intensive_admission;
+
+requirement introductory "Two introductory courses (first digit 1)" [core] {
+  courses at least 2 where course.subject = "PLSC" and course.number >= 1000 and course.number <= 1999
+    or course.attributes contains "YC PLSC Intro Courses";
+}
+
+requirement core_lectures "Two non-introductory core lectures" [core] {
+  courses at least 2 where course.attributes contains "YC PLSC Core Lecture";
+}
+
+requirement methods "One course in the methodology and formal theory subfield" [core] {
+  slot where course.attributes contains "YC PLSC Method &Formal Theory";
+}
+
+requirement seminars "Two seminars taught by Political Science faculty, one in the senior year, not taken Credit/D/Fail" [core] {
+  courses at least 2
+    where course.subject = "PLSC" and course.number >= 3000 and course.number <= 4899 and course.format = "seminar"
+      or attempt.approved_for contains "seminars";
+  constraint senior_year_seminar "At least one in the senior year": at least 1 attempts where attempt.year_of_study = 4;
+  constraint seminar_letter "Seminars taken Credit/D/Fail do not count": all where attempt.grading_mode = "letter";
+}
+
+requirement subfields "Outside the concentration: two courses in each of any two subfields" [core] {
+  children at least 2;
+  requirement subfield_american "American government" { courses at least 2 where course.attributes contains "YC PLSC American Govt"; }
+  requirement subfield_comparative "Comparative politics" { courses at least 2 where course.attributes contains "YC PLSC Comparative Govt"; }
+  requirement subfield_international "International relations" { courses at least 2 where course.attributes contains "YC PLSC Internatl Relations"; }
+  requirement subfield_philosophy "Political philosophy" { courses at least 2 where course.attributes contains "YC PLSC Political Philosophy"; }
+}
+
+requirement concentration "At least seven courses in the interdisciplinary field of concentration, approved by the DUS" [concentration] {
+  courses at least 7 where attempt.approved_for contains "concentration";
+}
+
+requirement electives "Further Political Science courses toward the 15" [elective] {
+  courses at least 0 where course.subject = "PLSC" or course.code in ["DRST0005", "DRST0006"] or attempt.approved_for contains "outside_plsc";
+}
+
+requirement junior_colloquium "PLSC 4900, in the spring term of junior year" [senior] {
+  slot from [PLSC 4900];
+  constraint junior_spring "Taken in the junior year": all where attempt.year_of_study = 3;
+}
+
+requirement senior "Senior requirement: a yearlong senior essay in PLSC 4901 and 4903, focused on the concentration" [senior] {
+  courses exactly 2 from [PLSC 4901, PLSC 4903];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint outside_limit "At most three courses from other departments, with DUS permission" in program:
+  limit 3 attempts where course.subject != "PLSC";
+
+constraint crdf_lectures "Up to two lecture courses taken Credit/D/Fail count; seminars taken Credit/D/Fail do not" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_seminars "No seminar taken Credit/D/Fail counts" in program:
+  all where attempt.grading_mode = "letter" or course.format != "seminar";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen term courses including the senior requirement" in program:
+  total at least 15 attempts;

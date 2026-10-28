@@ -1,22 +1,67 @@
-// Astronomy B.A. -- 10 courses beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [
-    SELECT 2 FROM [PHYS 1700, PHYS 1710],
-    SELECT 2 FROM [PHYS 1800, PHYS 1810],
-    SELECT 2 FROM [PHYS 2000, PHYS 2010]
-] : "Prerequisite: introductory physics sequence" : 1;
-SELECT 3 FROM [MATH 1120, MATH 1150, SELECT 1 FROM [MATH 1200, ENAS 1510]] : "Prerequisite: MATH 1120, MATH 1150, and MATH 1200 or ENAS 1510" : 1;
+// Astronomy B.A.: ten courses beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/astronomy/
+program astronomy_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [ASTR 2100, ASTR 2200] : "ASTR 2100 or ASTR 2200" : 1;
-SELECT 1 FROM ASTR 2550 : "ASTR 2550" : 1;
-SELECT 1 FROM ASTR 3100 : "ASTR 3100" : 1;
-SELECT 1 FROM [RANGE(ASTR 2000, ASTR 9999)] : "One additional astronomy elective numbered 2000 or higher" : 2;
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710, PHYS 1800 and 1810, or PHYS 2000 and 2010" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1700 "PHYS 1700 and 1710" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+}
 
-$math = [RANGE(MATH 2000, MATH 9999), RANGE(S&DS 2000, S&DS 9999), RANGE(CPSC 2000, CPSC 9999), ASTR 3560, PLACEMENT("Advanced mathematical methods course approved by the DUS")];
-SELECT 2 FROM [$math, $math] : "Two advanced mathematics or mathematical methods courses (statistics or computer science count)" : 3;
+requirement prereq_calculus "Prerequisite: MATH 1120 and 1150" [prerequisite] {
+  courses exactly 2 from [MATH 1120, MATH 1150];
+}
 
-$sci3 = [RANGE(ASTR 3000, ASTR 9999), RANGE(PHYS 3000, PHYS 9999), RANGE(APHY 3000, APHY 9999), RANGE(MATH 3000, MATH 9999), RANGE(S&DS 3000, S&DS 9999), RANGE(CPSC 3000, CPSC 9999), RANGE(CHEM 3000, CHEM 9999), RANGE(EPS 3000, EPS 9999), RANGE(ENAS 3000, ENAS 9999), PLACEMENT("Natural, applied, or mathematical science course numbered 3000 or higher")];
-$sci = [RANGE(ASTR 0000, ASTR 9999), RANGE(PHYS 0000, PHYS 9999), RANGE(APHY 0000, APHY 9999), RANGE(MATH 0000, MATH 9999), RANGE(S&DS 0000, S&DS 9999), RANGE(CPSC 0000, CPSC 9999), RANGE(CHEM 0000, CHEM 9999), RANGE(EPS 0000, EPS 9999), RANGE(ENAS 0000, ENAS 9999), RANGE(BIOL 0000, BIOL 9999), PLACEMENT("Natural, applied, or mathematical science course")];
-SELECT 2 FROM [$sci3, $sci3] : "Science electives: two numbered 3000 or higher" : 4;
-SELECT 1 FROM [$sci] : "Science electives: one additional natural, applied, or mathematical science course" : 5;
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
 
-SELECT 1 FROM ASTR 4920 : "Senior essay or research project" : 1;
+requirement intro_astronomy "ASTR 2100 or 2200" [core] {
+  slot from [ASTR 2100, ASTR 2200];
+}
+
+requirement astr_2550 "ASTR 2550" [core] {
+  slot from [ASTR 2550];
+}
+
+requirement astr_3100 "ASTR 3100" [core] {
+  slot from [ASTR 3100];
+}
+
+requirement astronomy_elective "One additional Astronomy elective numbered 2000 or higher" [elective] {
+  slot where course.subject = "ASTR" and course.number >= 2000;
+}
+
+requirement mathematics "Two advanced mathematics or mathematical methods courses (MATH 2000+, statistics, computer science, or ASTR 3560)" [core] {
+  courses at least 2
+    where course.subject = "MATH" and course.number >= 2000
+      or course.subject in ["S&DS", "CPSC"] and course.number >= 2000
+      or course.code = "ASTR3560"
+      or attempt.approved_for contains "mathematics";
+}
+
+requirement science_electives "Three electives in the natural, applied, or mathematical sciences, at least two numbered 3000 or higher" [elective] {
+  courses at least 3
+    where course.distributionals contains "Sc"
+      or course.subject in ["ASTR", "PHYS", "APHY", "MATH", "AMTH", "S&DS", "CPSC", "CHEM", "EPS", "ENAS", "BIOL", "MCDB", "MB&B", "E&EB", "BENG", "CENG", "ECE", "MENG", "ENVE"];
+  constraint advanced_science "At least two numbered 3000 or higher":
+    at least 2 attempts where course.number >= 3000;
+}
+
+requirement senior "Senior essay or research project (ASTR 4920)" [senior] {
+  slot from [ASTR 4920];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Ten courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 10 attempts;

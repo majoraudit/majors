@@ -10,6 +10,14 @@ import json
 
 PKG = "pylibmql"
 NAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*$")
+MIN_VERSION = (0, 3, 0)
+INSTITUTION_FILE = "yale-institution.json"
+# Canonical course IDs: subject + number, e.g. CPSC2010, CHEM1340L, or the
+# Summer Session form PSYCS1390 (PSYC S1390).
+CODE_RES = (
+    re.compile(r"([A-Z&]{2,5})([0-9]{3,4}[A-Z]?)"),
+    re.compile(r"([A-Z&]{2,5})S([0-9]{3,4}[A-Z]?)"),
+)
 
 
 def installed_version():
@@ -31,47 +39,28 @@ def ensure_pylibmql():
 
 
 def parse_args(argv=None):
-    ap = argparse.ArgumentParser(description="Parse MQL files in ./majors")
+    ap = argparse.ArgumentParser(description="Compile MQL 0.2 files in ./majors")
     ap.add_argument(
         "-v", "--verbose",
         action="store_true",
-        help="print every visited file and its parsed MQL JSON",
-    )
-    ap.add_argument(
-        "-D", "--define",
-        dest="defines",
-        action="append",
-        default=[],
-        metavar="NAME[=VALUE]",
-        help="define an external value, like the C compiler's -D "
-             "(-DNAME, -DNAME=VALUE, -D NAME=VALUE). "
-             "Without =VALUE the value is '1'. May be repeated.",
+        help="print every visited file and its compiled semantic IR",
     )
     return ap.parse_args(argv)
 
 
-def parse_extern(defines):
-    """Build the externals dict from -D style definitions (last one wins)."""
-    result = {}
-    for item in defines:
-        name, sep, value = item.partition("=")
-        if not NAME_RE.match(name):
-            raise SystemExit(f"error: invalid name in -D {item!r}")
-        if not sep:
-            raise SystemExit(f"error: missing value in -D {item!r}")
-        key = "$" + name
-        if key in result:
-            logging.warning("overriding %s, duplicate", key)
-        result[key] = value #pylibmql.parse_extern_value(value)
-
-    return result
+def load_institution(year_dir):
+    """Return (source text, parsed schema) for a catalog year's institution schema."""
+    path = year_dir / INSTITUTION_FILE
+    with open(path, "r") as f:
+        text = f.read()
+    return text, json.loads(text)
 
 
 def load_ssot(dirpath, filenames):
     """Return (path, data) for the directory's JSON file, or (None, None) if it has none."""
     jsons = [
         f for f in filenames
-        if f.endswith(".json") and not f.startswith("README") and f != "manifest.json"
+        if f.endswith(".json") and not f.startswith("README") and f not in ("manifest.json", INSTITUTION_FILE)
     ]
     if not jsons:
         return None, None
@@ -85,14 +74,63 @@ def load_ssot(dirpath, filenames):
         return path, json.load(f)
 
 
-def parse_mql(path, extern):
+def compile_mql(path, institution_text):
     with open(path, "r") as f:
-        result = pylibmql.parse_with_externals(f.read(), extern)
-    jresult = json.loads(result.json())
-    requirements = jresult.get("requirements") if isinstance(jresult, dict) else None
-    if not isinstance(requirements, list) or not requirements:
-        raise ValueError(f"no parsed requirements: {path}")
-    return result
+        result = pylibmql.compile_program(f.read(), str(path), institution_text)
+    program = json.loads(result.json())
+    if not program.get("requirements"):
+        raise ValueError(f"no compiled requirements: {path}")
+    return result, program
+
+
+def walk(node):
+    """Yield every dict nested anywhere in a JSON value."""
+    if isinstance(node, dict):
+        yield node
+        for value in node.values():
+            yield from walk(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from walk(value)
+
+
+def check_vocabulary(path, program, institution):
+    """Return errors for literals the compiler cannot type-check itself.
+
+    The compiler checks enum and grade literals. Course attributes and
+    distributionals are SET fields, and course codes are free-form, so their
+    values are checked here against the institution schema.
+    """
+    errors = []
+    subjects = set(institution["enums"]["subject"]) | set(institution.get("department_aliases", {}))
+    sets = {
+        "attributes": set(institution.get("tag_values", [])),
+        "distributionals": set(institution["enums"]["distributional"]),
+    }
+    if program.get("program_id") != path.stem:
+        errors.append(f"{path}: program id {program.get('program_id')!r} must match file name {path.stem!r}")
+
+    def check_code(code):
+        matches = (r.fullmatch(code) for r in CODE_RES)
+        if not any(m and m.group(1) in subjects for m in matches):
+            errors.append(f"{path}: unknown course code {code!r}")
+
+    for node in walk(program):
+        if node.get("kind") == "COURSE_LIST":
+            for code in node["canonical_course_ids"]:
+                check_code(code)
+        if node.get("kind") != "COMPARE":
+            continue
+        field = node["field"]["field"]
+        values = node["value"] if isinstance(node["value"], list) else [node["value"]]
+        if field == "code":
+            for code in values:
+                check_code(code)
+        elif node["field"]["target"] == "CATALOG_COURSE" and field in sets:
+            for value in values:
+                if value not in sets[field]:
+                    errors.append(f"{path}: {value!r} is not a declared course {field} value")
+    return errors
 
 
 def validate_manifest(path):
@@ -176,10 +214,11 @@ def main():
     ensure_pylibmql()
     import pylibmql
 
+    version = tuple(int(part) for part in re.findall(r"\d+", pylibmql.__version__)[:3])
+    if version < MIN_VERSION:
+        raise SystemExit(f"error: {PKG} {pylibmql.__version__} cannot compile MQL 0.2; need 0.3.0+")
+
     args = parse_args()
-    extern = parse_extern(args.defines)
-    if args.verbose:
-        print(f"externals: {extern}")
 
     target_dir = Path(__file__).resolve().parent / "majors"
     errors = []
@@ -188,8 +227,13 @@ def main():
     manifests = sorted(target_dir.glob("*/manifest.json"))
     if not manifests:
         errors.append(f"{target_dir}: no catalog-year manifest found")
+    institutions = {}
     for manifest_path in manifests:
         errors.extend(validate_manifest(manifest_path))
+        try:
+            institutions[manifest_path.parent] = load_institution(manifest_path.parent)
+        except (OSError, json.JSONDecodeError) as e:
+            errors.append(f"{manifest_path.parent / INSTITUTION_FILE}: {e}")
 
     for dirpath, _dirnames, filenames in os.walk(target_dir):
         try:
@@ -206,6 +250,11 @@ def main():
         if not isinstance(specs, list) or not specs:
             errors.append(f"{ssot_path}: 'specializations' missing or empty")
             continue
+        institution = institutions.get(Path(dirpath).parent)
+        if institution is None:
+            errors.append(f"{ssot_path}: no {INSTITUTION_FILE} for this catalog year")
+            continue
+        institution_text, institution_data = institution
 
         for spec in specs:
             spec_path = Path(dirpath) / spec
@@ -217,7 +266,8 @@ def main():
                 if args.verbose:
                     print(spec_path)
                 try:
-                    result = parse_mql(spec_path, extern)
+                    result, program = compile_mql(spec_path, institution_text)
+                    errors.extend(check_vocabulary(spec_path, program, institution_data))
                     checked_mql += 1
                     if args.verbose:
                         print(result.json())
@@ -233,12 +283,12 @@ def main():
         for e in errors:
             print(f"error: {e}", file=sys.stderr)
         print(
-            f"validation failed: {len(errors)} error(s), {checked_mql} MQL file(s) parsed",
+            f"validation failed: {len(errors)} error(s), {checked_mql} MQL file(s) compiled",
             file=sys.stderr,
         )
         sys.exit(1)
 
-    print(f"validation passed: {checked_mql} MQL file(s) parsed")
+    print(f"validation passed: {checked_mql} MQL file(s) compiled")
 
 if __name__ == "__main__":
     main()

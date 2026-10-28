@@ -1,18 +1,73 @@
-// Engineering Sciences (Electrical) B.A. -- 8 technical term courses beyond the prerequisites, including the senior requirement.
-$elective = [CPSC 3650, CPSC 3660, MENG 3020L, MENG 2050, MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
-$elective4 = [MENG 4673, BENG 4611, PHYS 4300, APHY 4580, RANGE(CPSC 4000, CPSC 9999), RANGE(ECE 4000, ECE 4679), RANGE(ECE 4692, ECE 9999), SELECT 1 FROM [ECE 4680, ECE 4691]];
-$es = [$elective, RANGE(ECE 0000, ECE 9999), PLACEMENT("Elective approved by the DUS")];
+// Engineering Sciences (Electrical) B.A.: eight technical term courses beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering/
+// Each student's program must be approved by the DUS.
+program engineering_sciences_electrical_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [MATH 1120, PLACEMENT("Acceleration credit or placement beyond MATH 1120")] : "Prerequisite: MATH 1120 (if needed)" : 1;
-SELECT 1 FROM [MATH 1150, PLACEMENT("Acceleration credit or placement beyond MATH 1150")] : "Prerequisite: MATH 1150 (if needed)" : 1;
-SELECT 1 FROM [ENAS 1510, MATH 1200, MATH 2220, MATH 2250, MATH 2260, MATH 2550, MATH 2560] : "Prerequisite: ENAS 1510 or MATH 1200 or higher" : 1;
-SELECT 1 FROM [ENAS 1300, CPSC 2010, PLACEMENT("More advanced programming course approved by the DUS (CPSC 1001 does not count)")] : "Prerequisite: ENAS 1300 or higher" : 1;
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010]] : "Prerequisite: PHYS 1700, 1710 or PHYS 1800, 1810 or higher" : 1;
+fact calculus_1120_placement "Acceleration credit or placement beyond MATH 1120": placement { test: "Yale mathematics placement", result: "beyond MATH 1120" };
+fact calculus_1150_placement "Acceleration credit or placement beyond MATH 1150": placement { test: "Yale mathematics placement", result: "beyond MATH 1150" };
 
-SELECT 1 FROM [ENAS 1940, MATH 2220, MATH 2250, MATH 2260] : "ENAS 1940, MATH 2220, MATH 2250, or MATH 2260" : 1;
-SELECT 3 FROM [ECE 2000, ECE 2011, ECE 2020] : "ECE 2000, 2011, and 2020" : 1;
+requirement prereq_1120 "Prerequisite: MATH 1120" [prerequisite] {
+  slot from [MATH 1120];
+}
 
-// Three electives with a one-term senior project; two with ECE 4710 and 4721.
-SELECT 2-3 FROM [$es, $es, $es] : "Two or three approved electives" : 3;
+requirement prereq_1150 "Prerequisite: MATH 1150" [prerequisite] {
+  slot from [MATH 1150];
+}
 
-SELECT 1 FROM [CLASS(ECE 4710), CLASS(ECE 4721), SELECT 2 FROM [ECE 4710, ECE 4721]] : "Senior requirement: research or design project (ECE 4710 and/or 4721)" : 1;
+effect placed_1120 when fact calculus_1120_placement: waive prereq_1120;
+effect placed_1150 when fact calculus_1150_placement: waive prereq_1150;
+
+requirement prereq_multivariable "Prerequisite: ENAS 1510 or MATH 1200 or higher" [prerequisite] {
+  slot where course.code in ["ENAS1510", "MATH1200"] or course.subject = "MATH" and course.number >= 2220;
+}
+
+requirement prereq_programming "Prerequisite: ENAS 1300 or higher (CPSC 1001 does not count)" [prerequisite] {
+  slot where course.code in ["ENAS1300", "CPSC2010"] or attempt.approved_for contains "prereq_programming";
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710 or higher" [prerequisite] {
+  courses at least 2 where course.code in ["PHYS1700", "PHYS1710", "PHYS1800", "PHYS1810", "PHYS2000", "PHYS2010"];
+}
+
+requirement mathematics "ENAS 1940, MATH 2220, 2250, or 2260" [core] {
+  slot from [ENAS 1940, MATH 2220, MATH 2250, MATH 2260];
+}
+
+requirement ece_core "ECE 2000, 2011, and 2020" [core] {
+  courses exactly 3 from [ECE 2000, ECE 2011, ECE 2020];
+}
+
+// A two-term project (ECE 4710 and 4721) takes the place of one elective.
+choice senior_length "Senior project length": solver one of "one_term", "two_term";
+
+requirement senior_one_term "Senior requirement: one-term research or design project (ECE 4710 or 4721, with DUS approval)" [senior] when senior_length = "one_term" {
+  slot where course.code in ["ECE4710", "ECE4721"];
+}
+
+requirement senior_two_term "Senior requirement: two-term research or design project (ECE 4710 and 4721)" [senior] when senior_length = "two_term" {
+  courses exactly 2 from [ECE 4710, ECE 4721];
+}
+
+requirement electives "Two or three approved electives" [elective] {
+  courses at least (senior_length: "one_term" => 3, "two_term" => 2)
+    where course.code in ["CPSC3650", "CPSC3660", "MENG3020L", "MENG2050", "MENG4673", "BENG4611", "PHYS4300", "APHY4580"]
+      or course.subject in ["CPSC", "ECE"] and course.number >= 4000
+      or course.subject = "ECE"
+      or attempt.approved_for contains "electives";
+}
+
+constraint one_special_project "Only one of ECE 4680 or 4691 (Pass/Fail) counts toward the major" in program:
+  limit 1 attempts where course.code in ["ECE4680", "ECE4691"];
+
+constraint no_crdf "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode != "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "Eight technical term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 8 attempts;

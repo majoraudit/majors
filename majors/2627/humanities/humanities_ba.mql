@@ -1,16 +1,66 @@
-// Humanities B.A. -- 14 term courses including the senior essay.
-// No more than four of the six core courses may concern one world-historical tradition.
-SELECT 2 FROM [TAG("YC HUMS CoreSem Interpretation"), TAG("YC HUMS CoreSem Interpretation")] : "Core: two Interpretations seminars" : 1;
-SELECT 2 FROM [TAG("YC HUMS CoreSem Modernities"), TAG("YC HUMS CoreSem Modernities")] : "Core: two Modernities seminars" : 1;
-SELECT 2 FROM [TAG("YC HUMS CoreSem Traditions"), TAG("YC HUMS CoreSem Traditions")] : "Core: two Traditions lectures or seminars" : 1;
+// Humanities B.A.: fourteen term courses including the senior essay.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/humanities/
+program humanities_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [TAG("YC HUMS Area Literature"), PLACEMENT("Literature course approved by the DUS")] : "Area of study: literature" : 2;
-SELECT 1 FROM [TAG("YC HUMS Area Arts"), PLACEMENT("Visual, musical, or dramatic arts course approved by the DUS")] : "Area of study: visual, musical, or dramatic arts" : 2;
-SELECT 1 FROM [TAG("YC HUMS Area Science"), PLACEMENT("Science in the humanities course approved by the DUS")] : "Area of study: science in the humanities" : 2;
-SELECT 1 FROM [TAG("YC HUMS Area History"), PLACEMENT("Intellectual history and historical analysis course approved by the DUS")] : "Area of study: intellectual history and historical analysis" : 2;
+fact journal_entries "At least one intellectual journal entry submitted to the DUS each semester":
+  approval dus_approval { for: "journal" };
 
-$focus = PLACEMENT("Elective complementing the student's area of focus, approved by the DUS");
-SELECT 3 FROM [$focus, $focus, $focus] : "Three electives in the area of focus" : 3;
+requirement core_interpretations "Core: two Interpretations seminars" [core] {
+  courses at least 2 where course.attributes contains "YC HUMS CoreSem Interpretation";
+}
 
-SELECT 1 FROM PLACEMENT("At least one intellectual journal entry submitted to the DUS each semester") : "Intellectual journal" : 1;
-SELECT 1 FROM HUMS 4910 : "One- or two-term senior essay (HUMS 4910)" : 1;
+requirement core_modernities "Core: two Modernities seminars" [core] {
+  courses at least 2 where course.attributes contains "YC HUMS CoreSem Modernities";
+}
+
+requirement core_traditions "Core: two Traditions lectures or seminars" [core] {
+  courses at least 2 where course.attributes contains "YC HUMS CoreSem Traditions";
+}
+
+// Courses carry no world-historical tradition field, so the DUS checks this balance.
+advisory requirement core_balance "No more than four of the six core courses may concern one world-historical tradition" [core] {
+  slot where attempt.approved_for contains "core_balance";
+}
+
+requirement areas "One course in each of four areas of study (the Franke Seminar may count)" [distribution] {
+  children exactly 4;
+  requirement area_literature "Literature" {
+    slot where course.attributes contains "YC HUMS Area Literature" or attempt.approved_for contains "area_literature";
+  }
+  requirement area_arts "Visual, musical, or dramatic arts" {
+    slot where course.attributes contains "YC HUMS Area Arts" or attempt.approved_for contains "area_arts";
+  }
+  requirement area_science "Science in the humanities" {
+    slot where course.attributes contains "YC HUMS Area Science" or attempt.approved_for contains "area_science";
+  }
+  requirement area_history "Intellectual history and historical analysis" {
+    slot where course.attributes contains "YC HUMS Area History" or attempt.approved_for contains "area_history";
+  }
+}
+
+requirement focus "Three electives complementing the area of focus, approved by the DUS" [concentration] {
+  courses at least 3 where attempt.approved_for contains "focus";
+}
+
+requirement journal "Intellectual journal: at least one entry each semester" [core] {
+  slot where attempt.approved_for contains "journal";
+}
+
+effect journal_done when fact journal_entries: waive journal;
+
+requirement senior "One- or two-term senior essay (HUMS 4910)" [senior] {
+  courses between 1 and 2 where course.code = "HUMS4910";
+}
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen term courses including the senior essay" in roles [core, distribution, concentration, senior]:
+  total at least 14 attempts;

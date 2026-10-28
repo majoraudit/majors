@@ -1,22 +1,72 @@
-// Anthropology B.A. -- Concentration in Medical Anthropology and Global Health -- 12 course credits including the senior requirement.
-$anth = RANGE(ANTH 0000, ANTH 9999);
-$adv = RANGE(ANTH 3000, ANTH 4999);
-$cognate = PLACEMENT("Cognate course in another department approved by the DUS");
+// Anthropology B.A. (concentration in Medical Anthropology and Global Health): twelve course credits including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/anthropology/
+program anthropology_ba_medical_anthropology_and_global_health {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Biological")] : "Introductory/intermediate course: evolution of human and nonhuman primates (biological)" : 1;
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Archaeology")] : "Introductory/intermediate course: archaeological study of human societies" : 1;
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Linguistic")] : "Introductory/intermediate course: social, cultural, and linguistic dimensions" : 1;
+requirement intro "One introductory or intermediate course (1000-2999) in each of the three subfields" [core] {
+  children at least 3;
+  requirement intro_biological "Evolution of human and nonhuman primates" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes contains "YC ANTH Biological";
+  }
+  requirement intro_archaeological "Archaeological study of human societies and cultures" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes contains "YC ANTH Archaeology";
+  }
+  requirement intro_sociocultural "Social, cultural, and linguistic dimensions of human life" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes overlaps ["YC ANTH Sociocultural", "YC ANTH Linguistic"];
+  }
+}
 
-// ANTH 4071, ANTH 4091, and a seminar used for the senior essay do not count here.
-SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999)] : "Three advanced ANTH courses (3000-4000 level), excluding senior essay work" : 2;
-LIMIT 3 FROM [$cognate, $cognate, $cognate] : "At most three cognate courses from other departments" : 2;
+requirement advanced "Three advanced Anthropology courses (3000-4999), not senior essay courses or the seminar used for the senior essay" [core] {
+  courses at least 3
+    where course.subject = "ANTH" and course.number >= 3000 and course.number <= 4999
+      and not course.code in ["ANTH4071", "ANTH4091"];
+}
 
-// Remaining credits (ANTH 4071 counts here for the yearlong essay option).
-SELECT 5 FROM [$anth, $anth, $anth, $anth, $anth, $cognate, $cognate, $cognate] : "Anthropology electives or approved cognates" : 4;
+requirement electives "Anthropology electives or approved cognate courses toward the twelve credits" [elective] {
+  courses at least 0 where course.subject = "ANTH" or attempt.approved_for contains "cognate";
+}
 
-// Concentration requirements (six credits in medical anthropology, global health, or cognates).
-SELECT 1 FROM ANTH 4848 : "MAGH: ANTH 4848" : 1;
-SELECT 1 FROM [RANGE_TAG(ANTH 3000, ANTH 4999, "YC ANTH Medical"), PLACEMENT("3000/4000-level seminar supporting senior essay preparation, approved by the DUS")] : "MAGH: seminar at the 3000 or 4000 level" : 2;
-SELECT 4 FROM [TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), TAG("YC ANTH Medical"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS"), PLACEMENT("Medical anthropology/global health cognate approved by the DUS")] : "MAGH: four other electives" : 3;
+requirement senior "Senior essay in the senior year" [senior] {
+  children at least 1;
+  requirement senior_seminar "Option 1: a substantial essay in an additional advanced seminar, approved by the instructor" {
+    slot where course.subject = "ANTH" and course.number >= 3000 and attempt.approved_for contains "senior";
+  }
+  requirement senior_independent "Option 2: independent essay in ANTH 4091" {
+    slot from [ANTH 4091];
+  }
+  requirement senior_yearlong "Option 3: yearlong essay begun in ANTH 4071 and completed in ANTH 4091" {
+    courses exactly 2 from [ANTH 4071, ANTH 4091];
+  }
+  constraint senior_year "Completed in the senior year": all where attempt.year_of_study = 4;
+}
 
-SELECT 1 FROM [CLASS(ANTH 4091), SELECT 2 FROM [ANTH 4071, ANTH 4091], PLACEMENT("Senior essay written in an additional advanced seminar, approved by the instructor")] : "Senior essay (seminar essay, ANTH 4091, or yearlong ANTH 4071 and ANTH 4091)" : 1;
+constraint cognate_limit "At most three cognate courses from other departments, with DUS approval" in program:
+  limit 3 attempts where course.subject != "ANTH";
+
+constraint outside_limit "At most two courses taken outside Yale, with DUS approval" in program:
+  limit 2 attempts where attempt.source != "yale";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint total_credits "Twelve course credits in all" in program:
+  total at least 12 credits;
+
+// Six concentration credits among the major courses, in medical anthropology, global health, or cognates.
+constraint magh_core "MAGH: ANTH 4848" in program:
+  at least 1 attempts where course.code = "ANTH4848";
+constraint magh_seminar "MAGH: a 3000- or 4000-level seminar supporting senior essay preparation" in program:
+  at least 1 attempts
+    where course.subject = "ANTH" and course.number >= 3000 and course.attributes contains "YC ANTH Medical"
+      or attempt.approved_for contains "magh_seminar";
+constraint magh_total "Six concentration credits in medical anthropology, global health, or approved cognates" in roles [core, elective]:
+  total at least 6 credits where course.attributes contains "YC ANTH Medical" or attempt.approved_for contains "concentration";

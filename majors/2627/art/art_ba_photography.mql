@@ -1,21 +1,63 @@
-// Art B.A. -- Photography concentration. 14 courses including prerequisites and the senior project.
-$intro = RANGE(ART 0001, ART 1999);
-$upper = RANGE(ART 2000, ART 9999);
-$hsar = RANGE(HSAR 0000, HSAR 9999);
+// Art B.A. (Photography concentration): fourteen courses including the prerequisites and the senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/art/
+program art_ba_photography {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM PLACEMENT("Favorable sophomore review of studio work") : "Prerequisite: sophomore review" : 1;
-SELECT 2 FROM [ART 1111, ART 1514] : "Prerequisite: Visual Thinking and Basic Drawing" : 1;
-SELECT 3 FROM [$intro, $intro, $intro] : "Prerequisite: three additional introductory courses (0001-1999)" : 2;
+fact sophomore_review "Favorable faculty review of studio work before the end of sophomore year":
+  approval committee_approval { for: "sophomore_review" };
 
-// A sixth introductory course may count toward this requirement.
-SELECT 4 FROM [$upper, $upper, $upper, $upper, $intro] : "Four courses numbered 2000 or above" : 3;
-LIMIT 1 FROM $intro : "At most one additional introductory course counts toward the 2000-level requirement" : 3;
+requirement review "Prerequisite: sophomore review" [prerequisite] {
+  slot where attempt.approved_for contains "sophomore_review";
+}
 
-SELECT 1-2 FROM [ART 1836, ART 1838] : "Photography: ART 1836 and/or 1838" : 1;
-SELECT 1-2 FROM [ART 2837, ART 2839] : "Photography: ART 2837 and/or 2839" : 1;
-SELECT 1 FROM [ART 3837, ART 3838] : "Photography: ART 3837 or 3838" : 1;
-SELECT 1 FROM [ART 3879, ART 4801, ART 4803] : "Photography: ART 3879, 4801, or 4803" : 1;
+effect review_passed when fact sophomore_review: waive review;
 
-SELECT 1 FROM ART 3995 : "Junior Seminar" : 1;
-SELECT 2 FROM [$hsar, $hsar, PLACEMENT("DUS-approved equivalent of a history of art course"), PLACEMENT("DUS-approved equivalent of a history of art course")] : "Two courses in the history of art (DUS-approved equivalents permitted)" : 2;
-SELECT 2 FROM [ART 4995, ART 4996] : "Two-term senior project" : 1;
+requirement prereq_core "Prerequisite: ART 1111 and 1514, taken at Yale" [prerequisite] {
+  courses exactly 2 from [ART 1111, ART 1514];
+  constraint prereq_at_yale "Outside studio credit cannot replace the two prerequisites": all where attempt.source = "yale";
+}
+
+requirement prereq_intro "Prerequisite: three additional introductory courses (0001-1999), which may also be concentration courses" [prerequisite] {
+  courses at least 3 where course.subject = "ART" and course.number <= 1999;
+}
+
+requirement upper "Four courses numbered 2000 or above (a sixth introductory course may count)" [elective] {
+  courses at least 4 where course.subject = "ART" and not course.code in ["ART3995", "ART4995", "ART4996"];
+  constraint one_extra_intro "At most one introductory course counts here": at most 1 attempts where course.number <= 1999;
+}
+
+requirement junior_seminar "Junior Seminar (ART 3995)" [core] {
+  slot from [ART 3995];
+}
+
+requirement history_of_art "Two courses in the history of art, or DUS-approved equivalents (Film and Media Studies with DUS permission)" [core] {
+  courses at least 2 where course.subject = "HSAR" or attempt.approved_for contains "history_of_art";
+}
+
+requirement senior "Two-term senior project (ART 4995 and 4996)" [senior] {
+  courses exactly 2 from [ART 4995, ART 4996];
+}
+
+// The five concentration courses are chosen among the courses above; they add no courses.
+constraint ph_intro "Photography: ART 1836 and/or 1838" in program:
+  at least 1 attempts where course.code in ["ART1836", "ART1838"];
+constraint ph_intermediate "Photography: ART 2837 and/or 2839" in program:
+  at least 1 attempts where course.code in ["ART2837", "ART2839"];
+constraint ph_3837 "Photography: ART 3837 or 3838" in program:
+  at least 1 attempts where course.code in ["ART3837", "ART3838"];
+constraint ph_advanced "Photography: ART 3879, 4801, or 4803" in program:
+  at least 1 attempts where course.code in ["ART3879", "ART4801", "ART4803"];
+constraint ph_total "Five photography courses in all" in program:
+  at least 5 attempts where course.code in ["ART1836", "ART1838", "ART2837", "ART2839", "ART3837", "ART3838", "ART3879", "ART4801", "ART4803"];
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution, study abroad, or the Norfolk fellowship count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen courses in all" in program:
+  total at least 14 attempts;

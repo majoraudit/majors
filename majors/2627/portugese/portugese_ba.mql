@@ -1,12 +1,41 @@
-// Portuguese B.A. -- 10 term courses beyond the prerequisite, including the senior essay.
-$port = [RANGE(PORT 1400, PORT 4909), RANGE(PORT 4921, PORT 9999)];
-$related = PLACEMENT("Related course in another language and literature, anthropology, history, history of art, area studies, or study abroad, approved by the DUS");
+// Portuguese B.A.: ten term courses beyond the prerequisite, including the senior essay.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/portuguese/
+program portugese_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PORT 1300, PLACEMENT("Equivalent of PORT 1300 by placement")] : "Prerequisite: PORT 1300 or equivalent" : 1;
+fact portuguese_placement "Placement equivalent to PORT 1300": placement { test: "Portuguese placement", result: "PORT 1300" };
 
-SELECT 5 FROM [$port, $port, $port, $port, $port] : "At least five courses in the literatures or cultures of the Portuguese world" : 2;
-// The senior essay counts for at most two credits; with a one-term essay, one more course is needed.
-SELECT 3-4 FROM [$port, $port, $port, $port, $related, $related, $related, $related] : "Additional courses (Portuguese or up to four approved related courses)" : 3;
-LIMIT 4 FROM [$related, $related, $related, $related] : "At most four courses from other departments or study abroad" : 3;
+requirement prereq "Prerequisite: PORT 1300 or an equivalent" [prerequisite] {
+  slot from [PORT 1300];
+}
 
-SELECT 1 FROM [CLASS(PORT 4910), CLASS(PORT 4920), SELECT 2 FROM [PORT 4910, PORT 4920]] : "Senior essay (PORT 4910 and/or 4920)" : 1;
+effect placed when fact portuguese_placement: waive prereq;
+
+requirement portuguese_world "Five term courses in the literatures or cultures of the Portuguese world" [core] {
+  courses at least 5 where course.subject = "PORT" and course.number >= 1400 and not course.code in ["PORT4910", "PORT4920"];
+}
+
+requirement electives "Further Portuguese courses, or up to four related courses from other departments or study abroad approved by the DUS" [elective] {
+  courses at least 0
+    where course.subject = "PORT" and course.number >= 1400 and not course.code in ["PORT4910", "PORT4920"]
+      or attempt.approved_for contains "related";
+}
+
+requirement senior "Senior essay: PORT 4910 and/or 4920" [senior] {
+  courses between 1 and 2 from [PORT 4910, PORT 4920];
+}
+
+constraint related_limit "At most four relevant courses from other departments or study abroad" in program:
+  limit 4 attempts where course.subject != "PORT" or attempt.source = "study_abroad";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Ten term courses beyond the prerequisite, including the senior essay" in roles [core, elective, senior]:
+  total at least 10 attempts;

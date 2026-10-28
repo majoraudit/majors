@@ -1,22 +1,101 @@
-// Film and Media Studies B.A. -- 12 term courses including the senior requirement.
-// The intensive major (approved by the Film and Media Studies Committee) completes both a senior essay and a senior project.
-$film = RANGE(FILM 0000, FILM 9999);
-$seniorsem = RANGE(FILM 4000, FILM 4999);
+// Film and Media Studies B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/film-media-studies/
+// The intensive major (approved by the Film and Media Studies Committee at the end of junior year) completes both
+// a senior essay and a senior project; it is meant for students not pursuing two majors.
+program film_media_studies {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 3 FROM [FILM 1501, FILM 1601, FILM 3201] : "Required courses: FILM 1501, 1601, and 3201" : 1;
-SELECT 1 FROM TAG("YC FILM World Cinema") : "Upper-level international (non-U.S.) or world cinema course" : 2;
-SELECT 1 FROM TAG("YC FILM Critical Studies") : "Upper-level critical studies course" : 2;
-SELECT 1 FROM TAG("YC FILM Production") : "Cinematic or digital time-based media production course" : 2;
-SELECT 4 FROM [$film, $film, $film, $film, PLACEMENT("Course in another department substituted with DUS permission")] : "Four electives" : 4;
+choice track "Major track": declared one of "standard", "intensive";
+choice senior_kind "Standard-track senior requirement": solver one of "essay", "project";
 
-// Production/screenwriting projects also require FILM 4940 (0.5 credit), which does not count toward the twelve courses.
-SELECT 1 FROM [
-    SELECT 2 FROM [FILM 4910, FILM 4920],
-    SELECT 2 FROM [$seniorsem, SELECT 1 FROM [FILM 4910, FILM 4920]],
-    SELECT 2 FROM [$seniorsem, $seniorsem],
-    SELECT 3 FROM [FILM 4870, FILM 4880, FILM 4940],
-    SELECT 2 FROM [SELECT 1 FROM [SELECT 2 FROM [FILM 4550, FILM 4560], SELECT 2 FROM [FILM 4800, FILM 4810], SELECT 2 FROM [FILM 4550, FILM 4810], SELECT 2 FROM [FILM 4800, FILM 4560]], FILM 4940],
-    SELECT 2 FROM [SELECT 1 FROM [SELECT 2 FROM [FILM 4830, FILM 4840], SELECT 2 FROM [FILM 4800, FILM 4810], SELECT 2 FROM [FILM 4830, FILM 4810], SELECT 2 FROM [FILM 4800, FILM 4840]], FILM 4940],
-    SELECT 3 FROM [FILM 4800, FILM 4810, FILM 4940]
-] : "Senior requirement: senior essay (FILM 4910-4920, seminar plus one term, or two senior seminars) or production/screenwriting project with FILM 4940" : 1;
-SELECT 1 FROM PLACEMENT("Prospectus approved by a faculty adviser, submitted to the DUS by the end of reading week of junior year") : "Senior prospectus" : 1;
+fact prospectus "Prospectus approved by a faculty adviser, submitted to the DUS by the end of reading week of junior year":
+  approval adviser_approval { for: "prospectus" };
+fact intensive_approval "Intensive major approved by the Film and Media Studies Committee":
+  approval committee_approval { for: "intensive" };
+
+requirement required_courses "Required courses FILM 1501, 1601, and 3201, preferably in the first or second year, not Credit/D/Fail" [core] {
+  courses exactly 3 from [FILM 1501, FILM 1601, FILM 3201];
+  constraint required_letter "Required courses may not be taken Credit/D/Fail": all where attempt.grading_mode = "letter";
+}
+
+requirement world_cinema "An upper-level international (non-U.S.) or world cinema course" [core] {
+  slot where course.attributes contains "YC FILM World Cinema";
+}
+
+requirement critical_studies "An upper-level critical studies course" [core] {
+  slot where course.attributes contains "YC FILM Critical Studies";
+}
+
+requirement production "A course in producing cinematic or digital time-based media" [core] {
+  slot where course.attributes contains "YC FILM Production";
+}
+
+requirement electives "Four electives (courses in other departments with DUS permission)" [elective] {
+  courses at least 4 where course.subject = "FILM" or attempt.approved_for contains "electives";
+}
+
+requirement senior "Senior requirement in the senior year: a senior essay or a production/screenwriting project (the intensive major does both)" [senior] {
+  children at least (track: "standard" => 1, "intensive" => 2);
+  requirement senior_essay "Senior essay (two courses, two credits)" when track = "intensive" or senior_kind = "essay" {
+    children at least 1;
+    requirement essay_tutorial "FILM 4910 and 4920" { courses exactly 2 from [FILM 4910, FILM 4920]; }
+    requirement essay_seminar_term "A senior seminar and one term of FILM 4910 or 4920" {
+      children exactly 2;
+      requirement essay_seminar "Senior seminar (FILM 4000-4999)" {
+        slot where course.subject = "FILM" and course.number >= 4000 and course.format = "seminar";
+      }
+      requirement essay_term "FILM 4910 or 4920" { slot from [FILM 4910, FILM 4920]; }
+    }
+    requirement essay_two_seminars "Two senior seminars" {
+      courses exactly 2 where course.subject = "FILM" and course.number >= 4000 and course.format = "seminar";
+    }
+  }
+  requirement senior_project "Senior production or screenwriting project: two production seminars" when track = "intensive" or senior_kind = "project" {
+    children at least 1;
+    requirement project_4870 "FILM 4870 and 4880" { courses exactly 2 from [FILM 4870, FILM 4880]; }
+    requirement project_film "Filmmaking: FILM 4550 or 4800, then FILM 4560 or 4810" {
+      children exactly 2;
+      requirement project_film_fall "FILM 4550 or 4800" { slot from [FILM 4550, FILM 4800]; }
+      requirement project_film_spring "FILM 4560 or 4810" { slot from [FILM 4560, FILM 4810]; }
+    }
+    requirement project_screenwriting "Screenwriting: FILM 4830 or 4800, then FILM 4840 or 4810" {
+      children exactly 2;
+      requirement project_screen_fall "FILM 4830 or 4800" { slot from [FILM 4830, FILM 4800]; }
+      requirement project_screen_spring "FILM 4840 or 4810" { slot from [FILM 4840, FILM 4810]; }
+    }
+  }
+  constraint senior_year "Taken in the senior year" in subtree senior: all where attempt.year_of_study = 4;
+}
+
+// FILM 4940 (half credit) is required for a senior project but does not count toward the twelve courses.
+requirement project_colloquium "FILM 4940 (half credit), for students completing a senior project" [senior_extra]
+    when track = "intensive" or senior_kind = "project" {
+  slot from [FILM 4940];
+}
+
+requirement senior_prospectus "Senior prospectus approved by a faculty adviser" [senior_extra] {
+  slot where attempt.approved_for contains "prospectus";
+}
+
+requirement intensive_admission "Approval of the intensive major by the Film and Media Studies Committee" [senior_extra]
+    when track = "intensive" {
+  slot where attempt.approved_for contains "intensive";
+}
+
+effect prospectus_done when fact prospectus: waive senior_prospectus;
+effect intensive_approved when fact intensive_approval: waive intensive_admission;
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the twelve, with DUS permission" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in roles [core, elective, senior]:
+  total at least 12 attempts;

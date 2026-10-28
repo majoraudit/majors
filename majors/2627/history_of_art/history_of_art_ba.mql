@@ -1,28 +1,103 @@
-// History of Art B.A. -- 12 term courses including the senior requirement.
-// Only courses originating in History of Art fulfill the distribution requirements; one course may satisfy
-// both a geographical and a chronological category.
-$inter = [RANGE(HSAR 2000, HSAR 3490), RANGE(HSAR 3500, HSAR 4400), RANGE(HSAR 4402, HSAR 4497)];
-$seminar = [RANGE(HSAR 3500, HSAR 4400), RANGE(HSAR 4402, HSAR 4497)];
+// History of Art B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/history-of-art/
+// Only History of Art courses fulfill the distribution requirements, which are met by the six intermediate and
+// advanced courses; one course may satisfy one geographical and one chronological category.
+program history_of_art_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [RANGE(HSAR 1000, HSAR 1999), RANGE(HSAR 1000, HSAR 1999)] : "Two introductory courses at the 1000 level" : 2;
-SELECT 4 FROM [$inter, $inter, $inter, $inter] : "Four intermediate and advanced courses (2000 and 3000 levels)" : 3;
-SELECT 2 FROM [$seminar, $seminar] : "Two seminars at the 3500-4497 level" : 2;
-SELECT 4 FROM [
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Africa & Pacific")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR The Americas")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Asia & Near East")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Europe")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Transregional")]
-] : "Distribution: four of the five geographical areas (among the six intermediate/advanced courses)" : 2;
-SELECT 4 FROM [
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Pre-800")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR 800-1400")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR 1400-1800")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Post-1800")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4497, "YC HSAR Transchronological")]
-] : "Distribution: four of the five chronological periods (among the six intermediate/advanced courses)" : 2;
+requirement introductory "Two introductory courses at the 1000 level" [core] {
+  courses at least 2 where course.subject = "HSAR" and course.number >= 1000 and course.number <= 1999;
+}
 
-SELECT 1 FROM HSAR 4401 : "Methods seminar: HSAR 4401 (junior year)" : 1;
-SELECT 2 FROM [RANGE(HSAR 0000, HSAR 9999), RANGE(HSAR 0000, HSAR 9999), PLACEMENT("Course in a related department directly relevant to the major, approved by the DUS"), PLACEMENT("Course in a related department directly relevant to the major, approved by the DUS")] : "Two electives" : 4;
+requirement intermediate "Four intermediate and advanced courses at the 2000 and 3000 levels" [core] {
+  courses at least 4 where course.subject = "HSAR" and course.number >= 2000 and course.number <= 3999;
+}
 
-SELECT 1 FROM [CLASS(HSAR 4499), PLACEMENT("Two-term senior essay approved by petition to the DUS and adviser")] : "Senior essay (HSAR 4499)" : 1;
+requirement seminars "Two seminars at the 3500-4497 level" [core] {
+  courses at least 2
+    where course.subject = "HSAR" and course.number >= 3500 and course.number <= 4497 and course.code != "HSAR4401"
+      and course.format = "seminar";
+}
+
+requirement geographic "Distribution: four of the five geographical categories, among the six intermediate and advanced courses" [distribution] {
+  children at least 4;
+  requirement geo_africa_pacific "Africa & Pacific" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Africa & Pacific"; }
+  requirement geo_americas "The Americas" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR The Americas"; }
+  requirement geo_asia_near_east "Asia & Near East" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Asia & Near East"; }
+  requirement geo_europe "Europe" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Europe"; }
+  requirement geo_transregional "Transregional" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Transregional"; }
+}
+
+requirement chronological "Distribution: four of the five chronological categories, among the six intermediate and advanced courses" [distribution] {
+  children at least 4;
+  requirement chron_pre_800 "Pre-800" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Pre-800"; }
+  requirement chron_800_1400 "800-1400" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR 800-1400"; }
+  requirement chron_1400_1800 "1400-1800" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR 1400-1800"; }
+  requirement chron_post_1800 "Post-1800" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Post-1800"; }
+  requirement chron_transchronological "Transchronological" { slot where course.subject = "HSAR" and course.number >= 2000 and course.number <= 4497 and not course.code in ["HSAR4401"] and course.attributes contains "YC HSAR Transchronological"; }
+}
+
+requirement methods "Methods seminar: HSAR 4401" [core] {
+  slot from [HSAR 4401];
+}
+
+requirement electives "Two electives (courses in related departments directly relevant to the major, with DUS approval)" [elective] {
+  courses at least 2 where course.subject = "HSAR" or attempt.approved_for contains "electives";
+}
+
+requirement senior "Senior essay: HSAR 4499 (a two-term essay by petition to the DUS and adviser, normally by the week after spring break of junior year)" [senior] {
+  children at least 1;
+  requirement senior_one_term "HSAR 4499" { slot from [HSAR 4499]; }
+  requirement senior_two_term "Two-term senior essay approved by petition" {
+    courses exactly 2 where course.code = "HSAR4499" or attempt.approved_for contains "senior";
+  }
+}
+
+// Distribution categories are properties of the intermediate and advanced courses, so each may count there too.
+share geo_africa_pacific_counts: geo_africa_pacific, intermediate, seminars;
+share geo_americas_counts: geo_americas, intermediate, seminars;
+share geo_asia_near_east_counts: geo_asia_near_east, intermediate, seminars;
+share geo_europe_counts: geo_europe, intermediate, seminars;
+share geo_transregional_counts: geo_transregional, intermediate, seminars;
+share chron_pre_800_counts: chron_pre_800, intermediate, seminars;
+share chron_800_1400_counts: chron_800_1400, intermediate, seminars;
+share chron_1400_1800_counts: chron_1400_1800, intermediate, seminars;
+share chron_post_1800_counts: chron_post_1800, intermediate, seminars;
+share chron_transchronological_counts: chron_transchronological, intermediate, seminars;
+share geo_africa_pacific_chron_pre_800: geo_africa_pacific, chron_pre_800;
+share geo_africa_pacific_chron_800_1400: geo_africa_pacific, chron_800_1400;
+share geo_africa_pacific_chron_1400_1800: geo_africa_pacific, chron_1400_1800;
+share geo_africa_pacific_chron_post_1800: geo_africa_pacific, chron_post_1800;
+share geo_africa_pacific_chron_transchronological: geo_africa_pacific, chron_transchronological;
+share geo_americas_chron_pre_800: geo_americas, chron_pre_800;
+share geo_americas_chron_800_1400: geo_americas, chron_800_1400;
+share geo_americas_chron_1400_1800: geo_americas, chron_1400_1800;
+share geo_americas_chron_post_1800: geo_americas, chron_post_1800;
+share geo_americas_chron_transchronological: geo_americas, chron_transchronological;
+share geo_asia_near_east_chron_pre_800: geo_asia_near_east, chron_pre_800;
+share geo_asia_near_east_chron_800_1400: geo_asia_near_east, chron_800_1400;
+share geo_asia_near_east_chron_1400_1800: geo_asia_near_east, chron_1400_1800;
+share geo_asia_near_east_chron_post_1800: geo_asia_near_east, chron_post_1800;
+share geo_asia_near_east_chron_transchronological: geo_asia_near_east, chron_transchronological;
+share geo_europe_chron_pre_800: geo_europe, chron_pre_800;
+share geo_europe_chron_800_1400: geo_europe, chron_800_1400;
+share geo_europe_chron_1400_1800: geo_europe, chron_1400_1800;
+share geo_europe_chron_post_1800: geo_europe, chron_post_1800;
+share geo_europe_chron_transchronological: geo_europe, chron_transchronological;
+share geo_transregional_chron_pre_800: geo_transregional, chron_pre_800;
+share geo_transregional_chron_800_1400: geo_transregional, chron_800_1400;
+share geo_transregional_chron_1400_1800: geo_transregional, chron_1400_1800;
+share geo_transregional_chron_post_1800: geo_transregional, chron_post_1800;
+share geo_transregional_chron_transchronological: geo_transregional, chron_transchronological;
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in roles [core, elective, senior]:
+  total at least 12 attempts;

@@ -1,28 +1,78 @@
-// English B.A. -- standard major. At least 14 courses including the senior requirement.
-$found = [ENGL 1025, ENGL 1026, ENGL 1027, ENGL 1028];
-$cw = TAG("YC ENGL Creative Writing");
-$engl = RANGE(ENGL 0000, ENGL 9999);
-$outside = PLACEMENT("Relevant upper-level course in another department (normally literature in translation or another language) approved by the DUS");
+// English B.A. (standard major): at least fourteen courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/english-language-literature/
+program english_ba_standard {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 3 FROM [$found, SELECT 2 FROM [DRST 0001, DRST 0002], SELECT 2 FROM [ENGL 1029, ENGL 1030], PLACEMENT("Two overlapping upper-level courses substituted for one foundational course with DUS permission")] : "Three foundational courses from ENGL 1025-1028 (DRST 0001-0002 or ENGL 1029-1030 may replace one)" : 1;
+fact library_meeting "Met with a research librarian within the first four weeks of the first term of the senior requirement":
+  approval dus_approval { for: "library" };
 
-// Introductory courses do not fulfill the period requirements.
-SELECT 1 FROM [TAG("YC ENGL Medieval")] : "Historical period: Medieval" : 2;
-SELECT 1 FROM [TAG("YC ENGL Renaissance")] : "Historical period: Renaissance" : 2;
-SELECT 1 FROM [TAG("YC ENGL 18th/19th Century")] : "Historical period: 18th/19th century" : 2;
-SELECT 1 FROM [TAG("YC ENGL 20th/21st Century")] : "Historical period: 20th/21st century" : 2;
+requirement foundational "Three foundational courses from ENGL 1025-1028 (DRST 0001-0002, or ENGL 1029-1030, may replace one)" [literature] {
+  children at least 3;
+  requirement found_1025 "ENGL 1025" { slot from [ENGL 1025]; }
+  requirement found_1026 "ENGL 1026" { slot from [ENGL 1026]; }
+  requirement found_1027 "ENGL 1027" { slot from [ENGL 1027]; }
+  requirement found_1028 "ENGL 1028" { slot from [ENGL 1028]; }
+  requirement found_drst "DRST 0001 and 0002 together" { courses exactly 2 from [DRST 0001, DRST 0002]; }
+  requirement found_1029 "ENGL 1029 and 1030 together" { courses exactly 2 from [ENGL 1029, ENGL 1030]; }
+  requirement found_substitute "Two overlapping upper-level courses in place of one foundational course, with DUS permission" {
+    courses exactly 2 where attempt.approved_for contains "found_substitute";
+  }
+  constraint one_replacement "At most one foundational course is replaced" in subtree foundational:
+    at most 2 attempts where not course.code in ["ENGL1025", "ENGL1026", "ENGL1027", "ENGL1028"];
+}
 
-SELECT 1 FROM [TAG("YC ENGL Junior Seminar")] : "Junior literature (non-creative writing) seminar" : 2;
-SELECT 1 FROM PLACEMENT("Meeting with a research librarian in the first term of the senior requirement") : "Library requirement" : 1;
+// Introductory courses (numbered 1030 or below) do not fulfill the period requirements.
+requirement periods "One course in each historical period" [literature] {
+  children exactly 4;
+  requirement period_medieval "Medieval" { slot where course.attributes contains "YC ENGL Medieval" and course.number > 1030; }
+  requirement period_renaissance "Renaissance" { slot where course.attributes contains "YC ENGL Renaissance" and course.number > 1030; }
+  requirement period_18_19 "18th/19th century" { slot where course.attributes contains "YC ENGL 18th/19th Century" and course.number > 1030; }
+  requirement period_20_21 "20th/21st century" { slot where course.attributes contains "YC ENGL 20th/21st Century" and course.number > 1030; }
+}
 
-LIMIT 5 FROM [RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030), RANGE(ENGL 1000, ENGL 1030)] : "At most five introductory courses (ENGL 1020 and 1023 count as introductory)" : 4;
-LIMIT 2 FROM [$outside, $outside] : "At most two courses from other departments" : 4;
-LIMIT 2 FROM [$cw, $cw] : "At most two designated creative writing courses" : 4;
+requirement junior_seminar "A junior literature (non-creative writing) seminar" [literature] {
+  slot where course.attributes contains "YC ENGL Junior Seminar";
+}
 
-SELECT 4 FROM [$engl, $engl, $engl, $engl, $outside, $outside, PLACEMENT("Residential College Seminar approved by the DUS")] : "Four electives" : 4;
+requirement library "Library requirement: a meeting with a research librarian in the first term of the senior requirement" [senior] {
+  slot where attempt.approved_for contains "library";
+}
 
-SELECT 1 FROM [
-    SELECT 2 FROM [TAG("YC ENGL Senior Seminar"), TAG("YC ENGL Senior Seminar")],
-    SELECT 2 FROM [TAG("YC ENGL Senior Seminar"), ENGL 4100],
-    SELECT 2 FROM [ENGL 4100, ENGL 4101]
-] : "Senior requirement: two senior seminars, a senior seminar and ENGL 4100, or a two-term senior essay (ENGL 4100, 4101)" : 1;
+effect library_done when fact library_meeting: waive library;
+
+// Up to two courses in other departments (normally literature in translation or in another language) and certain
+// Residential College Seminars may count as electives with DUS permission.
+requirement electives "Four electives" [literature] {
+  courses at least 4 where course.subject = "ENGL" or attempt.approved_for contains "outside_elective";
+  constraint creative_writing_limit "At most two designated creative writing courses":
+    at most 2 attempts where course.attributes contains "YC ENGL Creative Writing";
+}
+
+requirement senior "Two-course senior requirement: two senior seminars, a senior seminar and a one-term senior essay, or a two-term senior essay with DUS permission" [senior] {
+  children at least 1;
+  requirement senior_two_seminars "Two senior seminars" { courses exactly 2 where course.attributes contains "YC ENGL Senior Seminar"; }
+  requirement senior_seminar_essay "A senior seminar and a one-term senior essay (ENGL 4100)" {
+    children exactly 2;
+    requirement senior_seminar_one "Senior seminar" { slot where course.attributes contains "YC ENGL Senior Seminar"; }
+    requirement senior_essay_one "ENGL 4100" { slot from [ENGL 4100]; }
+  }
+  requirement senior_essay_two "Two-term senior essay (ENGL 4100 and 4101), with DUS permission" { courses exactly 2 from [ENGL 4100, ENGL 4101]; }
+}
+
+constraint intro_limit "At most five introductory courses (numbered 1030 or below; ENGL 1020 and 1023 count as introductory)" in program:
+  limit 5 attempts where course.subject = "ENGL" and course.number <= 1030;
+
+constraint outside_limit "At most two courses from other departments, as electives only, with DUS permission" in program:
+  limit 2 attempts where course.subject != "ENGL" and not course.code in ["DRST0001", "DRST0002"];
+
+constraint crdf_limit "At most four Credit/D/Fail courses count toward the major" in program:
+  limit 4 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "At least fourteen courses" in roles [literature, senior]:
+  total at least 14 attempts;

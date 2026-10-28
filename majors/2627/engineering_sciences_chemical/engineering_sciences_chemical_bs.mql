@@ -1,21 +1,79 @@
-// Engineering Sciences (Chemical) B.S. -- 12 term courses beyond the prerequisites, including the senior requirement,
+// Engineering Sciences (Chemical) B.S.: twelve term courses beyond the prerequisites, including the senior requirement,
 // chosen in consultation with the DUS.
-$engelective = [RANGE(CENG 0000, CENG 9999), RANGE(ENAS 0000, ENAS 9999), RANGE(BENG 0000, BENG 9999), RANGE(ECE 0000, ECE 9999), RANGE(ENVE 0000, ENVE 9999), RANGE(MENG 0000, MENG 9999), RANGE(CPSC 0000, CPSC 9999), PLACEMENT("Engineering elective approved by the DUS")];
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/chemical-engineering/
+program engineering_sciences_chemical_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [MATH 1120, MATH 1150] : "Prerequisite: MATH 1120 and 1150" : 1;
-SELECT 1 FROM [ENAS 1510, MATH 1200] : "Prerequisite: ENAS 1510 or MATH 1200" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670]] : "Prerequisite: general chemistry" : 1;
-SELECT 2 FROM [CHEM 1340L, CHEM 1360L] : "Prerequisite: general chemistry laboratory" : 1;
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], CLASS(PHYS 2600)] : "Prerequisite: physics" : 1;
+requirement prereq_calculus "Prerequisite: MATH 1120 and 1150" [prerequisite] {
+  courses exactly 2 from [MATH 1120, MATH 1150];
+}
 
-SELECT 1 FROM [ENAS 1300, CPSC 1001, CPSC 2000] : "Computing" : 1;
-SELECT 1 FROM ENAS 1940 : "Mathematics: ENAS 1940" : 1;
-SELECT 1 FROM [CHEM 1740, CHEM 2200] : "Chemistry: CHEM 1740 or 2200" : 1;
-SELECT 1 FROM CHEM 3320 : "Chemistry: CHEM 3320" : 1;
+requirement prereq_multivariable "Prerequisite: ENAS 1510 or MATH 1200" [prerequisite] {
+  slot from [ENAS 1510, MATH 1200];
+}
 
-SELECT 1 FROM [CENG 1500, CENG 2100] : "Chemical engineering: CENG 1500 or 2100" : 1;
-SELECT 5 FROM [CENG 3000, CENG 3010, SELECT 1 FROM [CENG 3140, MENG 3422], CENG 3150, CENG 4110] : "Chemical engineering: CENG 3000, 3010, 3140 (or MENG 3422), 3150, 4110" : 1;
+requirement prereq_chemistry "Prerequisite: CHEM 1610 and 1650, or CHEM 1630 and 1670" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+}
 
-SELECT 1 FROM [$engelective] : "One engineering elective" : 3;
+requirement prereq_chemistry_lab "Prerequisite: CHEM 1340L and 1360L" [prerequisite] {
+  courses exactly 2 from [CHEM 1340L, CHEM 1360L];
+}
 
-SELECT 1 FROM [CENG 4160, CENG 4900] : "Senior research project (CENG 4160 or 4900)" : 1;
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810, PHYS 2000 and 2010, or PHYS 2600" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_2600 "PHYS 2600" { slot from [PHYS 2600]; }
+}
+
+requirement computing "Computing: ENAS 1300, CPSC 1001, or CPSC 2000" [core] {
+  slot from [ENAS 1300, CPSC 1001, CPSC 2000];
+}
+
+requirement mathematics "Mathematics: ENAS 1940" [core] {
+  slot from [ENAS 1940];
+}
+
+requirement chem_organic "Chemistry: CHEM 1740 or 2200" [core] {
+  slot from [CHEM 1740, CHEM 2200];
+}
+
+requirement chem_physical "Chemistry: CHEM 3320" [core] {
+  slot from [CHEM 3320];
+}
+
+requirement ceng_intro "Chemical engineering: CENG 1500 or 2100" [core] {
+  slot from [CENG 1500, CENG 2100];
+}
+
+requirement ceng_core "Chemical engineering: CENG 3000, 3010, 3150, and 4110" [core] {
+  courses exactly 4 from [CENG 3000, CENG 3010, CENG 3150, CENG 4110];
+}
+
+requirement ceng_transport "Chemical engineering: CENG 3140 or MENG 3422" [core] {
+  slot from [CENG 3140, MENG 3422];
+}
+
+requirement engineering_elective "One engineering elective" [elective] {
+  slot where course.subject in ["CENG", "ENAS", "BENG", "ECE", "ENVE", "MENG", "CPSC"] or attempt.approved_for contains "engineering_electives";
+}
+
+requirement senior "Senior research project (CENG 4160 or 4900), in the senior year" [senior] {
+  slot from [CENG 4160, CENG 4900];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major (the DUS may consider requests)" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses (twelve credits) beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 12 attempts;

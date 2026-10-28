@@ -1,19 +1,82 @@
-// Architecture B.A. -- Design concentration. 15 course credits including prerequisites and the senior requirement.
-$histtheory = TAG("YC ARCH History & Theory");
-$urbanism = TAG("YC ARCH Urbanism & Landscap");
-$materials = TAG("YC ARCH Materials & Design");
-$structures = [TAG("YC ARCH Structures & Computation"), ARCH 1400, MATH 1120, MATH 1150, MATH 1200, PHYS 1800, PHYS 2000];
+// Architecture B.A. (Design concentration): fifteen course credits including the prerequisites and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/architecture/
+program architecture_ba_design {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM ARCH 1001 : "Prerequisite: ARCH 1001" : 1;
-SELECT 1 FROM ARCH 2000 : "Prerequisite: ARCH 2000" : 1;
-SELECT 1 FROM [ARCH 2600, ARCH 2601] : "Prerequisite: ARCH 2600 or 2601" : 1;
-SELECT 1 FROM PLACEMENT("Advanced technology, library, and shop orientation sessions completed") : "Required orientations" : 1;
+fact technology_orientation "Advanced technology workshop and materials laboratory orientation completed":
+  approval dus_approval { for: "technology_orientation" };
+fact library_orientation "Ninety-minute introductory library research session completed":
+  approval dus_approval { for: "library_orientation" };
+fact shop_orientation "Woodshop and materials lab orientation sessions completed":
+  approval dus_approval { for: "shop_orientation" };
+fact portfolio_submitted "Portfolio of design work, including prerequisites and the senior project, submitted to the DUS by the end of the spring term":
+  approval dus_approval { for: "portfolio" };
 
-SELECT 4 FROM [ARCH 3000, ARCH 3001, ARCH 2001, ARCH 2003] : "Core: junior studios ARCH 3000 and 3001; surveys ARCH 2001 and 2003" : 1;
+requirement prereq_1001 "Prerequisite: ARCH 1001, by the end of sophomore year" [prerequisite] {
+  slot from [ARCH 1001];
+}
 
-SELECT 1 FROM [$histtheory, PLACEMENT("History/theory elective approved by the DUS")] : "Elective: history and theory of architecture and the city" : 2;
-SELECT 1 FROM [$urbanism, PLACEMENT("Urbanism/landscape elective approved by the DUS")] : "Elective: urbanism and landscape" : 2;
-SELECT 1 FROM [$materials, PLACEMENT("Materials/design elective approved by the DUS")] : "Elective: materials and design" : 2;
-SELECT 1 FROM [$structures, PLACEMENT("Structures/computation elective approved by the DUS")] : "Elective: structures and computation" : 2;
+requirement prereq_2000 "Prerequisite: ARCH 2000, by the end of sophomore year" [prerequisite] {
+  slot from [ARCH 2000];
+}
 
-SELECT 2 FROM [ARCH 4000, ARCH 4001] : "Senior requirement: ARCH 4000 and 4001" : 1;
+requirement prereq_2600 "Prerequisite: ARCH 2600 or 2601, by the end of sophomore year" [prerequisite] {
+  slot from [ARCH 2600, ARCH 2601];
+}
+
+requirement orientations "Orientation sessions: advanced technology, library, and shop" [orientation] {
+  children exactly 3;
+  requirement orientation_technology "Advanced technology orientation" { slot where attempt.approved_for contains "technology_orientation"; }
+  requirement orientation_library "Library orientation" { slot where attempt.approved_for contains "library_orientation"; }
+  requirement orientation_shop "Shop orientation" { slot where attempt.approved_for contains "shop_orientation"; }
+}
+
+effect technology_done when fact technology_orientation: waive orientation_technology;
+effect library_done when fact library_orientation: waive orientation_library;
+effect shop_done when fact shop_orientation: waive orientation_shop;
+
+requirement surveys "Core: history of architecture surveys ARCH 2001 and 2003, by the end of junior year" [core] {
+  courses exactly 2 from [ARCH 2001, ARCH 2003];
+}
+
+requirement studios "Core: junior studios ARCH 3000 and 3001 (1.5 credits each), after acceptance into the major" [core] {
+  courses exactly 2 from [ARCH 3000, ARCH 3001];
+}
+
+requirement electives "Electives in the four subject areas, approved by the DUS" [elective] {
+  children exactly 4;
+  requirement elective_history "History and theory of architecture and the city" {
+    slot where course.attributes contains "YC ARCH History & Theory" or attempt.approved_for contains "elective_history";
+  }
+  requirement elective_urbanism "Urbanism and landscape" {
+    slot where course.attributes contains "YC ARCH Urbanism & Landscape" or attempt.approved_for contains "elective_urbanism";
+  }
+  requirement elective_materials "Materials and design" {
+    slot where course.attributes contains "YC ARCH Materials & Design" or attempt.approved_for contains "elective_materials";
+  }
+  requirement elective_structures "Structures and computation (ARCH 1400, an approved calculus or physics course, or another approved course)" {
+    slot where (course.attributes contains "YC ARCHStructures&Computation" or course.code in ["ARCH1400", "MATH1120", "MATH1150", "MATH1200", "PHYS1800", "PHYS2000"]) or attempt.approved_for contains "elective_structures";
+  }
+}
+
+requirement senior "Senior requirement: ARCH 4000 (fall) and ARCH 4001 (spring), 1.5 credits each" [senior] {
+  courses exactly 2 from [ARCH 4000, ARCH 4001];
+}
+
+requirement portfolio "Portfolio of design work submitted to the DUS" [senior] {
+  slot where attempt.approved_for contains "portfolio";
+}
+
+effect portfolio_done when fact portfolio_submitted: waive portfolio;
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Fifteen course credits in all, including the prerequisites" in program:
+  total at least 15 credits;

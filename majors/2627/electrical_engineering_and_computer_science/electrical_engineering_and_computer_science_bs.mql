@@ -1,23 +1,94 @@
-// Electrical Engineering and Computer Science B.S. -- 15 term courses beyond the prerequisites, including the senior project.
-// Acceleration credits may not satisfy prerequisites; MATH 1160 may not replace MATH 1150, nor MATH 1210 replace MATH 1200.
-$ee = [RANGE(ECE 3000, ECE 4679), RANGE(ECE 4692, ECE 4999), SELECT 1 FROM [ECE 4680, ECE 4691], PLACEMENT("Electrical engineering elective in another department approved by both DUSs")];
-$cs = [RANGE(CPSC 3000, CPSC 4899), RANGE(CPSC 4901, CPSC 4999), PLACEMENT("Computer science elective in another department approved by both DUSs")];
+// Electrical Engineering and Computer Science B.S.: fifteen term courses beyond the prerequisites, including the senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering-computer-science/
+// MATH 1160 may not replace MATH 1150, and MATH 1210 may not replace MATH 1200.
+program electrical_engineering_and_computer_science_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [MATH 1120, PLACEMENT("Equivalent of one year of high school calculus")] : "Prerequisite: MATH 1120" : 1;
-SELECT 1 FROM [MATH 1150, PLACEMENT("Equivalent of one year of high school calculus")] : "Prerequisite: MATH 1150" : 1;
-SELECT 1 FROM [ENAS 1510, MATH 1200, RANGE(MATH 2000, MATH 9999)] : "Prerequisite: ENAS 1510 or MATH 1200 (or higher)" : 1;
-SELECT 1 FROM [CPSC 1001, PLACEMENT("Previous programming experience")] : "Prerequisite: CPSC 1001 (students without programming experience)" : 1;
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 1700, PHYS 1710]] : "Prerequisite: physics (PHYS 1700, 1710 only for students taking MATH 1120)" : 1;
+fact high_school_calculus "Equivalent of one year of calculus in high school": prior_coursework { description: "one year of calculus" };
+fact programming_experience "Previous programming experience": prior_coursework { description: "programming" };
 
-SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
-SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
-SELECT 2 FROM [CPSC 2230, CPSC 3230] : "CPSC 2230 and 3230" : 1;
-SELECT 1 FROM [CPSC 3650, CPSC 3660] : "Algorithms (CPSC 3650 or 3660; only one may count)" : 1;
-SELECT 4 FROM [ECE 2000, ECE 2011, ECE 2020, ECE 2031] : "ECE 2000, 2011, 2020, and 2031" : 1;
-SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260, S&DS 2380, S&DS 2410] : "Linear algebra or probability (MATH 2220, 2250, 2260, S&DS 2380, or 2410)" : 1;
+requirement prereq_calculus "Prerequisite: MATH 1120 and 1150 (waived after a year of high school calculus)" [prerequisite] {
+  courses exactly 2 from [MATH 1120, MATH 1150];
+}
 
-// Cross-titled courses may count either way; CPSC 2900 and 4900 may not be used as electives.
-SELECT 2 FROM [$ee, $ee] : "Two advanced electrical engineering electives (3000- or 4000-level)" : 3;
-SELECT 2 FROM [$cs, $cs] : "Two advanced computer science electives (3000- or 4000-level)" : 3;
+effect calculus_waived when fact high_school_calculus: waive prereq_calculus;
 
-SELECT 1 FROM [CLASS(CPSC 4900), CLASS(ECE 4710), CLASS(ECE 4721), SELECT 2 FROM [ECE 4710, ECE 4721]] : "Senior project (CPSC 4900, or ECE 4710 and/or 4721), approved by both DUSs" : 1;
+requirement prereq_multivariable "Prerequisite: ENAS 1510 or MATH 1200, or a higher-level course" [prerequisite] {
+  slot where course.code in ["ENAS1510", "MATH1200"] or course.subject = "MATH" and course.number >= 2000;
+}
+
+requirement prereq_programming "Prerequisite: CPSC 1001, for students without previous programming experience" [prerequisite] {
+  slot from [CPSC 1001];
+}
+
+effect programming_waived when fact programming_experience: waive prereq_programming;
+
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810, or PHYS 2000 and 2010 (PHYS 1700 and 1710 for students taking MATH 1120)" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_1700 "PHYS 1700 and 1710, with MATH 1120" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+}
+
+requirement cs_intro "CPSC 2010" [core] {
+  slot from [CPSC 2010];
+}
+
+requirement discrete "CPSC 2020 (MATH 2440 may substitute)" [core] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement cs_core "CPSC 2230 and 3230" [core] {
+  courses exactly 2 from [CPSC 2230, CPSC 3230];
+}
+
+requirement algorithms "CPSC 3650 or 3660 (only one may count)" [core] {
+  slot from [CPSC 3650, CPSC 3660];
+}
+
+requirement ece_core "ECE 2000, 2011, 2020, and 2031" [core] {
+  courses exactly 4 from [ECE 2000, ECE 2011, ECE 2020, ECE 2031];
+}
+
+requirement mathematics "One of MATH 2220, 2250, 2260, S&DS 2380, or 2410" [core] {
+  slot from [MATH 2220, MATH 2250, MATH 2260, S&DS 2380, S&DS 2410];
+}
+
+// Cross-titled courses may count on either side.
+requirement ee_electives "Two 3000- or 4000-level electrical engineering electives (one of ECE 4680 or 4691 with both DUSs' permission)" [elective] {
+  courses at least 2
+    where course.subject = "ECE" and course.number >= 3000 and course.number <= 4999
+        and not course.code in ["ECE4710", "ECE4721"]
+      or attempt.approved_for contains "ee_electives";
+  constraint one_special_project "At most one of ECE 4680 or 4691": at most 1 attempts where course.code in ["ECE4680", "ECE4691"];
+}
+
+requirement cs_electives "Two 3000- or 4000-level computer science electives (not CPSC 2900 or 4900)" [elective] {
+  courses at least 2
+    where course.subject = "CPSC" and course.number >= 3000 and course.number <= 4999 and course.code != "CPSC4900"
+      or attempt.approved_for contains "cs_electives";
+}
+
+requirement senior "Senior project approved by the DUS in each department: CPSC 4900, or ECE 4710 and/or 4721" [senior] {
+  children at least 1;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_ece "ECE 4710 and/or 4721" { courses between 1 and 2 from [ECE 4710, ECE 4721]; }
+}
+
+constraint one_algorithms "Only one of CPSC 3650 or 3660 counts toward the major" in program:
+  limit 1 attempts where course.code in ["CPSC3650", "CPSC3660"];
+
+constraint no_acceleration "Acceleration credits may not satisfy prerequisites" in roles [prerequisite]:
+  all where attempt.source != "acceleration";
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode != "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 15 attempts;

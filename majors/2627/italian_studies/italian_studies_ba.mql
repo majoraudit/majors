@@ -1,19 +1,74 @@
-// Italian Studies B.A. -- 11 term courses beyond the prerequisite, including the senior requirement.
-$ital = RANGE(ITAL 1400, ITAL 9999);
-$related = PLACEMENT("Related course in another language and literature, history of art, history, linguistics, philosophy, or media approved by the DUS");
+// Italian Studies B.A.: eleven term courses beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/italian-studies/
+program italian_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [ITAL 1300, PLACEMENT("Equivalent L3 Italian credit by placement")] : "Prerequisite: ITAL 1300 (L3) or equivalent" : 1;
+fact italian_placement "Placement equivalent to ITAL 1300 (L3)": placement { test: "Italian placement", result: "L3" };
+fact senior_meetings "Met with the DUS at least twice a month in the senior year and with department faculty at the end of the final semester":
+  approval dus_approval { for: "senior_meetings" };
 
-SELECT 1 FROM [ITAL 1400, PLACEMENT("Equivalent of ITAL 1400 approved by the DUS")] : "ITAL 1400 or equivalent" : 1;
-SELECT 1 FROM [ITAL 1500, ITAL 1510] : "ITAL 1500 or 1510" : 1;
-SELECT 1 FROM [ITAL 4162, ITAL 4172] : "Survey of Italian literature (ITAL 4162 or 4172)" : 1;
-SELECT 1 FROM [ITAL 1310, PLACEMENT("Equivalent course on Dante's Divine Comedy")] : "Dante's Divine Comedy (ITAL 1310 or equivalent)" : 1;
-SELECT 4 FROM [$ital, $ital, $ital, $ital] : "Four additional Italian Studies courses numbered 1400 or above (including graduate courses)" : 3;
-SELECT 5 FROM [TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian"), TAG("YC ITAL Taught in Italian")] : "At least five of the eight Italian Studies courses conducted in Italian" : 2;
-LIMIT 3 FROM [TAG("YC ITAL Taught in English"), TAG("YC ITAL Taught in English"), TAG("YC ITAL Taught in English")] : "No more than three Italian department courses taught in English" : 3;
+requirement prereq "Prerequisite: ITAL 1300 (L3) or an equivalent" [prerequisite] {
+  slot from [ITAL 1300];
+}
 
-SELECT 2 FROM [$related, $related, PLACEMENT("Graduate course in another national literature or in linguistics")] : "Two related courses in other departments" : 4;
-LIMIT 1 FROM PLACEMENT("Graduate course in another national literature or in linguistics") : "At most one graduate substitution for the related courses" : 4;
+effect placed when fact italian_placement: waive prereq;
 
-SELECT 1 FROM ITAL 4491 : "Senior essay written in Italian (ITAL 4491)" : 1;
-SELECT 1 FROM PLACEMENT("Concluding meeting with department faculty and regular meetings with the DUS in the senior year") : "Senior meetings with the DUS and faculty" : 1;
+requirement ital_1400 "ITAL 1400 or an equivalent" [italian] {
+  slot where course.code = "ITAL1400" or attempt.approved_for contains "ital_1400";
+}
+
+requirement ital_1500 "ITAL 1500 or 1510" [italian] {
+  slot from [ITAL 1500, ITAL 1510];
+}
+
+requirement survey "A survey course on Italian literature: ITAL 4162 or 4172" [italian] {
+  slot from [ITAL 4162, ITAL 4172];
+}
+
+requirement dante "A course on Dante's Divine Comedy: ITAL 1310 or an equivalent" [italian] {
+  slot where course.code = "ITAL1310" or attempt.approved_for contains "dante";
+}
+
+requirement ital_electives "Four additional Italian Studies courses numbered 1400 or above (including graduate courses)" [italian] {
+  courses at least 4 where course.subject = "ITAL" and course.number >= 1400 and course.code != "ITAL4491";
+}
+
+requirement related "Two related courses in other departments approved by the DUS (one may be a graduate course in another national literature or linguistics)" [elective] {
+  courses at least 2 where attempt.approved_for contains "related";
+  constraint one_graduate "At most one graduate course": at most 1 attempts where course.number >= 5000;
+}
+
+requirement senior "Senior essay written in Italian (ITAL 4491), in the senior year" [senior] {
+  slot from [ITAL 4491];
+  constraint senior_year "Completed in the senior year": all where attempt.year_of_study = 4;
+}
+
+requirement meetings "Regular senior-year meetings with the DUS and a concluding meeting with department faculty" [senior] {
+  slot where attempt.approved_for contains "senior_meetings";
+}
+
+effect meetings_done when fact senior_meetings: waive meetings;
+
+constraint taught_in_italian "At least five of the eight Italian Studies courses conducted in Italian" in roles [italian]:
+  at least 5 attempts where course.attributes contains "YC ITAL Taught in Italian";
+
+constraint taught_in_english "No more than three Italian department courses taught in English" in program:
+  limit 3 attempts where course.attributes contains "YC ITAL Taught in English";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, excluding the senior essay" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint senior_letter "The senior essay is not taken Credit/D/Fail" in direct senior:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint eight_italian "Eight Italian Studies courses numbered 1400 or above" in roles [italian]:
+  total at least 8 attempts;
+
+constraint total_courses "Eleven term courses beyond the prerequisite" in roles [italian, elective, senior]:
+  total at least 11 attempts;

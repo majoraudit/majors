@@ -1,18 +1,65 @@
-// Latin American Studies B.A. -- 12 term courses beyond the prerequisite, including the senior requirement.
+// Latin American Studies B.A.: twelve term courses beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/latin-american-studies/
 // Courses outside the program's listings count if at least a third of the syllabus concerns the region (DUS approval).
-$last = RANGE(LAST 0000, LAST 9999);
-$latam = PLACEMENT("Course with Latin American content approved by the DUS");
+program latin_american_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [DIST_DEPT("L3", "SPAN"), DIST_DEPT("L3", "PORT"), RANGE(SPAN 1300, SPAN 9999), RANGE(PORT 1300, PORT 9999), PLACEMENT("Equivalent placement at the L3 level in Spanish or Portuguese")] : "Prerequisite: Spanish or Portuguese at the L3 level" : 1;
+fact language_placement "Placement at the L3 level or higher in Spanish or Portuguese":
+  language_proficiency { language: "Spanish or Portuguese", level: "L3" };
 
-SELECT 1 FROM [LAST 1100, PLACEMENT("Introductory course approved by the DUS")] : "One introductory course" : 2;
-SELECT 2 FROM [RANGE(ANTH 0000, ANTH 9999), RANGE(ECON 0000, ECON 9999), RANGE(PLSC 0000, PLSC 9999), RANGE(ANTH 0000, ANTH 9999), RANGE(ECON 0000, ECON 9999), RANGE(PLSC 0000, PLSC 9999), $latam] : "Latin American content: two social science courses (anthropology, economics, or political science)" : 2;
-SELECT 2 FROM [TAG("YC HIST Latin America"), TAG("YC HIST Latin America"), $latam] : "Latin American content: two history courses" : 2;
-SELECT 2 FROM [RANGE(SPAN 2000, SPAN 9999), RANGE(SPAN 2000, SPAN 9999), RANGE(PORT 2000, PORT 9999), RANGE(PORT 2000, PORT 9999), $latam] : "Latin American content: two Spanish American or Brazilian literature courses beyond the language requirement" : 2;
-SELECT 1 FROM [TAG("YC HSAR The Americas"), RANGE(ARCH 0000, ARCH 9999), RANGE(FILM 0000, FILM 9999), RANGE(MUSI 0000, MUSI 9999), RANGE(TDPS 0000, TDPS 9999), $latam] : "Latin American content: one course in art, architecture, film and media studies, music, or theater studies" : 2;
-SELECT 3 FROM [$last, $last, $last, $latam, $latam, $latam] : "Three additional electives" : 4;
+requirement prereq "Prerequisite: Spanish or Portuguese at the L3 level or higher, or the equivalent" [prerequisite] {
+  slot where course.subject in ["SPAN", "PORT"] and course.distributionals overlaps ["L3", "L4", "L5"];
+}
 
-SELECT 1 FROM [DIST_DEPT("L5", "SPAN"), DIST_DEPT("L5", "PORT")] : "One course taught in Spanish or Portuguese at the L5 level" : 2;
-SELECT 3 FROM [PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS"), PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS"), PLACEMENT("Seminar or upper-level course taken in the junior or senior year, approved by the DUS")] : "Three seminars or upper-level courses in the junior and senior years" : 3;
+effect placed when fact language_placement: waive prereq;
 
-SELECT 1 FROM [LAST 4491, LAST 4492] : "Senior essay (LAST 4491) or senior project (LAST 4492)" : 1;
+requirement intro "One introductory course" [core] {
+  slot where course.code = "LAST1100" or attempt.approved_for contains "intro";
+}
+
+requirement social_sciences "Latin American content: two courses in the social sciences (anthropology, economics, or political science)" [content] {
+  courses at least 2
+    where course.subject in ["ANTH", "ECON", "PLSC"] and attempt.approved_for contains "latin_american_content";
+}
+
+requirement history "Latin American content: two courses in history" [content] {
+  courses at least 2
+    where course.attributes contains "YC HIST Latin America"
+      or course.subject = "HIST" and attempt.approved_for contains "latin_american_content";
+}
+
+requirement literature "Latin American content: two courses in Spanish American or Brazilian literatures, beyond the language requirement" [content] {
+  courses at least 2
+    where course.subject in ["SPAN", "PORT"] and course.number >= 2000 and attempt.approved_for contains "latin_american_content";
+}
+
+requirement arts "Latin American content: one course in art, architecture, film and media studies, music, or theater studies" [content] {
+  slot where course.attributes contains "YC HSAR The Americas"
+    or course.subject in ["HSAR", "ARCH", "FILM", "MUSI", "TDPS"] and attempt.approved_for contains "latin_american_content";
+}
+
+requirement electives "Three additional electives" [elective] {
+  courses at least 3 where course.subject = "LAST" or attempt.approved_for contains "latin_american_content";
+}
+
+requirement senior "Senior essay (LAST 4491) or senior project (LAST 4492)" [senior] {
+  slot from [LAST 4491, LAST 4492];
+}
+
+constraint upper_level "Three of the courses are seminars or upper-level courses taken in the junior and senior years" in roles [core, content, elective]:
+  at least 3 attempts where attempt.year_of_study >= 3 and (course.format = "seminar" or course.number >= 3000);
+
+constraint taught_l5 "One course is taught in Spanish or Portuguese at the L5 level" in roles [core, content, elective]:
+  at least 1 attempts where course.distributionals contains "L5" and course.language in ["Spanish", "Portuguese"];
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses beyond the prerequisite" in roles [core, content, elective, senior]:
+  total at least 12 attempts;

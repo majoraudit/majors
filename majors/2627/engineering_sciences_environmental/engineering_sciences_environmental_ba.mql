@@ -1,14 +1,49 @@
-// Engineering Sciences (Environmental) B.A. -- 9 term course credits beyond the prerequisites, including the senior requirement.
-SELECT 2 FROM [MATH 1120, MATH 1150] : "Prerequisite: MATH 1120 and 1150" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670]] : "Prerequisite: two-term lecture sequence in chemistry" : 1;
-SELECT 2 FROM [PHYS 1700, PHYS 1710] : "Prerequisite: PHYS 1700 and 1710" : 1;
+// Engineering Sciences (Environmental) B.A.: nine term course credits beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-engineering/
+program engineering_sciences_environmental_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [ENVE 1200, ENVE 3600] : "ENVE 1200 and ENVE 3600" : 1;
-SELECT 1 FROM [ENVE 3730, ENVE 3770] : "ENVE 3730 or 3770" : 1;
+// Electives may build toward an optional emphasis; the emphasis does not change the audit.
+choice emphasis "Optional area of emphasis": declared one of "none", "climate_energy", "environmental_science_technology", "sustainability_policy", "self_designed";
 
-// Electives may build toward an optional emphasis: Climate and Energy; Environmental Science and Technology;
-// Sustainability and Policy; or Self-designed.
-$elective = PLACEMENT("Elective chosen in consultation with the DUS");
-SELECT 5 FROM [$elective, $elective, $elective, $elective, $elective] : "Five electives approved by the DUS" : 3;
+requirement prereq_calculus "Prerequisite: MATH 1120 and 1150" [prerequisite] {
+  courses exactly 2 from [MATH 1120, MATH 1150];
+}
 
-SELECT 1 FROM [ENVE 4160, ENVE 4900] : "Senior requirement (ENVE 4160 or 4900)" : 1;
+requirement prereq_chemistry "Prerequisite: a two-term lecture sequence in chemistry" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710" [prerequisite] {
+  courses exactly 2 from [PHYS 1700, PHYS 1710];
+}
+
+requirement enve_core "ENVE 1200 and 3600" [core] {
+  courses exactly 2 from [ENVE 1200, ENVE 3600];
+}
+
+requirement enve_3730 "ENVE 3730 or 3770" [core] {
+  slot from [ENVE 3730, ENVE 3770];
+}
+
+requirement electives "Five electives chosen with the DUS" [elective] {
+  courses at least 5 where attempt.approved_for contains "electives";
+}
+
+requirement senior "Senior requirement: ENVE 4160 or 4900" [senior] {
+  slot from [ENVE 4160, ENVE 4900];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Nine term course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 9 credits;

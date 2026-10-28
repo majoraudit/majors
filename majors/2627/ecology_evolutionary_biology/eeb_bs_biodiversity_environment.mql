@@ -1,36 +1,88 @@
-// Ecology and Evolutionary Biology B.S. -- Biodiversity and the Environment concentration. 5.5 course credits beyond the prerequisites, plus the senior requirement.
-$math = [MATH 1150, MATH 1160, MATH 1180, MATH 1200, MATH 2220, MATH 2250, MATH 2350, MATH 2410, MATH 2420, MATH 2440, MATH 2460, MATH 2470, MATH 2550];
-$sds = [RANGE(S&DS 1000, S&DS 1060), S&DS 2200, S&DS 2300, S&DS 2380, S&DS 2400];
-$cpsc = [CPSC 1001, CPSC 1230, CPSC 2010];
-$chem = [CHEM 1740, CHEM 2200, CHEM 1750, CHEM 2210, CHEM 2220L, CHEM 2230L];
-$phys = [PHYS 1700, PHYS 1800, PHYS 1710, PHYS 1810];
-$eps = [EPS 1100, EPS 2120, EPS 2200, EPS 2220, EPS 2320, EPS 2400, EPS 2550];
-$accel = PLACEMENT("Acceleration credit or advanced course accepted in place of the prerequisite");
+// Ecology and Evolutionary Biology B.S. (Biodiversity and the Environment concentration): 5.5 course credits beyond the
+// prerequisites, plus the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/ecology-evolutionary-biology/
+program eeb_bs_biodiversity_environment {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 4 FROM [SELECT 1 FROM [BIOL 1010, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1020, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1030, PLACEMENT("Biology placement examination")], SELECT 1 FROM [BIOL 1040, PLACEMENT("Biology placement examination")]] : "Prerequisite: BIOL 1010-1040" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670], $accel] : "Prerequisite: two-term general chemistry lecture sequence" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CHEM 1340L, CHEM 1360L], $accel] : "Prerequisite: general chemistry laboratories" : 1;
-SELECT 1 FROM [MATH 1150, MATH 1160, MATH 1200, RANGE(S&DS 1000, S&DS 1060), S&DS 2300, $accel] : "Prerequisite: one term of mathematics or statistics" : 1;
-// Four or five courses totaling four credits; laboratories are half-credit.
-SELECT 4-5 FROM [$math, $sds, $cpsc, $chem, $phys, $eps, $accel, $accel] : "Prerequisite: additional quantitative and physical science courses totaling four credits" : 1;
-LIMIT 2 FROM $math : "No more than two additional prerequisites from Mathematics" : 1;
-LIMIT 2 FROM $sds : "No more than two additional prerequisites from Statistics and Data Science" : 1;
-LIMIT 2 FROM $cpsc : "No more than two additional prerequisites from Computer Science" : 1;
-LIMIT 2 FROM $chem : "No more than two additional prerequisites from Chemistry" : 1;
-LIMIT 2 FROM $phys : "No more than two additional prerequisites from Physics" : 1;
-LIMIT 2 FROM $eps : "No more than two additional prerequisites from Earth and Planetary Sciences" : 1;
+fact biology_placement "Placed out of BIOL 1010-1040 by the biology placement examination":
+  placement { test: "Biology placement examination", result: "pass" };
 
-SELECT 2 FROM [EEB 2220, EEB 2225] : "Biodiversity and the Environment: EEB 2220 and 2225" : 1;
-SELECT 1 FROM [
-    SELECT 2 FROM [RANGE(EEB 2246, EEB 2272), TAG("YC E&EB Organismal Lec/Labs")],
-    SELECT 2 FROM [EEB 3326, EEB 3327L],
-    SELECT 2 FROM [MCDB 2900, MCDB 2910L],
-    PLACEMENT("Other organismal diversity lecture course with laboratory approved by the DUS")
-] : "Organismal diversity lecture course with associated laboratory (EEB 2246-2272, or EEB 3326 and 3327L)" : 2;
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
 
-// Residential College Seminars may not count. Other science, MATH, S&DS, or CPSC courses with DUS permission.
-$elective = [RANGE(EEB 2000, EEB 9999), RANGE(MCDB 2000, MCDB 9999), RANGE(MB&B 2000, MB&B 9999), PLACEMENT("Research course or laboratory in a biological sciences department or the School of Medicine"), PLACEMENT("Science, mathematics, statistics, or computer science course approved by the DUS")];
-SELECT 2 FROM [$elective, $elective] : "Two electives (two credits)" : 3;
-SELECT 1 FROM [PLACEMENT("One of the electives is a lecture or seminar course")] : "At least one elective must be a lecture or seminar" : 3;
+effect biology_placed when fact biology_placement: waive prereq_biology;
 
-SELECT 1 FROM [SELECT 2 FROM [EEB 4475, EEB 4476], SELECT 2 FROM [EEB 4495, EEB 4496]] : "Senior requirement: two terms of original research (EEB 4475 and 4476, or EEB 4495 and 4496)" : 1;
+// Acceleration credit or advanced courses in chemistry, mathematics, or physics may replace those prerequisites.
+requirement prereq_chemistry "Prerequisite: general chemistry CHEM 1610 and 1650, or CHEM 1630 and 1670" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+  requirement prereq_chem_accelerated "Acceleration credit or an advanced chemistry course accepted by the DUS" {
+    slot where attempt.source = "acceleration" and course.subject = "CHEM" or attempt.approved_for contains "prereq_chemistry";
+  }
+}
+
+requirement prereq_chemistry_lab "Prerequisite: CHEM 1340L and 1360L" [prerequisite] {
+  courses exactly 2 where course.code in ["CHEM1340L", "CHEM1360L"] or attempt.approved_for contains "prereq_chemistry_lab";
+}
+
+requirement prereq_quantitative "Prerequisite: one term of mathematics (MATH 1150, 1160, or 1200) or statistics (S&DS 1000-1060 or 2300)" [prerequisite] {
+  slot where course.code in ["MATH1150", "MATH1160", "MATH1200", "S&DS2300"]
+      or course.subject = "S&DS" and course.number >= 1000 and course.number <= 1060
+      or attempt.source = "acceleration" and course.subject = "MATH";
+}
+
+requirement prereq_additional "Prerequisite: four or five additional quantitative and physical science courses totaling four credits" [prerequisite] {
+  credits at least 4
+    where course.code in [
+        "MATH1150", "MATH1160", "MATH1180", "MATH1200", "MATH2220", "MATH2250", "MATH2350", "MATH2410",
+        "MATH2420", "MATH2440", "MATH2460", "MATH2470", "MATH2550", "S&DS2200", "S&DS2300", "S&DS2380",
+        "S&DS2400", "CPSC1001", "CPSC1230", "CPSC2010", "CHEM1740", "CHEM2200", "CHEM1750", "CHEM2210",
+        "CHEM2220L", "CHEM2230L", "PHYS1700", "PHYS1800", "PHYS1710", "PHYS1810", "EPS1100", "EPS2120",
+        "EPS2200", "EPS2220", "EPS2320", "EPS2400", "EPS2550"
+      ]
+      or course.subject = "S&DS" and course.number >= 1000 and course.number <= 1060
+      or attempt.source = "acceleration" and course.subject in ["CHEM", "MATH", "PHYS"];
+  constraint per_department "No more than two of these courses from the same department":
+    group course.subject at most 2 per group;
+}
+
+requirement core "Biodiversity and the Environment: EEB 2220 and 2225" [core] {
+  courses exactly 2 from [EEB 2220, EEB 2225];
+}
+
+requirement diversity "A lecture course on organismal diversity with its laboratory (usually EEB 2246-2272; or EEB 3326 and 3327L; others such as MCDB 2900 and 2910L with DUS approval)" [core] {
+  credits at least 1.5
+    where course.subject = "EEB" and course.number >= 2246 and course.number <= 2272
+      or course.attributes contains "YC E&EB Organismal Lec/Labs"
+      or course.code in ["EEB3326", "EEB3327L"]
+      or attempt.approved_for contains "diversity";
+  constraint diversity_lab "Including the associated laboratory": at least 1 attempts where course.format = "lab";
+}
+
+requirement electives "Two electives for two credits: most EEB, MCDB, or MB&B courses numbered 2000+, or biological research courses; other sciences, MATH, S&DS, or CPSC with DUS permission" [elective] {
+  credits at least 2
+    where course.subject in ["EEB", "E&EB", "MCDB", "MB&B"] and course.number >= 2000
+      or attempt.approved_for contains "electives";
+  constraint lecture_or_seminar "At least one elective is a lecture or a seminar":
+    at least 1 attempts where course.format in ["lecture", "seminar"];
+}
+
+requirement senior "Senior requirement: two terms of original research (EEB 4475 and 4476, or EEB 4495 and 4496)" [senior] {
+  children at least 1;
+  requirement senior_4475 "EEB 4475 and 4476" { courses exactly 2 from [EEB 4475, EEB 4476]; }
+  requirement senior_4495 "EEB 4495 and 4496" { courses exactly 2 from [EEB 4495, EEB 4496]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "5.5 course credits beyond the prerequisites, not counting the senior requirement" in roles [core, elective]:
+  total at least 5.5 credits;

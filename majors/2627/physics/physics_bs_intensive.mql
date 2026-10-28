@@ -1,17 +1,73 @@
-// Physics B.S., intensive major -- 10.5 course credits beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [
-    SELECT 4 FROM [PHYS 1700, PHYS 1710, MATH 1120, MATH 1150],
-    SELECT 4 FROM [PHYS 1800, PHYS 1810, MATH 1150, MATH 1200],
-    SELECT 4 FROM [PHYS 2000, PHYS 2010, MATH 1200, SELECT 1 FROM [MATH 2220, MATH 2250, MATH 2260]],
-    SELECT 3 FROM [PHYS 2600, PHYS 2610, SELECT 1 FROM [MATH 1200, ENAS 1510, PHYS 4000, PLACEMENT("Equivalent mathematics corequisite")]]
-] : "Prerequisite: introductory physics sequence with its mathematics corequisites" : 1;
-SELECT 1 FROM [CLASS(PHYS 2050L), SELECT 2 FROM [PHYS 1650L, PHYS 1660L]] : "Prerequisite: PHYS 2050L, or PHYS 1650L and 1660L" : 1;
+// Physics B.S., intensive major: 10.5 course credits beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/physics/
+// Courses taken to satisfy the requirements must be approved by the DUS.
+program physics_bs_intensive {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PHYS 4000, PLACEMENT("Mathematics course at or above the level of PHYS 4000")] : "Mathematics at the level of PHYS 4000 or above" : 1;
-SELECT 3 FROM [PHYS 4100, PHYS 4500, PHYS 4300] : "Advanced classical physics: mechanics (PHYS 4100), statistical physics (PHYS 4500), electromagnetism (PHYS 4300)" : 1;
-SELECT 2 FROM [SELECT 1 FROM [PHYS 4390, PHYS 4400], PHYS 4410] : "Quantum mechanics: PHYS 4390 or 4400, and PHYS 4410" : 1;
-SELECT 2 FROM [SELECT 1 FROM [PHYS 2060L, PLACEMENT("Equivalent of PHYS 2060L")], SELECT 1 FROM [PHYS 4450L, PLACEMENT("Equivalent of PHYS 4450L")]] : "Laboratories: PHYS 2060L and PHYS 4450L (or equivalents)" : 1;
-$adv = [RANGE(PHYS 3000, PHYS 4709), RANGE(PHYS 4721, PHYS 9999), PLACEMENT("Advanced science, engineering, or mathematics course approved by the DUS")];
-SELECT 1 FROM $adv : "One advanced elective approved by the DUS" : 3;
+requirement prereq_sequence "Prerequisite: an introductory physics sequence with its mathematics corequisites" [prerequisite] {
+  children at least 1;
+  requirement prereq_1700 "PHYS 1700 and 1710, with MATH 1120 and 1150" { courses exactly 4 from [PHYS 1700, PHYS 1710, MATH 1120, MATH 1150]; }
+  requirement prereq_1800 "PHYS 1800 and 1810, with MATH 1150 and 1200" { courses exactly 4 from [PHYS 1800, PHYS 1810, MATH 1150, MATH 1200]; }
+  requirement prereq_2000 "PHYS 2000 and 2010, with MATH 1200 and MATH 2220, 2250, or 2260" {
+    children exactly 2;
+    requirement prereq_2000_core "PHYS 2000, 2010, and MATH 1200" { courses exactly 3 from [PHYS 2000, PHYS 2010, MATH 1200]; }
+    requirement prereq_2000_linear "MATH 2220, 2250, or 2260" { slot from [MATH 2220, MATH 2250, MATH 2260]; }
+  }
+  requirement prereq_2600 "PHYS 2600 and 2610, with MATH 1200, ENAS 1510, PHYS 4000, or an equivalent" {
+    children exactly 2;
+    requirement prereq_2600_core "PHYS 2600 and 2610" { courses exactly 2 from [PHYS 2600, PHYS 2610]; }
+    requirement prereq_2600_math "MATH 1200, ENAS 1510, PHYS 4000, or an equivalent" {
+      slot where course.code in ["MATH1200", "ENAS1510", "PHYS4000"] or attempt.approved_for contains "prereq_2600_math";
+    }
+  }
+}
 
-SELECT 2 FROM [PHYS 4710, PHYS 4720, PHYS 4710, PHYS 4720] : "Senior requirement: two terms of independent research (PHYS 4710 and/or 4720)" : 1;
+requirement prereq_lab "Prerequisite: PHYS 2050L, or PHYS 1650L and 1660L" [prerequisite] {
+  children at least 1;
+  requirement prereq_lab_2050 "PHYS 2050L" { slot from [PHYS 2050L]; }
+  requirement prereq_lab_1650 "PHYS 1650L and 1660L" { courses exactly 2 from [PHYS 1650L, PHYS 1660L]; }
+}
+
+requirement mathematics "A mathematics course at the level of PHYS 4000 or more advanced" [core] {
+  slot where course.code = "PHYS4000" or attempt.approved_for contains "mathematics";
+}
+
+requirement classical "Advanced classical physics: mechanics (PHYS 4100), statistical physics (PHYS 4500), and electromagnetism (PHYS 4300)" [core] {
+  courses exactly 3 from [PHYS 4100, PHYS 4500, PHYS 4300];
+}
+
+requirement quantum "Quantum mechanics: PHYS 4390 or 4400, and PHYS 4410" [core] {
+  children exactly 2;
+  requirement quantum_first "PHYS 4390 or 4400" { slot from [PHYS 4390, PHYS 4400]; }
+  requirement quantum_second "PHYS 4410" { slot from [PHYS 4410]; }
+}
+
+requirement labs "Laboratories: PHYS 2060L and PHYS 4450L, or equivalents" [core] {
+  children exactly 2;
+  requirement lab_2060 "PHYS 2060L or an equivalent" { slot where course.code = "PHYS2060L" or attempt.approved_for contains "lab_2060"; }
+  requirement lab_4450 "PHYS 4450L or an equivalent" { slot where course.code = "PHYS4450L" or attempt.approved_for contains "lab_4450"; }
+}
+
+requirement advanced "One advanced elective (3000 or higher in Physics, or an approved advanced course in the sciences, engineering, or mathematics)" [elective] {
+  slot where course.subject = "PHYS" and course.number >= 3000 and not course.code in ["PHYS4710", "PHYS4720"]
+    or attempt.approved_for contains "advanced";
+}
+
+requirement senior "Senior requirement: two terms of independent research (PHYS 4710 and/or 4720, or equivalents)" [senior] {
+  courses at least 2 where course.code in ["PHYS4710", "PHYS4720"] or attempt.approved_for contains "senior";
+}
+
+constraint research_repeat "PHYS 4710 and 4720 count, in any combination, at most twice" in program:
+  repeat at most 2 times where course.code in ["PHYS4710", "PHYS4720"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "10.5 course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 10.5 credits;

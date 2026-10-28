@@ -1,41 +1,241 @@
-// Molecular Biophysics and Biochemistry -- Chemical Biology concentration. simultaneous B.S./M.S. -- B.S. requirements (12.5 course credits) beyond the introductory courses, including the senior requirement.
-// Concentration courses may also satisfy major requirements; placement and acceleration credit do not count toward them.
-$cure = PLACEMENT("Course-based undergraduate research experience or research-for-credit course related to the concentration, approved by the DUS");
-$physlab = [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, PHYS 1650L, PHYS 1660L, CHEM 3550L, PLACEMENT("Other 2000+ physics lab approved by the DUS")];
-$biochemlab = [MB&B 2510L, CHEM 3550L, PLACEMENT("Other 2000+ biochemistry lab approved by the DUS")];
-$tools = [MB&B 4350, S&DS 2380, CPSC 1001, PLACEMENT("Critical tools course approved by the DUS")];
-$skills = [$physlab, $biochemlab, $tools, MB&B 4700];
+// Molecular Biophysics and Biochemistry simultaneous B.S./M.S. (Chemical Biology concentration): 12.5 course credits beyond the
+// introductory courses, including the senior requirement, plus the graduate requirements of the M.S..
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/molecular-biophysics-biochemistry/
+program molecular_biophysics_and_biochemistry_chemical_biology_bsms {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [BIOL 1010, BIOL 1020] : "Introductory: BIOL 1010 and 1020" : 1;
-SELECT 1 FROM [SELECT 4 FROM [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L], SELECT 4 FROM [CHEM 1630, CHEM 1670, CHEM 1340L, CHEM 1360L]] : "Introductory: two terms of general chemistry with laboratories" : 1;
-SELECT 2 FROM [SELECT 1 FROM [CHEM 2200, CHEM 1740], CHEM 2220L] : "Introductory: one term of organic chemistry with laboratory" : 1;
-SELECT 1 FROM [SELECT 2 FROM [MATH 1120, MATH 1150], CLASS(MATH 1160)] : "Introductory: two terms of calculus (MATH 1120 and 1150, or MATH 1160)" : 1;
+requirement intro_biology "Introductory: BIOL 1010 and 1020" [introductory] {
+  courses exactly 2 from [BIOL 1010, BIOL 1020];
+}
 
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Biophysics: two semesters of physics (PHYS 1700 and 1710 or higher)" : 1;
-SELECT 1 FROM [MB&B 2750, CHEM 3320] : "Biophysics: biophysical chemistry (MB&B 2750 or CHEM 3320)" : 1;
-SELECT 1 FROM [RANGE(PHYS 3000, PHYS 9999), RANGE(CHEM 3000, CHEM 9999), RANGE(MATH 3000, MATH 9999), RANGE(S&DS 3000, S&DS 9999), RANGE(CPSC 3000, CPSC 9999), RANGE(APHY 3000, APHY 9999), RANGE(MB&B 3000, MB&B 9999), PLACEMENT("3000+ course in the physical sciences, mathematics, statistics, or computer science approved by the DUS")] : "Biophysics (B.S.): one additional 3000+ course in physical sciences, mathematics, statistics, or computer science" : 3;
-SELECT 2 FROM [MB&B 3000, MB&B 3010] : "Biochemistry: MB&B 3000 and 3010 (no substitutions)" : 1;
-SELECT 1 FROM [CHEM 1750, RANGE(CHEM 2000, CHEM 9999)] : "Biochemistry: CHEM 1750 or any 2000+ Chemistry course" : 1;
-SELECT 1 FROM [MB&B 2680, MB&B 1070, AFAM 1370, HSHM 2060, HSHM 4060, HSHM 4240, HSHM 4750, HSHM 4810, HIST 1779, SOCY 1600, SOCY 1601, SOCY 3760, MCDB 3750, WGSS 2270, WGSS 4457, PLACEMENT("Science and society course approved by petition")] : "Science and society (0.5 credit; MB&B 2680 recommended)" : 2;
+requirement intro_chemistry "Introductory: two terms of general chemistry with laboratories" [introductory] {
+  children at least 1;
+  requirement intro_chem_1610 "CHEM 1610, 1650, 1340L, and 1360L" { courses exactly 4 from [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L]; }
+  requirement intro_chem_1630 "CHEM 1630, 1670, 1340L, and 1360L" { courses exactly 4 from [CHEM 1630, CHEM 1670, CHEM 1340L, CHEM 1360L]; }
+}
 
-// Practical skills credits come from two or three categories (physics lab, biochemistry lab, critical tools);
-// at least one half-credit must be an MB&B course. MB&B 4700 counts according to the research project.
-SELECT 2-4 FROM [$skills, $skills, $skills, $skills] : "Practical skills: two credits (four half-credit or two full-credit courses)" : 3;
-SELECT 1 FROM [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, MB&B 2510L, MB&B 4350, MB&B 4700] : "Practical skills: at least one half-credit from MB&B" : 3;
-SELECT 1 FROM [RANGE(MB&B 2000, MB&B 4699), RANGE(MB&B 4701, MB&B 4899), RANGE(MB&B 4911, MB&B 9999)] : "Elective: MB&B lecture or seminar at the 2000+ level" : 4;
-SELECT 1 FROM [RANGE(MB&B 2000, MB&B 9999), RANGE(CHEM 2000, CHEM 9999), RANGE(MCDB 2000, MCDB 9999), RANGE(BIOL 2000, BIOL 9999), RANGE(PHYS 2000, PHYS 9999), RANGE(MATH 2000, MATH 9999), RANGE(S&DS 2000, S&DS 9999), RANGE(CPSC 2000, CPSC 9999), RANGE(EEB 2000, EEB 9999), RANGE(EPS 2000, EPS 9999), RANGE(BENG 2000, BENG 9999), PLACEMENT("2000+ STEM lecture or seminar approved by the DUS")] : "Elective (B.S.): one additional 2000+ seminar or lecture course in STEM" : 4;
+requirement intro_organic "Introductory: one term of organic chemistry (CHEM 2200 or 1740) with laboratory (CHEM 2220L)" [introductory] {
+  children exactly 2;
+  requirement intro_organic_lecture "CHEM 2200 or 1740" { slot from [CHEM 2200, CHEM 1740]; }
+  requirement intro_organic_lab "CHEM 2220L" { slot from [CHEM 2220L]; }
+}
 
-SELECT 1 FROM [MB&B 4900, MB&B 4910] : "Senior essay: literature project (MB&B 4900) or laboratory research essay (MB&B 4910)" : 1;
+requirement intro_calculus "Introductory: two terms of calculus (MATH 1120 and 1150, or MATH 1160)" [introductory] {
+  children at least 1;
+  requirement intro_calc_two "MATH 1120 and 1150" { courses exactly 2 from [MATH 1120, MATH 1150]; }
+  requirement intro_calc_1160 "MATH 1160" { slot from [MATH 1160]; }
+}
 
-// Simultaneous B.S./M.S.: graduate courses must earn Honors, High Pass, or Pass, with at least two Honors and a High Pass average.
-$gradstem = [RANGE(MB&B 5000, MB&B 9999), RANGE(CHEM 5000, CHEM 9999), RANGE(MCDB 5000, MCDB 9999), RANGE(PHYS 5000, PHYS 9999), RANGE(BENG 5000, BENG 9999), RANGE(CPSC 5000, CPSC 9999), RANGE(S&DS 5000, S&DS 9999), PLACEMENT("Graduate STEM course approved by the DUS and DGS")];
-SELECT 2 FROM [RANGE(MB&B 5000, MB&B 9999), RANGE(MB&B 5000, MB&B 9999)] : "M.S.: two graduate MB&B courses" : 3;
-SELECT 4 FROM [$gradstem, $gradstem, $gradstem, $gradstem] : "M.S.: four additional graduate STEM courses" : 3;
-SELECT 1 FROM PLACEMENT("Admission to the simultaneous B.S./M.S. program (application by the end of the fifth term), approved by the DUS and DGS") : "M.S.: program admission" : 1;
+requirement physics "Biophysics: two semesters of physics (PHYS 1700 and 1710 or higher)" [core] {
+  courses at least 2 from [PHYS 1700, PHYS 1710, PHYS 1800, PHYS 1810, PHYS 2000, PHYS 2010, PHYS 2600, PHYS 2610];
+}
 
-SELECT 2 FROM [SELECT 1 FROM [CHEM 1750, CHEM 2210, CHEM 2300], CHEM 2230L] : "Chemical Biology: second semester of organic chemistry with laboratory" : 2;
-$chemcell = [RANGE(CHEM 2000, CHEM 9999), RANGE(MCDB 2000, MCDB 9999), RANGE(MB&B 2000, MB&B 9999)];
-SELECT 2 FROM [$chemcell, $chemcell] : "Chemical Biology (B.S.): two 2000+ electives in chemistry or cell biology" : 2;
-SELECT 1 FROM [RANGE(CHEM 3000, CHEM 9999), RANGE(MCDB 3000, MCDB 9999), RANGE(MB&B 3000, MB&B 9999)] : "Chemical Biology (B.S.): one 3000+ elective in chemistry or cell biology" : 2;
-SELECT 1 FROM [MB&B 4700, MB&B 3640, $cure] : "Chemical Biology: research" : 2;
-SELECT 1 FROM [MB&B 4430, CHEM 4190, PLACEMENT("Advanced chemical biology course approved by the DUS")] : "Chemical Biology: advanced lecture or seminar" : 2;
+requirement biophysical_chemistry "Biophysics: biophysical chemistry (MB&B 2750 or CHEM 3320)" [core] {
+  slot from [MB&B 2750, CHEM 3320];
+}
+
+requirement biophysics_advanced "Biophysics (B.S.): one additional 3000+ course in the physical sciences, mathematics, statistics, or computer science" [core] {
+  slot where course.subject in ["PHYS", "CHEM", "MATH", "S&DS", "CPSC", "APHY", "MB&B"] and course.number >= 3000
+    or attempt.approved_for contains "biophysics_advanced";
+}
+
+requirement biochemistry "Biochemistry: MB&B 3000 and 3010 (no substitutions)" [core] {
+  courses exactly 2 from [MB&B 3000, MB&B 3010];
+}
+
+requirement chemistry_elective "Biochemistry: CHEM 1750 or any Chemistry course numbered 2000 or above" [core] {
+  slot where course.code = "CHEM1750" or course.subject = "CHEM" and course.number >= 2000;
+}
+
+requirement science_society "Science and society, half credit (MB&B 2680 recommended; alternatives listed or by petition)" [core] {
+  slot where course.code in ["MB&B2680", "MB&B1070", "BLST1370", "HSHM2060", "HSHM4060", "HSHM4240", "HSHM4750", "HSHM4810", "HIST1779", "SOCY1600", "SOCY1601", "SOCY3760", "MCDB3750", "WGSS2270", "WGSS4457"]
+    or attempt.approved_for contains "science_society";
+}
+
+// MB&B 4700 (research for credit) counts in whichever category its project fits, recorded as an approval.
+requirement skills "Practical skills: two credits across two or three categories, at least a half-credit from MB&B" [core] {
+  children at least 2;
+  requirement skills_physics_lab "Physics lab" {
+    credits at least 0.5 where course.code in ["MB&B1210L", "MB&B1220L", "MB&B1230L", "MB&B1240L", "PHYS1650L", "PHYS1660L", "CHEM3550L"]
+      or attempt.approved_for contains "skills_physics_lab";
+  }
+  requirement skills_biochemistry_lab "Biochemistry lab" {
+    credits at least 0.5 where course.code in ["MB&B2510L", "CHEM3550L"] or attempt.approved_for contains "skills_biochemistry_lab";
+  }
+  requirement skills_tools "Critical tools" {
+    credits at least 0.5 where course.code in ["MB&B4350", "S&DS2380", "CPSC1001"] or attempt.approved_for contains "skills_tools";
+  }
+  constraint skills_credits "Two credits in all" in subtree skills: total at least 2 credits;
+  constraint skills_mbb "At least a half-credit from MB&B" in subtree skills: at least 0.5 credits where course.subject = "MB&B";
+}
+
+requirement mbb_elective "Elective: an MB&B lecture or seminar at the 2000+ level" [elective] {
+  slot where course.subject = "MB&B" and course.number >= 2000 and course.format in ["lecture", "seminar"];
+}
+
+requirement stem_elective "Elective (B.S.): one additional 2000+ seminar or lecture course in STEM" [elective] {
+  slot where course.subject in ["MB&B", "CHEM", "MCDB", "BIOL", "PHYS", "MATH", "S&DS", "CPSC", "EEB", "E&EB", "EPS", "BENG", "APHY"] and course.number >= 2000 and course.format in ["lecture", "seminar"]
+    or attempt.approved_for contains "stem_elective";
+}
+
+requirement senior "Senior essay: a literature project (MB&B 4900) or a laboratory research essay (MB&B 4910)" [senior] {
+  slot from [MB&B 4900, MB&B 4910];
+}
+
+// Concentration courses may also satisfy major requirements (pairwise sharing below); placement and
+// acceleration credit do not count toward them. The concentration adds zero to three credits.
+
+requirement conc_organic "Chemical Biology: Second semester of organic chemistry with laboratory (CHEM 1750, 2210, or 2300, and CHEM 2230L)" [concentration] {
+  courses exactly 2 where course.code in ["CHEM1750", "CHEM2210", "CHEM2300", "CHEM2230L"];
+}
+
+requirement conc_research "Chemical Biology: Research (MB&B 4700, 3640, or an approved research course)" [concentration] {
+  slot where course.code in ["MB&B4700", "MB&B3640"] or attempt.approved_for contains "cure";
+}
+
+requirement conc_advanced "Chemical Biology: Advanced chemical biology lecture or seminar (MB&B 4430, CHEM 4190, or approved)" [concentration] {
+  slot where course.code in ["MB&B4430", "CHEM4190"] or attempt.approved_for contains "conc_advanced";
+}
+
+requirement conc_electives "Chemical Biology: Two 2000+ electives in chemistry or cell biology" [concentration] {
+  courses at least 2 where course.subject in ["CHEM", "MCDB", "MB&B"] and course.number >= 2000;
+}
+
+requirement conc_upper "Chemical Biology: One 3000+ elective in chemistry or cell biology" [concentration] {
+  slot where course.subject in ["CHEM", "MCDB", "MB&B"] and course.number >= 3000;
+}
+
+share conc_organic_with_intro_biology: conc_organic, intro_biology;
+share conc_organic_with_intro_chem_1610: conc_organic, intro_chem_1610;
+share conc_organic_with_intro_chem_1630: conc_organic, intro_chem_1630;
+share conc_organic_with_intro_organic_lecture: conc_organic, intro_organic_lecture;
+share conc_organic_with_intro_organic_lab: conc_organic, intro_organic_lab;
+share conc_organic_with_intro_calc_two: conc_organic, intro_calc_two;
+share conc_organic_with_intro_calc_1160: conc_organic, intro_calc_1160;
+share conc_organic_with_physics: conc_organic, physics;
+share conc_organic_with_biophysical_chemistry: conc_organic, biophysical_chemistry;
+share conc_organic_with_biophysics_advanced: conc_organic, biophysics_advanced;
+share conc_organic_with_biochemistry: conc_organic, biochemistry;
+share conc_organic_with_chemistry_elective: conc_organic, chemistry_elective;
+share conc_organic_with_science_society: conc_organic, science_society;
+share conc_organic_with_skills_physics_lab: conc_organic, skills_physics_lab;
+share conc_organic_with_skills_biochemistry_lab: conc_organic, skills_biochemistry_lab;
+share conc_organic_with_skills_tools: conc_organic, skills_tools;
+share conc_organic_with_mbb_elective: conc_organic, mbb_elective;
+share conc_organic_with_stem_elective: conc_organic, stem_elective;
+share conc_research_with_intro_biology: conc_research, intro_biology;
+share conc_research_with_intro_chem_1610: conc_research, intro_chem_1610;
+share conc_research_with_intro_chem_1630: conc_research, intro_chem_1630;
+share conc_research_with_intro_organic_lecture: conc_research, intro_organic_lecture;
+share conc_research_with_intro_organic_lab: conc_research, intro_organic_lab;
+share conc_research_with_intro_calc_two: conc_research, intro_calc_two;
+share conc_research_with_intro_calc_1160: conc_research, intro_calc_1160;
+share conc_research_with_physics: conc_research, physics;
+share conc_research_with_biophysical_chemistry: conc_research, biophysical_chemistry;
+share conc_research_with_biophysics_advanced: conc_research, biophysics_advanced;
+share conc_research_with_biochemistry: conc_research, biochemistry;
+share conc_research_with_chemistry_elective: conc_research, chemistry_elective;
+share conc_research_with_science_society: conc_research, science_society;
+share conc_research_with_skills_physics_lab: conc_research, skills_physics_lab;
+share conc_research_with_skills_biochemistry_lab: conc_research, skills_biochemistry_lab;
+share conc_research_with_skills_tools: conc_research, skills_tools;
+share conc_research_with_mbb_elective: conc_research, mbb_elective;
+share conc_research_with_stem_elective: conc_research, stem_elective;
+share conc_advanced_with_intro_biology: conc_advanced, intro_biology;
+share conc_advanced_with_intro_chem_1610: conc_advanced, intro_chem_1610;
+share conc_advanced_with_intro_chem_1630: conc_advanced, intro_chem_1630;
+share conc_advanced_with_intro_organic_lecture: conc_advanced, intro_organic_lecture;
+share conc_advanced_with_intro_organic_lab: conc_advanced, intro_organic_lab;
+share conc_advanced_with_intro_calc_two: conc_advanced, intro_calc_two;
+share conc_advanced_with_intro_calc_1160: conc_advanced, intro_calc_1160;
+share conc_advanced_with_physics: conc_advanced, physics;
+share conc_advanced_with_biophysical_chemistry: conc_advanced, biophysical_chemistry;
+share conc_advanced_with_biophysics_advanced: conc_advanced, biophysics_advanced;
+share conc_advanced_with_biochemistry: conc_advanced, biochemistry;
+share conc_advanced_with_chemistry_elective: conc_advanced, chemistry_elective;
+share conc_advanced_with_science_society: conc_advanced, science_society;
+share conc_advanced_with_skills_physics_lab: conc_advanced, skills_physics_lab;
+share conc_advanced_with_skills_biochemistry_lab: conc_advanced, skills_biochemistry_lab;
+share conc_advanced_with_skills_tools: conc_advanced, skills_tools;
+share conc_advanced_with_mbb_elective: conc_advanced, mbb_elective;
+share conc_advanced_with_stem_elective: conc_advanced, stem_elective;
+share conc_electives_with_intro_biology: conc_electives, intro_biology;
+share conc_electives_with_intro_chem_1610: conc_electives, intro_chem_1610;
+share conc_electives_with_intro_chem_1630: conc_electives, intro_chem_1630;
+share conc_electives_with_intro_organic_lecture: conc_electives, intro_organic_lecture;
+share conc_electives_with_intro_organic_lab: conc_electives, intro_organic_lab;
+share conc_electives_with_intro_calc_two: conc_electives, intro_calc_two;
+share conc_electives_with_intro_calc_1160: conc_electives, intro_calc_1160;
+share conc_electives_with_physics: conc_electives, physics;
+share conc_electives_with_biophysical_chemistry: conc_electives, biophysical_chemistry;
+share conc_electives_with_biophysics_advanced: conc_electives, biophysics_advanced;
+share conc_electives_with_biochemistry: conc_electives, biochemistry;
+share conc_electives_with_chemistry_elective: conc_electives, chemistry_elective;
+share conc_electives_with_science_society: conc_electives, science_society;
+share conc_electives_with_skills_physics_lab: conc_electives, skills_physics_lab;
+share conc_electives_with_skills_biochemistry_lab: conc_electives, skills_biochemistry_lab;
+share conc_electives_with_skills_tools: conc_electives, skills_tools;
+share conc_electives_with_mbb_elective: conc_electives, mbb_elective;
+share conc_electives_with_stem_elective: conc_electives, stem_elective;
+share conc_upper_with_intro_biology: conc_upper, intro_biology;
+share conc_upper_with_intro_chem_1610: conc_upper, intro_chem_1610;
+share conc_upper_with_intro_chem_1630: conc_upper, intro_chem_1630;
+share conc_upper_with_intro_organic_lecture: conc_upper, intro_organic_lecture;
+share conc_upper_with_intro_organic_lab: conc_upper, intro_organic_lab;
+share conc_upper_with_intro_calc_two: conc_upper, intro_calc_two;
+share conc_upper_with_intro_calc_1160: conc_upper, intro_calc_1160;
+share conc_upper_with_physics: conc_upper, physics;
+share conc_upper_with_biophysical_chemistry: conc_upper, biophysical_chemistry;
+share conc_upper_with_biophysics_advanced: conc_upper, biophysics_advanced;
+share conc_upper_with_biochemistry: conc_upper, biochemistry;
+share conc_upper_with_chemistry_elective: conc_upper, chemistry_elective;
+share conc_upper_with_science_society: conc_upper, science_society;
+share conc_upper_with_skills_physics_lab: conc_upper, skills_physics_lab;
+share conc_upper_with_skills_biochemistry_lab: conc_upper, skills_biochemistry_lab;
+share conc_upper_with_skills_tools: conc_upper, skills_tools;
+share conc_upper_with_mbb_elective: conc_upper, mbb_elective;
+share conc_upper_with_stem_elective: conc_upper, stem_elective;
+
+constraint concentration_no_acceleration "Placement and acceleration credit do not count toward concentration requirements" in roles [concentration]:
+  all where attempt.source != "acceleration";
+
+constraint research_letter "Up to two credits of MB&B 4700 may be taken for a letter grade" in program:
+  limit 2 credits where course.code = "MB&B4700" and attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "12.5 course credits beyond the introductory courses, including the senior requirement" in roles [core, elective, senior]:
+  total at least 12.5 credits;
+
+fact ms_admission "Admitted to the simultaneous B.S./M.S. by the DUS and DGS (application by the end of the fifth term)":
+  approval committee_approval { for: "ms_admission" };
+
+requirement admission "Admission to the simultaneous B.S./M.S. program" [graduate] {
+  slot where attempt.approved_for contains "ms_admission";
+}
+
+effect admitted when fact ms_admission: waive admission;
+
+requirement graduate_mbb "M.S.: two graduate MB&B courses" [graduate] {
+  courses at least 2 where course.subject = "MB&B" and course.number >= 5000;
+}
+
+requirement graduate_stem "M.S.: four additional graduate STEM courses approved by the DUS and DGS" [graduate] {
+  courses at least 4
+    where course.subject in ["MB&B", "CHEM", "MCDB", "PHYS", "BENG", "CPSC", "S&DS"] and course.number >= 5000
+      or attempt.approved_for contains "graduate_stem";
+}
+
+constraint graduate_grades "Graduate courses earn Honors, High Pass, or Pass" in roles [graduate]:
+  all where attempt.graduate_grade in ["H", "HP", "P"];
+
+constraint graduate_honors "At least two grades of Honors" in roles [graduate]:
+  at least 2 attempts where attempt.graduate_grade = "H";
+
+advisory requirement graduate_average "All graduate grades must average High Pass" [graduate] {
+  slot where attempt.approved_for contains "graduate_average";
+}

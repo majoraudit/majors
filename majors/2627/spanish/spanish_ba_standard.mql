@@ -1,13 +1,49 @@
-// Spanish B.A. -- standard major. 10 term courses beyond the prerequisite, including the senior requirement.
-$adv = RANGE(SPAN 3000, SPAN 4899);
-$el = [RANGE(SPAN 2000, SPAN 4899), RANGE(SPAN 0001, SPAN 0999), PLACEMENT("Course taught in a language other than Spanish approved by the DUS")];
+// Spanish B.A. (standard major): ten term courses beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/spanish/
+program spanish_ba_standard {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [SPAN 1400, SPAN 1450, SPAN 1500, PLACEMENT("Equivalent by placement examination, advanced placement, or study abroad")] : "Prerequisite: SPAN 1400, 1450, 1500, or equivalent" : 1;
+fact spanish_placement "Equivalent of SPAN 1400 or above by placement examination, advanced placement, or study abroad":
+  placement { test: "Spanish placement", result: "SPAN 1400 or above" };
 
-SELECT 1 FROM SPAN 2200 : "Required introductory course: SPAN 2200" : 1;
-SELECT 2 FROM [RANGE(SPAN 2201, SPAN 2999), RANGE(SPAN 2201, SPAN 2999)] : "Two courses numbered SPAN 2200-2999" : 2;
-SELECT 3 FROM [$adv, $adv, $adv] : "3 courses numbered SPAN 3000 or higher" : 2;
-SELECT 3 FROM [$el, $el, $el] : "Three electives numbered SPAN 2000 or higher (or a first-year seminar taught in Spanish)" : 3;
-LIMIT 1 FROM PLACEMENT("Course taught in a language other than Spanish") : "At most one course taught in a language other than Spanish (DUS approval)" : 3;
+requirement prereq "Prerequisite: SPAN 1400, 1450, or 1500, or an equivalent" [prerequisite] {
+  slot from [SPAN 1400, SPAN 1450, SPAN 1500];
+}
 
-SELECT 1 FROM SPAN 4900 : "Senior requirement: senior project (SPAN 4900)" : 1;
+effect placed when fact spanish_placement: waive prereq;
+
+requirement intro "Required introductory course: SPAN 2200" [core] {
+  slot from [SPAN 2200];
+}
+
+requirement intermediate "Two courses numbered SPAN 2200-2999" [core] {
+  courses at least 2 where course.subject = "SPAN" and course.number >= 2201 and course.number <= 2999;
+}
+
+requirement advanced "Three courses numbered SPAN 3000 or higher" [core] {
+  courses at least 3 where course.subject = "SPAN" and course.number >= 3000 and course.number <= 4899;
+}
+
+requirement electives "Three electives numbered SPAN 2000 or higher, or a first-year seminar taught in Spanish (one course in another language with DUS approval)" [elective] {
+  courses at least 3
+    where course.subject = "SPAN" and (course.number >= 2000 and course.number <= 4899 or course.number <= 999)
+      or attempt.approved_for contains "electives";
+  constraint other_language "At most one course taught in a language other than Spanish":
+    at most 1 attempts where course.language != "Spanish";
+}
+
+requirement senior "Senior requirement: senior project (SPAN 4900)" [senior] {
+  slot from [SPAN 4900];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Ten term courses beyond the prerequisite" in roles [core, elective, senior]:
+  total at least 10 attempts;

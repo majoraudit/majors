@@ -1,21 +1,56 @@
-// Classics B.A. -- Two literatures concentration. 12 term courses including the senior requirement.
-$grek = RANGE(GREK 3000, GREK 4999);
-$latn = RANGE(LATN 3000, LATN 4999);
+// Classics B.A. (two literatures concentration): twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/classics/
+program classics_ba_two_literatures {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [GREK 4995, LATN 4995] : "GREK 4995 or LATN 4995" : 1;
-SELECT 6 FROM [GREK 4995, LATN 4995, $grek, $grek, $grek, $grek, $grek, $latn, $latn, $latn, $latn, $latn] : "Six Greek and Latin language courses numbered 3000 or above" : 2;
-SELECT 2 FROM [$grek, $grek] : "At least two Greek courses numbered 3000 or above" : 2;
-SELECT 2 FROM [$latn, $latn] : "At least two Latin courses numbered 3000 or above" : 2;
+requirement language "Six Greek and Latin language courses numbered 3000 or above, including GREK 4995 or LATN 4995" [language] {
+  courses at least 6 where course.subject in ["GREK", "LATN"] and course.number >= 3000;
+  constraint both_greek "At least two in Greek": at least 2 attempts where course.subject = "GREK";
+  constraint both_latin "At least two in Latin": at least 2 attempts where course.subject = "LATN";
+  constraint capstone_4995 "Including GREK 4995 or LATN 4995": at least 1 attempts where course.code in ["GREK4995", "LATN4995"];
+}
 
-SELECT 1 FROM [RANGE_TAG(CLCV 1000, CLCV 2999, "YC CLSS Lit/Cult Anc Greece")] : "Course covering broadly the literature and/or culture of ancient Greece (CLCV 1000/2000-level)" : 2;
-SELECT 1 FROM [RANGE_TAG(CLCV 1000, CLCV 2999, "YC CLSS Lit/Cult Anc Rome")] : "Course covering broadly the literature and/or culture of ancient Rome (CLCV 1000/2000-level)" : 2;
-SELECT 1 FROM [TAG("YC CLSS Ancient Hist Greece"), TAG("YC CLSS Ancient Hist Rome")] : "Course in ancient history" : 2;
-SELECT 1 FROM [TAG("YC CLSS Ancient Hist Greece"), TAG("YC CLSS Ancient Hist Rome"), TAG("YC CLSS Hist, Phil, Art, Arcg"), RANGE(CLCV 0000, CLCV 9999)] : "Additional course in ancient history, classical art and archaeology, ancient philosophy, or classical civilization" : 3;
+requirement greece "A course covering broadly the literature and/or culture of ancient Greece (CLCV, 1000 or 2000 level)" [core] {
+  slot where course.subject = "CLCV" and course.number >= 1000 and course.number <= 2999
+    and course.attributes contains "YC CLSS Lit/Cult Anc Greece";
+}
 
-SELECT 1 FROM [
-    SELECT 2 FROM [CLSS 4998, CLSS 4999],
-    SELECT 2 FROM [
-        SELECT 1 FROM [CLSS 4998, CLSS 4999],
-        SELECT 1 FROM [RANGE(CLCV 0000, CLCV 9999), RANGE(CLSS 0000, CLSS 9999), RANGE(LATN 0000, LATN 9999), RANGE(GREK 0000, GREK 9999), PLACEMENT("Relevant course in another field approved by the DUS")]
-    ]
-] : "Senior Tutorial: two terms (CLSS 4998 and 4999), or one term plus an additional course" : 1;
+requirement rome "A course covering broadly the literature and/or culture of ancient Rome (CLCV, 1000 or 2000 level)" [core] {
+  slot where course.subject = "CLCV" and course.number >= 1000 and course.number <= 2999
+    and course.attributes contains "YC CLSS Lit/Cult Anc Rome";
+}
+
+requirement ancient_history "A course in a related field in ancient history" [core] {
+  slot where course.attributes overlaps ["YC CLSS Ancient Hist Greece", "YC CLSS Ancient Hist Rome"];
+}
+
+requirement additional "An additional course in ancient history, classical art and archaeology, ancient philosophy, or classical civilization" [elective] {
+  slot where course.attributes overlaps ["YC CLSS Ancient Hist Greece", "YC CLSS Ancient Hist Rome", "YC CLSS Hist, Phil, Art, Arcg"]
+    or course.subject = "CLCV";
+}
+
+requirement senior "Senior Tutorial: two terms (CLSS 4998 and 4999), or one term and an additional course" [senior] {
+  children at least 1;
+  requirement senior_two_term "Two terms of Senior Tutorial" {
+    courses exactly 2 from [CLSS 4998, CLSS 4999];
+  }
+  requirement senior_one_term "One term of Senior Tutorial and an additional course" {
+    children exactly 2;
+    requirement senior_tutorial "CLSS 4998 or 4999" { slot from [CLSS 4998, CLSS 4999]; }
+    requirement senior_additional "An additional course in Classics or a relevant field approved by the DUS" {
+      slot where course.subject in ["CLCV", "CLSS", "GREK", "LATN"] or attempt.approved_for contains "senior_additional";
+    }
+  }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in program:
+  total at least 12 attempts;

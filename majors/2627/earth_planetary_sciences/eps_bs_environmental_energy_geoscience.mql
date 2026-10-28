@@ -1,18 +1,72 @@
-// Earth and Planetary Sciences B.S. -- Environmental and Energy Geoscience concentration.
-// At least 11 term courses beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [CHEM 1650, CHEM 1670] : "Prerequisite: CHEM 1650 or 1670" : 1;
-SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
-SELECT 1 FROM [
-    SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010],
-    SELECT 2 FROM [SELECT 2 FROM [BIOL 1010, BIOL 1020], SELECT 1 FROM [SELECT 2 FROM [BIOL 1030, BIOL 1040], SELECT 2 FROM [EPS 1250, EPS 1260L]]]
-] : "Prerequisite: physics sequence, or cellular and evolutionary biology" : 1;
+// Earth and Planetary Sciences B.S. (Environmental and Energy Geoscience concentration): at least eleven term courses
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/
+// Acceleration credits may satisfy prerequisites with DUS permission; higher-level courses may replace
+// prerequisites and specific required courses with DUS permission (recorded as approvals).
+program eps_bs_environmental_energy_geoscience {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-$intro = [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L], EPS 1400];
-SELECT 2 FROM [$intro] : "Two introductory EPS courses" : 2;
-$core = [EPS 2320, EPS 2550, EPS 2740, EPS 2750, EPS 3100, EPS 2100, EPS 2200, EPS 3120, EPS 3220, EPS 3230, EPS 3620, PLACEMENT("Higher-level EPS course substituted with DUS permission")];
-SELECT 4 FROM [$core] : "Four core courses" : 2;
-$el = [RANGE(EPS 2000, EPS 9999), RANGE(EVST 0000, EVST 9999), RANGE(E&EB 0000, E&EB 9999), RANGE(EEB 0000, EEB 9999), RANGE(ENAS 0000, ENAS 9999), RANGE(ENVE 0000, ENVE 9999), RANGE(MENG 0000, MENG 9999), RANGE(CENG 0000, CENG 9999), PLACEMENT("Elective in a related field approved by the DUS")];
-SELECT 4 FROM [$el, $el, $el, $el] : "Four electives (EPS, EVST, EEB, Engineering, or related fields; core courses may count)" : 3;
-SELECT 2 FROM [RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999)] : "At least two electives from EPS" : 3;
+requirement prereq_chemistry "Prerequisite: CHEM 1650 or 1670" [prerequisite] {
+  slot from [CHEM 1650, CHEM 1670];
+}
 
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement prereq_science "Prerequisite: physics (PHYS 1700-1710, 1800-1810, or 2000-2010), or cellular and evolutionary biology" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1700 "PHYS 1700 and 1710" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_biology "Cellular biology (BIOL 1010 and 1020) and evolutionary biology (BIOL 1030 and 1040, or EPS 1250 and 1260L)" {
+    children exactly 2;
+    requirement prereq_cellular "BIOL 1010 and 1020" { courses exactly 2 from [BIOL 1010, BIOL 1020]; }
+    requirement prereq_evolutionary "BIOL 1030 and 1040, or EPS 1250 and 1260L" {
+      children at least 1;
+      requirement prereq_evol_biol "BIOL 1030 and 1040" { courses exactly 2 from [BIOL 1030, BIOL 1040]; }
+      requirement prereq_evol_eps "EPS 1250 and 1260L" { courses exactly 2 from [EPS 1250, EPS 1260L]; }
+    }
+  }
+}
+
+requirement intro "Two introductory EPS courses (EPS 1000-1400), with accompanying laboratories" [core] {
+  children at least 2;
+  requirement intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+  requirement intro_1250 "EPS 1250 with EPS 1260L" { courses exactly 2 from [EPS 1250, EPS 1260L]; }
+  requirement intro_1400 "EPS 1400" { slot from [EPS 1400]; }
+}
+
+requirement core "Four core courses" [core] {
+  courses at least 4
+    where course.code in ["EPS2320", "EPS2550", "EPS2740", "EPS2750", "EPS3100", "EPS2100", "EPS2200", "EPS3120", "EPS3220", "EPS3230", "EPS3620"]
+      or attempt.approved_for contains "core";
+}
+
+requirement electives "Four electives in EPS, EVST, EEB, Engineering, or related fields (further core courses may count), at least two in EPS" [elective] {
+  courses at least 4
+    where course.subject = "EPS" and course.number >= 2000
+      or course.subject in ["EVST", "EEB", "E&EB", "ENAS", "ENVE", "MENG", "CENG"]
+      or attempt.approved_for contains "electives";
+  constraint eps_electives "At least two electives from EPS": at least 2 attempts where course.subject = "EPS";
+}
+
+requirement senior "Senior essay (EPS 4920) or, with faculty permission, a two-term senior thesis (EPS 4900 and 4910)" [senior] {
+  children at least 1;
+  requirement senior_essay "EPS 4920" { slot from [EPS 4920]; }
+  requirement senior_thesis "EPS 4900 and 4910, with faculty permission" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the prerequisites or the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "At least eleven term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 11 attempts;

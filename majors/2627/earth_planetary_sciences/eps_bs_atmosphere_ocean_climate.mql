@@ -1,21 +1,67 @@
-// Earth and Planetary Sciences B.S. -- Atmosphere, Ocean, and Climate concentration.
-// At least 11 term courses beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
-SELECT 1 FROM [ENAS 1300, PLACEMENT("Equivalent programming course approved by the DUS")] : "Prerequisite: ENAS 1300 or equivalent" : 1;
-SELECT 1 FROM ENAS 1940 : "Prerequisite: ENAS 1940" : 1;
-SELECT 2 FROM [PHYS 1800, PHYS 1810] : "Prerequisite: PHYS 1800 and 1810" : 1;
-SELECT 2 FROM [PHYS 2050L, PHYS 2060L] : "Prerequisite: PHYS 2050L and 2060L" : 1;
+// Earth and Planetary Sciences B.S. (Atmosphere, Ocean, and Climate concentration): at least eleven term courses
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/
+// Acceleration credits may satisfy prerequisites with DUS permission; higher-level courses may replace
+// prerequisites and specific required courses with DUS permission (recorded as approvals).
+program eps_bs_atmosphere_ocean_climate {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L], SELECT 2 FROM [EPS 1250, EPS 1260L]] : "Introductory EPS course (with laboratory where required)" : 2;
-SELECT 5 FROM [
-    SELECT 1 FROM [EPS 1400, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
-    SELECT 1 FROM [EPS 3220, EPS 3230, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
-    SELECT 1 FROM [EPS 3350, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
-    SELECT 1 FROM [MENG 3422, PLACEMENT("Higher-level EPS course substituted with DUS permission")],
-    SELECT 1 FROM [S&DS 2300, S&DS 2380, MATH 2220]
-] : "Core: Earth's climate system, weather and climate, physical oceanography, fluid mechanics, statistics or linear algebra" : 1;
-$el = PLACEMENT("Elective in the environment, atmosphere, ocean, land surface, physics, or statistics approved by the DUS");
-SELECT 4 FROM [RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), RANGE(EPS 2000, EPS 9999), $el, $el, $el] : "Four electives" : 3;
-SELECT 1 FROM [RANGE(EPS 2000, EPS 9999)] : "At least one elective from EPS" : 3;
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
 
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;
+requirement prereq_programming "Prerequisite: ENAS 1300 or an equivalent" [prerequisite] {
+  slot where course.code = "ENAS1300" or attempt.approved_for contains "prereq_programming";
+}
+
+requirement prereq_differential_equations "Prerequisite: ENAS 1940" [prerequisite] {
+  slot from [ENAS 1940];
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810" [prerequisite] {
+  courses exactly 2 from [PHYS 1800, PHYS 1810];
+}
+
+requirement prereq_physics_lab "Prerequisite: PHYS 2050L and 2060L" [prerequisite] {
+  courses exactly 2 from [PHYS 2050L, PHYS 2060L];
+}
+
+requirement intro "One introductory EPS course (EPS 1000-1400), with accompanying laboratories" [core] {
+  children at least 1;
+  requirement intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+  requirement intro_1250 "EPS 1250 with EPS 1260L" { courses exactly 2 from [EPS 1250, EPS 1260L]; }
+}
+
+requirement core "Core: climate system, weather and climate, physical oceanography, fluid mechanics, and statistics or linear algebra" [core] {
+  children exactly 5;
+  requirement core_climate "Earth's climate system: EPS 1400" { slot where course.code = "EPS1400" or attempt.approved_for contains "core_climate"; }
+  requirement core_weather "Weather and climate: EPS 3220 or 3230" { slot where course.code in ["EPS3220", "EPS3230"] or attempt.approved_for contains "core_weather"; }
+  requirement core_ocean "Physical oceanography: EPS 3350" { slot where course.code = "EPS3350" or attempt.approved_for contains "core_ocean"; }
+  requirement core_fluids "Fluid mechanics: MENG 3422" { slot where course.code = "MENG3422" or attempt.approved_for contains "core_fluids"; }
+  requirement core_quantitative "Statistics or linear algebra: S&DS 2300, 2380, or MATH 2220" { slot from [S&DS 2300, S&DS 2380, MATH 2220]; }
+}
+
+requirement electives "Four electives in the environment, atmosphere, ocean, land surface, physics, or statistics, at least one in EPS" [elective] {
+  courses at least 4 where course.subject = "EPS" and course.number >= 2000 or attempt.approved_for contains "electives";
+  constraint eps_elective "At least one elective from EPS": at least 1 attempts where course.subject = "EPS";
+}
+
+requirement senior "Senior essay (EPS 4920) or, with faculty permission, a two-term senior thesis (EPS 4900 and 4910)" [senior] {
+  children at least 1;
+  requirement senior_essay "EPS 4920" { slot from [EPS 4920]; }
+  requirement senior_thesis "EPS 4900 and 4910, with faculty permission" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the prerequisites or the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "At least eleven term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 11 attempts;

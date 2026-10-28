@@ -1,18 +1,60 @@
-// East Asian Languages and Literatures B.A. -- Chinese concentration.
-// 11 term courses beyond the prerequisite including a one-term senior essay (12 with a yearlong essay).
-$advreading = [DIST_DEPT("L5", "CHNS"), DIST_DEPT("L5", "JAPN"), DIST_DEPT("L5", "KREN"), PLACEMENT("Advanced course with readings in literary or modern Chinese, Japanese, or Korean, approved by the DUS")];
-$lit = RANGE(EALL 2000, EALL 3999);
+// East Asian Languages and Literatures B.A. (Chinese concentration): eleven term courses beyond the prerequisite,
+// including a one-term senior essay (twelve with a yearlong essay).
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/east-asian-languages-literatures/
+program east_asian_languages_literatures_chinese {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [CHNS 1400, JAPN 1400, KREN 1400, PLACEMENT("Equivalent of intermediate Chinese, Japanese, or Korean by placement")] : "Prerequisite: CHNS 1400, JAPN 1400, KREN 1400, or equivalent" : 1;
+fact language_placement "Placement beyond intermediate Chinese, Japanese, or Korean":
+  placement { test: "EALL language placement", result: "beyond 1400" };
 
-SELECT 1 FROM [CHNS 1500, PLACEMENT("Equivalent of CHNS 1500 approved by the DUS")] : "Advanced language: CHNS 1500 or equivalent" : 1;
-SELECT 1 FROM [CHNS 1510, PLACEMENT("Equivalent of CHNS 1510 approved by the DUS")] : "Advanced language: CHNS 1510 or equivalent" : 1;
-SELECT 1 FROM CHNS 1700 : "Literary Chinese (CHNS 1700)" : 1;
+requirement prereq "Prerequisite: CHNS 1400, JAPN 1400, or KREN 1400, or the equivalent" [prerequisite] {
+  slot from [CHNS 1400, JAPN 1400, KREN 1400];
+}
 
-SELECT 1 FROM PLACEMENT("Survey course in Chinese, Japanese, Korean, or East Asian history and culture, approved by the DUS") : "Survey course in East Asian history and culture" : 2;
-SELECT 3 FROM [$lit, $lit, $lit] : "Three literature-in-translation courses (EALL 2000-3999; may include theater and film)" : 2;
-SELECT 1 FROM PLACEMENT("One of the EALL 2000-3999 literature courses focused primarily on premodern content") : "One literature-in-translation course with premodern content" : 2;
-SELECT 3 FROM [$advreading, $advreading, $advreading] : "Three advanced courses with readings in literary or modern Chinese, Japanese, and/or Korean" : 3;
+effect placed when fact language_placement: waive prereq;
 
-// The second term of a yearlong essay may not substitute for any of the eleven required courses.
-SELECT 1 FROM [CLASS(EALL 4910), SELECT 2 FROM [EALL 4920, EALL 4930]] : "Senior essay (EALL 4910, or yearlong EALL 4920 and 4930)" : 1;
+requirement advanced_language "Two terms of advanced Chinese: CHNS 1500 and 1510, or equivalents" [language] {
+  courses at least 2 where course.code in ["CHNS1500", "CHNS1510"] or attempt.approved_for contains "advanced_language";
+}
+
+requirement literary_language "Literary Chinese: CHNS 1700" [language] {
+  slot from [CHNS 1700];
+}
+
+requirement survey "A survey course in Chinese, Japanese, Korean, or East Asian history and culture, preferably early" [core] {
+  slot where attempt.approved_for contains "survey";
+}
+
+requirement translation "Three literature-in-translation courses taught in English (EALL 2000-3999, including theater and film), one premodern" [core] {
+  courses at least 3 where course.subject = "EALL" and course.number >= 2000 and course.number <= 3999;
+  constraint premodern "One focused primarily on premodern content":
+    at least 1 attempts where attempt.approved_for contains "premodern";
+}
+
+requirement advanced_reading "Three advanced courses with readings in literary or modern Chinese, Japanese, and/or Korean" [language] {
+  courses at least 3
+    where course.subject in ["CHNS", "JAPN", "KREN"] and course.distributionals contains "L5"
+      or attempt.approved_for contains "advanced_reading";
+}
+
+// The second term of a yearlong essay cannot replace any of the eleven required courses; exclusivity enforces this.
+requirement senior "Senior essay: EALL 4910 (one term), or EALL 4920 and 4930 (yearlong)" [senior] {
+  children at least 1;
+  requirement senior_one_term "EALL 4910" { slot from [EALL 4910]; }
+  requirement senior_yearlong "EALL 4920 and 4930" { courses exactly 2 from [EALL 4920, EALL 4930]; }
+}
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, with DUS permission" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "At least eleven term courses beyond the prerequisite" in roles [core, language, senior]:
+  total at least 11 attempts;

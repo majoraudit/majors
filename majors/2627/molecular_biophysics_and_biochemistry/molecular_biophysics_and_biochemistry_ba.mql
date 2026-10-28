@@ -1,25 +1,85 @@
-// Molecular Biophysics and Biochemistry B.A. -- 9.5 course credits beyond the introductory courses, including the senior requirement.
-$cure = PLACEMENT("Course-based undergraduate research experience or research-for-credit course related to the concentration, approved by the DUS");
-$physlab = [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, PHYS 1650L, PHYS 1660L, CHEM 3550L, PLACEMENT("Other 2000+ physics lab approved by the DUS")];
-$biochemlab = [MB&B 2510L, CHEM 3550L, PLACEMENT("Other 2000+ biochemistry lab approved by the DUS")];
-$tools = [MB&B 4350, S&DS 2380, CPSC 1001, PLACEMENT("Critical tools course approved by the DUS")];
-$skills = [$physlab, $biochemlab, $tools, MB&B 4700];
+// Molecular Biophysics and Biochemistry B.A.: 9.5 course credits beyond the
+// introductory courses, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/molecular-biophysics-biochemistry/
+program molecular_biophysics_and_biochemistry_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [BIOL 1010, BIOL 1020] : "Introductory: BIOL 1010 and 1020" : 1;
-SELECT 1 FROM [SELECT 4 FROM [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L], SELECT 4 FROM [CHEM 1630, CHEM 1670, CHEM 1340L, CHEM 1360L]] : "Introductory: two terms of general chemistry with laboratories" : 1;
-SELECT 2 FROM [SELECT 1 FROM [CHEM 2200, CHEM 1740], CHEM 2220L] : "Introductory: one term of organic chemistry with laboratory" : 1;
-SELECT 1 FROM [SELECT 2 FROM [MATH 1120, MATH 1150], CLASS(MATH 1160)] : "Introductory: two terms of calculus (MATH 1120 and 1150, or MATH 1160)" : 1;
+requirement intro_biology "Introductory: BIOL 1010 and 1020" [introductory] {
+  courses exactly 2 from [BIOL 1010, BIOL 1020];
+}
 
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1700, PHYS 1710], SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610]] : "Biophysics: two semesters of physics (PHYS 1700 and 1710 or higher)" : 1;
-SELECT 1 FROM [MB&B 2750, CHEM 3320] : "Biophysics: biophysical chemistry (MB&B 2750 or CHEM 3320)" : 1;
-SELECT 2 FROM [MB&B 3000, MB&B 3010] : "Biochemistry: MB&B 3000 and 3010 (no substitutions)" : 1;
-SELECT 1 FROM [CHEM 1750, RANGE(CHEM 2000, CHEM 9999)] : "Biochemistry: CHEM 1750 or any 2000+ Chemistry course" : 1;
-SELECT 1 FROM [MB&B 2680, MB&B 1070, AFAM 1370, HSHM 2060, HSHM 4060, HSHM 4240, HSHM 4750, HSHM 4810, HIST 1779, SOCY 1600, SOCY 1601, SOCY 3760, MCDB 3750, WGSS 2270, WGSS 4457, PLACEMENT("Science and society course approved by petition")] : "Science and society (0.5 credit; MB&B 2680 recommended)" : 2;
+requirement intro_chemistry "Introductory: two terms of general chemistry with laboratories" [introductory] {
+  children at least 1;
+  requirement intro_chem_1610 "CHEM 1610, 1650, 1340L, and 1360L" { courses exactly 4 from [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L]; }
+  requirement intro_chem_1630 "CHEM 1630, 1670, 1340L, and 1360L" { courses exactly 4 from [CHEM 1630, CHEM 1670, CHEM 1340L, CHEM 1360L]; }
+}
 
-// Practical skills credits come from two or three categories (physics lab, biochemistry lab, critical tools);
-// at least one half-credit must be an MB&B course. MB&B 4700 counts according to the research project.
-SELECT 1-2 FROM [$skills, $skills] : "Practical skills: one credit (one full-credit or two half-credit courses)" : 3;
-SELECT 1 FROM [MB&B 1210L, MB&B 1220L, MB&B 1230L, MB&B 1240L, MB&B 2510L, MB&B 4350, MB&B 4700] : "Practical skills: at least one half-credit from MB&B" : 3;
-SELECT 1 FROM [RANGE(MB&B 2000, MB&B 4699), RANGE(MB&B 4701, MB&B 4899), RANGE(MB&B 4911, MB&B 9999)] : "Elective: MB&B lecture or seminar at the 2000+ level" : 4;
+requirement intro_organic "Introductory: one term of organic chemistry (CHEM 2200 or 1740) with laboratory (CHEM 2220L)" [introductory] {
+  children exactly 2;
+  requirement intro_organic_lecture "CHEM 2200 or 1740" { slot from [CHEM 2200, CHEM 1740]; }
+  requirement intro_organic_lab "CHEM 2220L" { slot from [CHEM 2220L]; }
+}
 
-SELECT 1 FROM [MB&B 4900, MB&B 4910] : "Senior essay: literature project (MB&B 4900) or laboratory research essay (MB&B 4910)" : 1;
+requirement intro_calculus "Introductory: two terms of calculus (MATH 1120 and 1150, or MATH 1160)" [introductory] {
+  children at least 1;
+  requirement intro_calc_two "MATH 1120 and 1150" { courses exactly 2 from [MATH 1120, MATH 1150]; }
+  requirement intro_calc_1160 "MATH 1160" { slot from [MATH 1160]; }
+}
+
+requirement physics "Biophysics: two semesters of physics (PHYS 1700 and 1710 or higher)" [core] {
+  courses at least 2 from [PHYS 1700, PHYS 1710, PHYS 1800, PHYS 1810, PHYS 2000, PHYS 2010, PHYS 2600, PHYS 2610];
+}
+
+requirement biophysical_chemistry "Biophysics: biophysical chemistry (MB&B 2750 or CHEM 3320)" [core] {
+  slot from [MB&B 2750, CHEM 3320];
+}
+
+requirement biochemistry "Biochemistry: MB&B 3000 and 3010 (no substitutions)" [core] {
+  courses exactly 2 from [MB&B 3000, MB&B 3010];
+}
+
+requirement chemistry_elective "Biochemistry: CHEM 1750 or any Chemistry course numbered 2000 or above" [core] {
+  slot where course.code = "CHEM1750" or course.subject = "CHEM" and course.number >= 2000;
+}
+
+requirement science_society "Science and society, half credit (MB&B 2680 recommended; alternatives listed or by petition)" [core] {
+  slot where course.code in ["MB&B2680", "MB&B1070", "BLST1370", "HSHM2060", "HSHM4060", "HSHM4240", "HSHM4750", "HSHM4810", "HIST1779", "SOCY1600", "SOCY1601", "SOCY3760", "MCDB3750", "WGSS2270", "WGSS4457"]
+    or attempt.approved_for contains "science_society";
+}
+
+// MB&B 4700 (research for credit) counts in whichever category its project fits, recorded as an approval.
+requirement skills "Practical skills: one credit across two or three categories, at least a half-credit from MB&B" [core] {
+  children at least 2;
+  requirement skills_physics_lab "Physics lab" {
+    credits at least 0.5 where course.code in ["MB&B1210L", "MB&B1220L", "MB&B1230L", "MB&B1240L", "PHYS1650L", "PHYS1660L", "CHEM3550L"]
+      or attempt.approved_for contains "skills_physics_lab";
+  }
+  requirement skills_biochemistry_lab "Biochemistry lab" {
+    credits at least 0.5 where course.code in ["MB&B2510L", "CHEM3550L"] or attempt.approved_for contains "skills_biochemistry_lab";
+  }
+  requirement skills_tools "Critical tools" {
+    credits at least 0.5 where course.code in ["MB&B4350", "S&DS2380", "CPSC1001"] or attempt.approved_for contains "skills_tools";
+  }
+  constraint skills_credits "One credit in all" in subtree skills: total at least 1 credits;
+  constraint skills_mbb "At least a half-credit from MB&B" in subtree skills: at least 0.5 credits where course.subject = "MB&B";
+}
+
+requirement mbb_elective "Elective: an MB&B lecture or seminar at the 2000+ level" [elective] {
+  slot where course.subject = "MB&B" and course.number >= 2000 and course.format in ["lecture", "seminar"];
+}
+
+requirement senior "Senior essay: a literature project (MB&B 4900) or a laboratory research essay (MB&B 4910)" [senior] {
+  slot from [MB&B 4900, MB&B 4910];
+}
+
+constraint research_letter "Up to two credits of MB&B 4700 may be taken for a letter grade" in program:
+  limit 2 credits where course.code = "MB&B4700" and attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "9.5 course credits beyond the introductory courses, including the senior requirement" in roles [core, elective, senior]:
+  total at least 9.5 credits;

@@ -1,22 +1,84 @@
-// Computing and the Arts B.A. -- History of Art concentration. 12 term courses beyond the prerequisites (6 CPSC, 6 in the arts), plus the two-term senior project.
+// Computing and the Arts B.A. (History of Art concentration): twelve term courses beyond the prerequisites
+// (six in Computer Science, six in the arts), plus the two-term senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/
+program computing_and_arts_history_of_art {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
-SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
-SELECT 1 FROM CPSC 2230 : "CPSC 2230" : 1;
-SELECT 1 FROM [CPSC 4780, CPSC 4790] : "CPSC 4780 or 4790" : 2;
-SELECT 1 FROM [CPSC 3760, CPSC 4370, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790] : "One more of CPSC 3760, 4370, 4510, 4750, 4780, 4790" : 2;
-SELECT 1 FROM [TAG("YC CPAR HSAR CS Elective"), RANGE(CPSC 2000, CPSC 4899), RANGE(CPSC 4901, CPSC 9999)] : "One additional intermediate or advanced CPSC course (not CPSC 4900)" : 3;
+requirement cs_intro "CPSC 2010" [computing] {
+  slot from [CPSC 2010];
+}
 
-SELECT 1 FROM [RANGE(HSAR 1000, HSAR 1999)] : "Introductory 1000-level History of Art course" : 2;
-SELECT 2 FROM [
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4999, "YC HSAR Africa & Pacific")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4999, "YC HSAR Asia & Near East")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4999, "YC HSAR Europe")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4999, "YC HSAR The Americas")],
-    SELECT 1 FROM [RANGE_TAG(HSAR 2000, HSAR 4999, "YC HSAR Transregional")]
-] : "Two History of Art courses (2000-4000 level) in two different areas" : 2;
-SELECT 1 FROM [RANGE(ART 0000, ART 9999)] : "One studio art course" : 2;
-SELECT 1 FROM HSAR 4401 : "HSAR 4401" : 1;
-SELECT 1 FROM [RANGE(HSAR 4000, HSAR 4400), RANGE(HSAR 4402, HSAR 4498)] : "One 4000-level seminar in History of Art" : 2;
+requirement cs_discrete "CPSC 2020 (or MATH 2440), advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
 
-SELECT 2 FROM [CPSC 4900, HSAR 4499] : "Two-term senior project (CPSC 4900 and HSAR 4499)" : 1;
+requirement cs_data_structures "CPSC 2230, advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2230];
+}
+
+requirement cs_graphics "Two of CPSC 3760, 4370, 4510, 4750, 4780, or 4790, one of them CPSC 4780 or 4790" [computing] {
+  courses at least 2 from [CPSC 3760, CPSC 4370, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790];
+  constraint cs_4780 "One of them CPSC 4780 or 4790": at least 1 attempts where course.code in ["CPSC4780", "CPSC4790"];
+}
+
+requirement cs_elective "One additional intermediate or advanced Computer Science course for the track (not CPSC 4900)" [computing] {
+  slot where course.attributes contains "YC CPAR HSAR CS Elective"
+    or course.subject = "CPSC" and course.number >= 2000 and course.code != "CPSC4900";
+}
+
+requirement hsar_4401 "HSAR 4401" [arts] {
+  slot from [HSAR 4401];
+}
+
+requirement hsar_intro "An introductory 1000-level History of Art course" [arts] {
+  slot where course.subject = "HSAR" and course.number >= 1000 and course.number <= 1999;
+}
+
+requirement hsar_areas "Two History of Art courses (2000-4000 level) in different areas" [arts] {
+  children at least 2;
+  requirement hsar_area_africa_pacific "Africa & Pacific" {
+    slot where course.subject = "HSAR" and course.number >= 2000 and course.attributes contains "YC HSAR Africa & Pacific";
+  }
+  requirement hsar_area_asia_near_east "Asia & Near East" {
+    slot where course.subject = "HSAR" and course.number >= 2000 and course.attributes contains "YC HSAR Asia & Near East";
+  }
+  requirement hsar_area_europe "Europe" {
+    slot where course.subject = "HSAR" and course.number >= 2000 and course.attributes contains "YC HSAR Europe";
+  }
+  requirement hsar_area_americas "The Americas" {
+    slot where course.subject = "HSAR" and course.number >= 2000 and course.attributes contains "YC HSAR The Americas";
+  }
+  requirement hsar_area_transregional "Transregional" {
+    slot where course.subject = "HSAR" and course.number >= 2000 and course.attributes contains "YC HSAR Transregional";
+  }
+}
+
+requirement hsar_seminar "A 4000-level seminar in History of Art" [arts] {
+  slot where course.subject = "HSAR" and course.number >= 4000 and course.format = "seminar"
+    and not course.code in ["HSAR4401", "HSAR4499"];
+}
+
+requirement studio "A studio art course" [arts] {
+  slot where course.subject = "ART";
+}
+
+requirement senior "Two-term senior project approved by the DUS and acceptable to both departments: CPSC 4900 and HSAR 4499" [senior] {
+  children exactly 2;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_arts "HSAR 4499" { slot from [HSAR 4499]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in Computer Science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint six_arts "Six courses in the arts discipline" in roles [arts]:
+  total at least 6 attempts;

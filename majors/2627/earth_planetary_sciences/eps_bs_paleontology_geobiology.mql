@@ -1,26 +1,73 @@
-// Earth and Planetary Sciences B.S. -- Paleontology and Geobiology concentration.
-// At least 12 term courses (11.5 credits) beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [CHEM 1650, CHEM 1670] : "Prerequisite: CHEM 1650 or 1670" : 1;
-SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: multivariable calculus (MATH 1200 or ENAS 1510)" : 1;
-SELECT 4 FROM [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040] : "Prerequisite: BIOL 1010-1040" : 1;
+// Earth and Planetary Sciences B.S. (Paleontology and Geobiology concentration): at least twelve term courses (11.5 credits)
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/
+// Acceleration credits may satisfy prerequisites with DUS permission; higher-level courses may replace
+// prerequisites and specific required courses with DUS permission (recorded as approvals).
+program eps_bs_paleontology_geobiology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [EPS 1000, EPS 1010, SELECT 2 FROM [EPS 1100, EPS 1110L]] : "Introductory course for geological and environmental context" : 2;
-SELECT 2 FROM [EPS 1250, EPS 1260L] : "EPS 1250 and 1260L" : 1;
-SELECT 4 FROM [
-    SELECT 1 FROM [EPS 2320, EPS 3550],
-    SELECT 1 FROM [EEB 2225, E&EB 2225],
-    SELECT 1 FROM [EPS 2700, EPS 3250, EPS 3750],
-    SELECT 1 FROM [EPS 3130],
-    SELECT 1 FROM [EPS 3450],
-    SELECT 1 FROM [EPS 2550],
-    SELECT 1 FROM [EPS 3100],
-    SELECT 1 FROM [PLACEMENT("Statistical data analysis course applied to the life sciences, approved by the DUS")],
-    PLACEMENT("Higher-level EPS course substituted with DUS permission")
-] : "Four core courses from four different areas" : 2;
-$el = [RANGE(EPS 2000, EPS 9999), RANGE(E&EB 0000, E&EB 9999), RANGE(EEB 0000, EEB 9999), RANGE(MCDB 0000, MCDB 9999), PLACEMENT("Elective in a related field approved by the DUS")];
-SELECT 4 FROM [$el, $el, $el, $el] : "Four electives (EPS, EEB, MCDB, or related fields)" : 3;
-SELECT 1 FROM [RANGE(EPS 2000, EPS 9999)] : "At least one elective from EPS" : 3;
-$paleo = [EPS 2700, EPS 3250, EPS 3750, EPS 3130, EPS 3450, EPS 2550, PLACEMENT("Upper-level paleontology course approved by the DUS")];
-SELECT 4 FROM [$paleo, $paleo, $paleo, $paleo] : "At least four of the twelve courses must be upper-level (2000+) paleontology courses" : 4;
+requirement prereq_chemistry "Prerequisite: CHEM 1650 or 1670" [prerequisite] {
+  slot from [CHEM 1650, CHEM 1670];
+}
 
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [EPS 4900, EPS 4910]] : "Senior essay (EPS 4920) or, with faculty permission, two-term senior thesis (EPS 4900, 4910)" : 1;
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+requirement intro "One introductory EPS course (EPS 1000-1400), with accompanying laboratories" [core] {
+  children at least 1;
+  requirement intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+}
+
+requirement paleo_intro "EPS 1250 and 1260L" [core] {
+  courses exactly 2 from [EPS 1250, EPS 1260L];
+}
+
+requirement core "Four core courses from four different areas" [core] {
+  children at least 4;
+  requirement core_geochemistry "Geochemistry: EPS 2320 or 3550" { slot where course.code in ["EPS2320", "EPS3550"] or attempt.approved_for contains "core_geochemistry"; }
+  requirement core_evolution "Evolution: EEB 2225" { slot where course.code in ["EEB2225", "E&EB2225"] or attempt.approved_for contains "core_evolution"; }
+  requirement core_paleobiology "Paleobiology: EPS 2700, 3250, or 3750" { slot where course.code in ["EPS2700", "EPS3250", "EPS3750"] or attempt.approved_for contains "core_paleobiology"; }
+  requirement core_3130 "EPS 3130" { slot where course.code in ["EPS3130"] or attempt.approved_for contains "core_3130"; }
+  requirement core_3450 "EPS 3450" { slot where course.code in ["EPS3450"] or attempt.approved_for contains "core_3450"; }
+  requirement core_2550 "EPS 2550" { slot where course.code in ["EPS2550"] or attempt.approved_for contains "core_2550"; }
+  requirement core_3100 "EPS 3100" { slot where course.code in ["EPS3100"] or attempt.approved_for contains "core_3100"; }
+  requirement core_statistics "Statistical data analysis applied to the life sciences, approved by the DUS" { slot where attempt.approved_for contains "core_statistics"; }
+}
+
+requirement electives "Four electives in EPS, EEB, MCDB, or related fields, at least one in EPS" [elective] {
+  courses at least 4
+    where course.subject = "EPS" and course.number >= 2000 or course.subject in ["EEB", "E&EB", "MCDB"] or attempt.approved_for contains "electives";
+  constraint eps_elective "At least one elective from EPS": at least 1 attempts where course.subject = "EPS";
+}
+
+constraint upper_paleontology "At least four of the twelve courses are upper-level (2000+) paleontology courses" in roles [core, elective]:
+  at least 4 attempts
+    where course.code in ["EPS2700", "EPS3250", "EPS3750", "EPS3130", "EPS3450", "EPS2550"] or attempt.approved_for contains "upper_paleontology";
+
+requirement senior "Senior essay (EPS 4920) or, with faculty permission, a two-term senior thesis (EPS 4900 and 4910)" [senior] {
+  children at least 1;
+  requirement senior_essay "EPS 4920" { slot from [EPS 4920]; }
+  requirement senior_thesis "EPS 4900 and 4910, with faculty permission" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the prerequisites or the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "At least twelve term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 12 attempts;
+
+constraint total_credits "11.5 course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 11.5 credits;

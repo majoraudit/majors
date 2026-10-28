@@ -1,16 +1,67 @@
-// Sociology B.A. -- Health and Society concentration, non-intensive (standard) senior requirement. 13 term courses including the senior requirement.
-// No more than two introductory courses in any department or program may count toward the major.
-$socy = RANGE(SOCY 0000, SOCY 9999);
-$outside = PLACEMENT("Concentration-relevant course from outside Sociology approved by the DUS");
+// Sociology B.A. (Health and Society concentration, standard senior requirement): thirteen term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/sociology/
+// No more than two introductory courses in any department or program may count (checked for the departments these tracks use).
+program sociology_ba_standard_health_and_society {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [SOCY 1600, SOCY 1601, PLACEMENT("Similar gateway course approved by the DUS")] : "Gateway course (SOCY 1600 or 1601)" : 2;
-SELECT 1 FROM [SOCY 2001, SOCY 2002] : "Sociological theory (SOCY 2001 or 2002)" : 1;
-SELECT 1 FROM [S&DS 1000, S&DS 1100, S&DS 3630, PLACEMENT("Social science methodology course approved by the DUS")] : "One social science methodology course" : 2;
-SELECT 1 FROM SOCY 2100 : "Research design (SOCY 2100), usually spring of junior year" : 1;
-SELECT 2 FROM [RANGE_TAG(SOCY 2000, SOCY 3999, "YC SOCY Health & Society"), RANGE_TAG(SOCY 2000, SOCY 3999, "YC SOCY Health & Society"), PLACEMENT("Intermediate/advanced Sociology course relevant to health approved by the DUS")] : "Two intermediate or advanced Sociology courses relevant to the concentration" : 2;
-// At least one outside course is recommended from BIOL 1010-1040, MATH 1120 or higher, or ECON 2170.
-$health = [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040, RANGE(MATH 1120, MATH 9999), ECON 2170, PLACEMENT("Health-related course from outside Sociology approved by the DUS")];
-SELECT 5 FROM [$socy, $socy, $socy, $socy, $socy, $health, $health, $health, $health, $health] : "Five electives relevant to the concentration" : 4;
-LIMIT 5 FROM [$health, $health, $health, $health, $health] : "Up to five course credits from outside Sociology (DUS approval)" : 4;
+requirement gateway "Gateway course: SOCY 1600 or 1601, or a similar approved course" [core] {
+  slot where course.code in ["SOCY1600", "SOCY1601"] or attempt.approved_for contains "gateway";
+}
 
-SELECT 2 FROM [SOCY 4100, RANGE(SOCY 3000, SOCY 3999)] : "Senior requirement (non-intensive): senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating health and medicine" : 1;
+requirement theory "Sociological theory: SOCY 2001 or 2002" [core] {
+  slot from [SOCY 2001, SOCY 2002];
+}
+
+requirement methodology "One social science methodology course" [core] {
+  slot where course.code in ["S&DS1000", "S&DS1100", "S&DS3630"] or attempt.approved_for contains "methodology";
+}
+
+requirement research_design "Research design: SOCY 2100, usually in the spring of junior year" [core] {
+  slot from [SOCY 2100];
+}
+
+requirement health_courses "Two intermediate or advanced Sociology courses relevant to the concentration" [core] {
+  courses at least 2 where course.subject = "SOCY" and course.number >= 2000 and course.number <= 3999 and course.attributes contains "YC SOCY Health & Society" or attempt.approved_for contains "health_courses";
+}
+
+requirement electives "Five electives relevant to the concentration (an outside course from BIOL 1010-1040, MATH 1120 or higher, or ECON 2170 is recommended)" [elective] {
+  courses at least 5 where course.subject = "SOCY" or course.code in ["BIOL1010", "BIOL1020", "BIOL1030", "BIOL1040", "ECON2170"] or course.subject = "MATH" and course.number >= 1120 or attempt.approved_for contains "outside_concentration";
+}
+
+requirement senior "Senior requirement: a senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating health and medicine" [senior] {
+  children exactly 2;
+  requirement senior_essay "SOCY 4100" { slot from [SOCY 4100]; }
+  requirement senior_seminar "An additional 3000-level Sociology seminar" {
+    slot where course.subject = "SOCY" and course.number >= 3000 and course.number <= 3999 and course.format = "seminar";
+  }
+}
+
+constraint intro_limit_socy "No more than two introductory courses (below 2000) in Sociology" in program:
+  limit 2 attempts where course.subject = "SOCY" and course.number <= 1999;
+
+constraint intro_limit_sds "No more than two introductory courses (below 2000) in Statistics and Data Science" in program:
+  limit 2 attempts where course.subject = "S&DS" and course.number <= 1999;
+
+constraint intro_limit_biol "No more than two introductory courses (below 2000) in Biology" in program:
+  limit 2 attempts where course.subject = "BIOL" and course.number <= 1999;
+
+constraint intro_limit_math "No more than two introductory courses (below 2000) in Mathematics" in program:
+  limit 2 attempts where course.subject = "MATH" and course.number <= 1999;
+
+constraint intro_limit_econ "No more than two introductory courses (below 2000) in Economics" in program:
+  limit 2 attempts where course.subject = "ECON" and course.number <= 1999;
+
+constraint outside_limit "Up to 5 concentration-relevant courses from outside Sociology, with DUS approval" in program:
+  limit 5 attempts where course.subject != "SOCY";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Thirteen term courses including the senior requirement" in roles [core, elective, senior]:
+  total at least 13 attempts;

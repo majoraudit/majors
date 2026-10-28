@@ -1,17 +1,77 @@
-// Music B.A. -- intensive major: 14 term courses numbered 2000 or above, including the senior requirement.
-// With DUS permission, one 1000-level course may replace an intermediate course in the appropriate group.
-// Up to three performance instruction courses may count toward the major.
-$sub1000 = PLACEMENT("1000-level course substituted for an intermediate course with DUS permission");
+// Music B.A. (intensive major): fourteen courses, two intermediate and one advanced course in each of four groups,
+// and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/music/
+// Up to three performance-instruction course credits may count toward the major.
+program music_ba_intensive {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [TAG("YC MUSI Intermediate Grp I"), TAG("YC MUSI Intermediate Grp I"), $sub1000] : "Group I (music theory and technology): two intermediate courses" : 2;
-SELECT 1 FROM [TAG("YC MUSI Advanced Grp I")] : "Group I (music theory and technology): one advanced course" : 2;
-SELECT 2 FROM [TAG("YC MUSI Intermediate Grp II"), TAG("YC MUSI Intermediate Grp II"), $sub1000] : "Group II (composition, technology, and performance): two intermediate courses" : 2;
-SELECT 1 FROM [TAG("YC MUSI Advanced Grp II")] : "Group II (composition, technology, and performance): one advanced course" : 2;
-SELECT 2 FROM [TAG("YC MUSI Intermediate Grp III"), TAG("YC MUSI Intermediate Grp III"), $sub1000] : "Group III (Western art-music tradition): two intermediate courses" : 2;
-SELECT 1 FROM [TAG("YC MUSI Advanced Grp III")] : "Group III (Western art-music tradition): one advanced course" : 2;
-SELECT 2 FROM [TAG("YC MUSI Intermediate Grp IV"), TAG("YC MUSI Intermediate Grp IV"), $sub1000] : "Group IV (popular, vernacular, or non-Western music): two intermediate courses" : 2;
-SELECT 1 FROM [TAG("YC MUSI Advanced Grp IV")] : "Group IV (popular, vernacular, or non-Western music): one advanced course" : 2;
-LIMIT 1 FROM $sub1000 : "At most one 1000-level substitution" : 3;
+fact intensive_approval "Admitted to the intensive major after satisfactory first-term senior project work":
+  approval dus_approval { for: "intensive" };
 
-SELECT 2 FROM [RANGE(MUSI 4997, MUSI 4999), RANGE(MUSI 4997, MUSI 4999)] : "Senior requirement: two-term senior essay or project in music research or composition (MUSI 4997-4999)" : 1;
-SELECT 1 FROM PLACEMENT("Admission to the intensive major after satisfactory first-term senior project work") : "Intensive major admission" : 1;
+requirement intensive_admission "Admission to the intensive major" [senior] {
+  slot where attempt.approved_for contains "intensive";
+}
+
+effect intensive_admitted when fact intensive_approval: waive intensive_admission;
+
+requirement group_theory "Group I (music theory and technology): two intermediate courses and one advanced course" [core] {
+  children exactly 2;
+  requirement group_theory_intermediate "Two intermediate Group I courses (one 1000-level course may replace one, with DUS permission)" {
+    courses at least 2 where course.attributes contains "YC MUSI Intermediate Grp I" or attempt.approved_for contains "group_theory_intermediate";
+  }
+  requirement group_theory_advanced "One advanced Group I course" {
+    slot where course.attributes contains "YC MUSI Advanced Grp I";
+  }
+}
+
+requirement group_composition "Group II (composition, technology, and performance): two intermediate courses and one advanced course" [core] {
+  children exactly 2;
+  requirement group_composition_intermediate "Two intermediate Group II courses (one 1000-level course may replace one, with DUS permission)" {
+    courses at least 2 where course.attributes contains "YC MUSI Intermediate Grp II" or attempt.approved_for contains "group_composition_intermediate";
+  }
+  requirement group_composition_advanced "One advanced Group II course" {
+    slot where course.attributes contains "YC MUSI Advanced Grp II";
+  }
+}
+
+requirement group_western "Group III (the Western art-music tradition): two intermediate courses and one advanced course" [core] {
+  children exactly 2;
+  requirement group_western_intermediate "Two intermediate Group III courses (one 1000-level course may replace one, with DUS permission)" {
+    courses at least 2 where course.attributes contains "YC MUSI Intermediate Grp III" or attempt.approved_for contains "group_western_intermediate";
+  }
+  requirement group_western_advanced "One advanced Group III course" {
+    slot where course.attributes contains "YC MUSI Advanced Grp III";
+  }
+}
+
+requirement group_world "Group IV (popular, vernacular, or non-Western music): two intermediate courses and one advanced course" [core] {
+  children exactly 2;
+  requirement group_world_intermediate "Two intermediate Group IV courses (one 1000-level course may replace one, with DUS permission)" {
+    courses at least 2 where course.attributes contains "YC MUSI Intermediate Grp IV" or attempt.approved_for contains "group_world_intermediate";
+  }
+  requirement group_world_advanced "One advanced Group IV course" {
+    slot where course.attributes contains "YC MUSI Advanced Grp IV";
+  }
+}
+
+requirement senior "Senior requirement: two-term senior essay or project in music research or composition (MUSI 4997-4999), begun in the second-to-last term" [senior] {
+  courses exactly 2 where course.subject = "MUSI" and course.number >= 4997 and course.number <= 4999;
+}
+
+constraint one_1000_level "At most one 1000-level course in place of an intermediate course, with DUS permission" in roles [core]:
+  limit 1 attempts where course.number < 2000;
+
+constraint performance_limit "At most three performance-instruction credits count toward the major" in program:
+  limit 3 credits where attempt.approved_for contains "performance_instruction";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen courses including the senior requirement" in roles [core, senior]:
+  total at least 14 attempts;

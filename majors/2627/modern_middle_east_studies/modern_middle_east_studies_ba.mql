@@ -1,19 +1,51 @@
-// Modern Middle East Studies B.A. -- 12 term courses including the senior requirement.
-// With DUS approval, up to two Middle Eastern language courses below L5 may count toward the distribution requirements.
-$dist = [TAG("YC MMES Distribution Course"), PLACEMENT("Middle Eastern language course below L5 counted with DUS approval")];
-$sem = TAG("YC MMES Adv Seminar");
+// Modern Middle East Studies B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/modern-middle-east-studies/
+// The proposed course of study requires DUS approval.
+program modern_middle_east_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [TAG("YC MMES Survey Course"), TAG("YC MMES Survey Course")] : "Two introductory survey courses on the Middle East (modern period)" : 2;
-SELECT 2 FROM [PLACEMENT("Course on a Middle Eastern region or country"), PLACEMENT("Course on a different Middle Eastern region or country")] : "Distribution: two courses on different Middle Eastern regions or countries" : 3;
-SELECT 2 FROM [PLACEMENT("Middle East course in one department or program"), PLACEMENT("Middle East course in a second department or program")] : "Distribution: two courses from two different departments or programs" : 3;
-SELECT 2 FROM [TAG("YC NELC Medieval Near East"), TAG("YC NELC Medieval Near East"), TAG("YC NELC Ancient Near East"), PLACEMENT("Course focused on the period before 1750")] : "Distribution: two courses focused on the period before 1750" : 3;
-SELECT 6 FROM [$dist, $dist, $dist, $dist, $dist, $dist] : "Six distribution courses in total (satisfying the three categories above)" : 4;
-LIMIT 2 FROM [PLACEMENT("Middle Eastern language course below L5"), PLACEMENT("Middle Eastern language course below L5")] : "At most two language courses below L5" : 4;
-SELECT 2 FROM [$sem, $sem] : "Two advanced seminars" : 2;
-SELECT 1 FROM [DIST_DEPT("L5", "ARBC"), DIST_DEPT("L5", "HEBR"), DIST_DEPT("L5", "PERS"), DIST_DEPT("L5", "TKSH")] : "One course at the L5 level in Arabic, Hebrew, Persian, or Turkish" : 2;
+requirement surveys "Two introductory survey courses on the Middle East, focusing on the modern period" [core] {
+  courses at least 2 where course.attributes contains "YC MMES Survey Course";
+}
 
-SELECT 1 FROM [
-    CLASS(MMES 4491),
-    SELECT 2 FROM [MMES 4492, MMES 4493],
-    PLACEMENT("Senior essay written in an additional advanced seminar")
-] : "Senior essay (MMES 4491, MMES 4492 and 4493, or in an additional seminar)" : 1;
+requirement distribution "Eight distribution courses spread geographically, temporally, and across disciplines" [distribution] {
+  courses at least 8
+    where course.attributes overlaps ["YC MMES Distribution Course", "YC MMES Adv Seminar"]
+      or attempt.approved_for contains "distribution";
+  constraint regions "Two courses on different Middle Eastern regions or countries":
+    at least 2 attempts where attempt.approved_for contains "distinct_region";
+  constraint departments "Two courses from different departments or programs":
+    group course.subject distinct at least 2;
+  constraint pre_1750 "Two courses focusing substantially on the period before 1750":
+    at least 2 attempts
+      where course.attributes overlaps ["YC NELC Medieval Near East", "YC NELC Ancient Near East"] or attempt.approved_for contains "pre_1750";
+  constraint seminars "Two advanced seminars": at least 2 attempts where course.attributes contains "YC MMES Adv Seminar";
+  constraint language_below_l5 "Up to two Middle Eastern language courses below L5, with DUS approval":
+    at most 2 attempts where course.format = "language" and not course.distributionals contains "L5";
+}
+
+requirement language "One course at the L5 level in a Middle Eastern language" [language] {
+  slot where course.subject in ["ARBC", "HEBR", "PERS", "TKSH", "OTTM"] and course.distributionals contains "L5";
+}
+
+requirement senior "Senior essay using modern Middle Eastern language materials: MMES 4491, MMES 4492 and 4493, or an essay in an additional advanced seminar" [senior] {
+  children at least 1;
+  requirement senior_one_term "MMES 4491" { slot from [MMES 4491]; }
+  requirement senior_two_term "MMES 4492 and 4493" { courses exactly 2 from [MMES 4492, MMES 4493]; }
+  requirement senior_seminar "An essay in an additional advanced seminar" {
+    slot where course.attributes contains "YC MMES Adv Seminar" and attempt.approved_for contains "senior";
+  }
+  constraint senior_year "Completed in the senior year" in subtree senior: all where attempt.year_of_study = 4;
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

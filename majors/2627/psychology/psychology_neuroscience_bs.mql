@@ -1,19 +1,86 @@
-// Psychology B.S. -- neuroscience concentration. 12 courses beyond PSYC 1100, including the senior requirement.
-$psyc = RANGE(PSYC 0000, PSYC 9999);
-$outside = PLACEMENT("Course in a related department with substantial empirical psychology content, approved in advance by the DUS");
+// Psychology B.S. (neuroscience concentration): twelve courses beyond PSYC 1100, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/psychology/
+// The B.S. is typically awarded for empirical senior research.
+program psychology_neuroscience_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PSYC 1100, PLACEMENT("Score of 5 on AP Psychology or 7 on IB Psychology")] : "Prerequisite: PSYC 1100" : 1;
-SELECT 1 FROM [S&DS 1000, S&DS 2300, PLACEMENT("S&DS 1230 (YData) or S&DS 2300 for students with AP Statistics 5, with DUS approval")] : "Statistics (S&DS 1000 or 2300), preferably before the senior year" : 1;
-SELECT 2 FROM [TAG("YC PSYC Social Science Core"), SELECT 1 FROM [TAG("YC PSYC Social Science"), TAG("YC PSYC Social Science Core")]] : "Two social science courses (at least one Core: PSYC 1400, 1500, 1700)" : 2;
-SELECT 4 FROM [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040, PLACEMENT("AP Biology 5 or IB Biology 7 placement")] : "Neuroscience: introductory biology (BIOL 1010-1040)" : 1;
-SELECT 1 FROM [PSYC 1600, PSYC 2690L, PSYC 2760, MCDB 3200] : "Neuroscience: PSYC 1600 (or PSYC 2690L, 2760, or MCDB 3200)" : 1;
-SELECT 1 FROM [TAG("YC PSYC Natural Science"), TAG("YC PSYC Natural Science Core")] : "Neuroscience: one additional natural science course" : 2;
-SELECT 1 FROM [TAG("YC PSYC NSCI Track RsrchMthds"), PSYC 2600, PSYC 2538, PSYC 2700, PSYC 2658, PSYC 2670, SELECT 2 FROM [MCDB 3200, MCDB 3210L]] : "Neuroscience: data-collection (research methods) course" : 2;
-// Laboratory courses do not count; MCDB 3200 used as a substitute above may not also count here.
-SELECT 2 FROM [TAG("YC PSYC NSCI Track Adv Scie"), TAG("YC PSYC NSCI Track Adv Scie"), MCDB 2000, MCDB 2020, MCDB 2050, MCDB 2100, MCDB 2500, MCDB 3000, MCDB 3150, MCDB 3200, EEB 2220, EEB 2225, BENG 3200, BENG 5440, CPSC 4750, MB&B 3000, MB&B 3010, MB&B 4200, MB&B 4350, MB&B 4430, MB&B 3520, MATH 2220, MATH 2250, MATH 2410] : "Neuroscience: two advanced science courses" : 2;
-SELECT 2 FROM [$psyc, $psyc, $outside] : "Two electives" : 4;
-LIMIT 3 FROM [$outside, $outside, $outside] : "At most three courses from related departments" : 4;
-LIMIT 3 FROM [RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999)] : "No more than three credits from PSYC 4900-4999" : 4;
+fact ap_psychology "AP Psychology 5 or IB Psychology 7": placement { test: "AP or IB Psychology", result: "AP 5 or IB 7" };
 
-SELECT 1 FROM PSYC 4990 : "Senior requirement: empirical research in PSYC 4990 during the senior year (neuroscientific project supervised by neuroscience-area faculty)" : 1;
-SELECT 1 FROM [TAG("YC PSYC NSCI Track Senior Sem")] : "Senior requirement: one additional course credit from PSYC 4000-4999 with neuroscience content" : 1;
+requirement prereq "Prerequisite: PSYC 1100" [prerequisite] {
+  slot from [PSYC 1100];
+}
+
+effect psychology_placed when fact ap_psychology: waive prereq;
+
+requirement statistics "Statistics: S&DS 1000 or 2300, preferably before senior year, not Credit/D/Fail" [core, letter_required] {
+  slot where course.code in ["S&DS1000", "S&DS2300"] or attempt.approved_for contains "statistics";
+}
+
+requirement social "Two social science courses, at least one Core (PSYC 1400, 1500, 1700)" [core] {
+  courses at least 2 where course.attributes overlaps ["YC PSYC Social Science", "YC PSYC Social Science Core"];
+  constraint social_core "At least one Core": at least 1 attempts where course.attributes contains "YC PSYC Social Science Core";
+}
+
+fact ap_biology "AP Biology 5 or IB Biology 7": placement { test: "AP or IB Biology", result: "AP 5 or IB 7" };
+
+requirement biology "Neuroscience: introductory biology BIOL 1010-1040 (half credit each), unless excused by placement" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+effect biology_placed when fact ap_biology: waive biology;
+
+requirement neuroscience_intro "Neuroscience: PSYC 1600 (or PSYC 2690L, 2760, or MCDB 3200)" [core] {
+  slot from [PSYC 1600, PSYC 2690L, PSYC 2760, MCDB 3200];
+}
+
+requirement natural "Neuroscience: one additional natural science course" [core] {
+  slot where course.attributes overlaps ["YC PSYC Natural Science", "YC PSYC Natural Science Core"];
+}
+
+requirement methods "Neuroscience: a data-collection course (PSYC 2600, 2538, 2700, 2658, or 2670, or MCDB 3200 with 3210L), not Credit/D/Fail" [core, letter_required] {
+  children at least 1;
+  requirement methods_psyc "PSYC 2600, 2538, 2700, 2658, or 2670" {
+    slot where course.attributes contains "YC PSYC NSCI Track RsrchMthds" or course.code in ["PSYC2600", "PSYC2538", "PSYC2700", "PSYC2658", "PSYC2670"];
+  }
+  requirement methods_mcdb "MCDB 3200 with MCDB 3210L" { courses exactly 2 from [MCDB 3200, MCDB 3210L]; }
+}
+
+// Laboratory courses do not count; exclusivity keeps MCDB 3200 from counting twice.
+requirement advanced_science "Neuroscience: two advanced science courses" [core] {
+  courses at least 2
+    where (course.attributes contains "YC PSYC NSCI Track Adv Scie" or course.code in ["MCDB2000", "MCDB2020", "MCDB2050", "MCDB2100", "MCDB2500", "MCDB3000", "MCDB3150", "MCDB3200", "EEB2220", "EEB2225", "BENG3200", "BENG5440", "CPSC4750", "MB&B3000", "MB&B3010", "MB&B4200", "MB&B4350", "MB&B4430", "MB&B3520", "MATH2220", "MATH2250", "MATH2410"]) and course.format != "lab";
+}
+
+requirement electives "Two electives (courses in related departments with substantial empirical psychology content, approved in advance)" [elective] {
+  courses at least 2 where course.subject = "PSYC" or attempt.approved_for contains "related";
+}
+
+requirement senior_essay "Senior requirement: empirical research in PSYC 4990 in the senior year (a neuroscientific project supervised by neuroscience-area faculty), letter grade" [senior, letter_required] {
+  slot from [PSYC 4990];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+requirement senior_additional "Senior requirement: one more course credit from PSYC 4000-4999 with neuroscience content" [senior] {
+  credits at least 1 where course.subject = "PSYC" and course.number >= 4000 and course.attributes contains "YC PSYC NSCI Track Senior Sem";
+}
+
+constraint related_limit "At most three courses from related departments" in program:
+  limit 3 attempts where attempt.approved_for contains "related";
+
+constraint research_limit "No more than three credits from PSYC 4900-4999" in program:
+  limit 3 credits where course.subject = "PSYC" and course.number >= 4900;
+
+constraint letter_required "Statistics, research methods, and the senior essay course may not be taken Credit/D/Fail" in roles [letter_required]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval (advance approval recommended)" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve courses beyond PSYC 1100, including the senior requirement" in roles [core, elective, senior]:
+  total at least 12 attempts;

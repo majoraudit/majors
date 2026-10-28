@@ -1,16 +1,65 @@
-// Psychology B.A. -- standard major. 12 courses beyond PSYC 1100, including the senior requirement.
-$psyc = RANGE(PSYC 0000, PSYC 9999);
-$outside = PLACEMENT("Course in a related department with substantial empirical psychology content, approved in advance by the DUS");
+// Psychology B.A. (standard major): twelve courses beyond PSYC 1100, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/psychology/
+// The B.A. is typically awarded for a nonempirical literature review in the senior year.
+program psychology_standard_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PSYC 1100, PLACEMENT("Score of 5 on AP Psychology or 7 on IB Psychology")] : "Prerequisite: PSYC 1100" : 1;
-SELECT 1 FROM [S&DS 1000, S&DS 2300, PLACEMENT("S&DS 1230 (YData) or S&DS 2300 for students with AP Statistics 5, with DUS approval")] : "Statistics (S&DS 1000 or 2300), preferably before the senior year" : 1;
-SELECT 2 FROM [TAG("YC PSYC Social Science Core"), SELECT 1 FROM [TAG("YC PSYC Social Science"), TAG("YC PSYC Social Science Core")]] : "Two social science courses (at least one Core: PSYC 1400, 1500, 1700)" : 2;
-SELECT 2 FROM [TAG("YC PSYC Natural Science Core"), SELECT 1 FROM [TAG("YC PSYC Natural Science"), TAG("YC PSYC Natural Science Core")]] : "Two natural science courses (at least one Core: PSYC 1300, 1600)" : 2;
-SELECT 1 FROM [RANGE(PSYC 2000, PSYC 2999)] : "Research methods: one data-collection course numbered PSYC 2000-2999" : 2;
-SELECT 4 FROM [$psyc, $psyc, $psyc, $psyc, $outside, $outside, $outside, PLACEMENT("Second statistics or quantitative methods course approved in advance by the DUS")] : "Four electives" : 4;
-LIMIT 3 FROM [$outside, $outside, $outside] : "At most three courses from related departments" : 4;
-LIMIT 3 FROM [RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999), RANGE(PSYC 4900, PSYC 4999)] : "No more than three credits from PSYC 4900-4999" : 4;
+fact ap_psychology "AP Psychology 5 or IB Psychology 7": placement { test: "AP or IB Psychology", result: "AP 5 or IB 7" };
 
-// PSYC 4925 and 4950 are Pass/Fail and cannot carry the senior essay.
-SELECT 1 FROM [RANGE(PSYC 4000, PSYC 4899), PSYC 4990] : "Senior requirement: senior-year course from PSYC 4000-4899 or 4990, with a senior essay of at least 5,000 words (letter grade)" : 1;
-SELECT 1 FROM [RANGE(PSYC 4000, PSYC 4999)] : "Senior requirement: one additional course credit from PSYC 4000-4999" : 1;
+requirement prereq "Prerequisite: PSYC 1100" [prerequisite] {
+  slot from [PSYC 1100];
+}
+
+effect psychology_placed when fact ap_psychology: waive prereq;
+
+requirement statistics "Statistics: S&DS 1000 or 2300, preferably before senior year, not Credit/D/Fail" [core, letter_required] {
+  slot where course.code in ["S&DS1000", "S&DS2300"] or attempt.approved_for contains "statistics";
+}
+
+requirement social "Two social science courses, at least one Core (PSYC 1400, 1500, 1700)" [core] {
+  courses at least 2 where course.attributes overlaps ["YC PSYC Social Science", "YC PSYC Social Science Core"];
+  constraint social_core "At least one Core": at least 1 attempts where course.attributes contains "YC PSYC Social Science Core";
+}
+
+requirement natural "Two natural science courses, at least one Core (PSYC 1300, 1600)" [core] {
+  courses at least 2 where course.attributes overlaps ["YC PSYC Natural Science", "YC PSYC Natural Science Core"];
+  constraint natural_core "At least one Core": at least 1 attempts where course.attributes contains "YC PSYC Natural Science Core";
+}
+
+requirement methods "Research methods: a data-collection course numbered PSYC 2000-2999, not Credit/D/Fail" [core, letter_required] {
+  slot where course.subject = "PSYC" and course.number >= 2000 and course.number <= 2999;
+}
+
+requirement electives "Four electives (related-department courses or a second statistics course approved in advance by the DUS)" [elective] {
+  courses at least 4 where course.subject = "PSYC" or attempt.approved_for contains "related" or attempt.approved_for contains "second_statistics";
+}
+
+requirement senior_essay "Senior requirement: a senior-year course from PSYC 4000-4899 or 4990, with a senior essay of at least 5,000 words, letter grade (not PSYC 4925 or 4950)" [senior, letter_required] {
+  slot where course.subject = "PSYC" and (course.number >= 4000 and course.number <= 4899 or course.code = "PSYC4990")
+    and attempt.year_of_study = 4;
+}
+
+requirement senior_additional "Senior requirement: one more course credit from PSYC 4000-4999" [senior] {
+  credits at least 1 where course.subject = "PSYC" and course.number >= 4000;
+}
+
+constraint related_limit "At most three courses from related departments" in program:
+  limit 3 attempts where attempt.approved_for contains "related";
+
+constraint research_limit "No more than three credits from PSYC 4900-4999" in program:
+  limit 3 credits where course.subject = "PSYC" and course.number >= 4900;
+
+constraint letter_required "Statistics, research methods, and the senior essay course may not be taken Credit/D/Fail" in roles [letter_required]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval (advance approval recommended)" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve courses beyond PSYC 1100, including the senior requirement" in roles [core, elective, senior]:
+  total at least 12 attempts;

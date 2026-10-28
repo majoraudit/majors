@@ -1,24 +1,69 @@
-// Mathematics intensive major -- all requirements of the B.A. (10 courses) or B.S. (12 courses), plus MATH 3050, 3100, and 3500
-// and two graduate courses (5000+) in Mathematics among the required courses.
-$math = [RANGE(MATH 2250, MATH 4699), RANGE(MATH 4701, MATH 5999)];
-$dist = TAG("YC MATH Distribution");
-$outside = PLACEMENT("Math-intensive course from another department approved by the DUS");
-$physci = [ASTR 4180, ASTR 4300, CHEM 3330, CHEM 4700, PHYS 4010, PHYS 4100, PHYS 4020, PHYS 4300, PHYS 4400, PHYS 4410, PHYS 4500, PLACEMENT("Advanced physical science course approved by the DUS")];
+// Mathematics intensive major: the B.A. (ten courses) or B.S. (twelve) with MATH 3050, 3100, and 3500 and two graduate
+// Mathematics courses (5000+), which count as electives but toward no specific requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics/
+// Courses count when numbered MATH 2250-5999 (not MATH 4700); graduate courses 6000 and above do not count.
+program mathematics_intensive {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [MATH 1150, PLACEMENT("Equivalent of MATH 1150 (e.g., AP Calculus BC score of 4 or 5)")] : "Prerequisite: single-variable calculus through MATH 1150" : 1;
+choice degree "Degree": declared one of "ba", "bs";
 
-SELECT 1 FROM [MATH 2250, MATH 2260] : "Introductory sequence: linear algebra with proofs (MATH 2250 or 2260)" : 1;
-SELECT 1 FROM [MATH 2550, MATH 2560] : "Introductory sequence: real analysis (MATH 2550 or 2560)" : 1;
-SELECT 1 FROM [MATH 3020, MATH 1200] : "Introductory sequence: vector analysis or multivariable calculus (MATH 3020 or 1200)" : 1;
-SELECT 1 FROM [MATH 3500, PLACEMENT("Higher-level algebra course (typically MATH 3700) with prior written DUS permission")] : "Algebra (MATH 3500)" : 1;
-SELECT 2 FROM [MATH 3050, MATH 3100] : "Intensive: both MATH 3050 and MATH 3100" : 1;
-// Graduate courses numbered 6000 and above, and MATH 4700, do not count.
-SELECT 3 FROM [$dist, $dist, $dist] : "Three courses carrying the Math distribution attribute" : 2;
-// The graduate courses count as electives but not toward any specific requirement (such as distribution).
-SELECT 1 FROM [RANGE(MATH 5000, MATH 5999), PLACEMENT("Equivalent independent study approved by the DUS")] : "Intensive: graduate Mathematics course (counts as an elective)" : 2;
-SELECT 1 FROM [RANGE(MATH 5000, MATH 5999), PLACEMENT("Equivalent independent study approved by the DUS")] : "Intensive: second graduate Mathematics course" : 2;
-LIMIT 2 FROM [$outside, $outside] : "Up to two math-intensive courses from other departments (DUS approval)" : 3;
+fact calculus_equivalent "Equivalent of MATH 1150 (e.g., AP Calculus BC 4 or 5)": placement { test: "AP Calculus BC", result: "4 or 5" };
 
-SELECT 1 FROM [RANGE(MATH 4800, MATH 4890), PLACEMENT("MATH 4750 senior essay with DUS consent")] : "Senior requirement: seminar numbered MATH 4800-4890, or MATH 4750 with DUS consent" : 1;
+requirement prereq "Prerequisite: single-variable calculus through MATH 1150" [prerequisite] {
+  slot from [MATH 1150];
+}
 
-SELECT 1 FROM [PLACEMENT("B.A. degree (no additional courses)"), SELECT 2 FROM [$physci, $physci]] : "Degree: B.A., or B.S. with two advanced courses in the physical sciences" : 2;
+effect calculus_waived when fact calculus_equivalent: waive prereq;
+
+requirement linear_algebra "Introductory sequence: linear algebra with proofs (MATH 2250 or 2260)" [mathematics] {
+  slot from [MATH 2250, MATH 2260];
+}
+
+requirement real_analysis_intro "Introductory sequence: real analysis (MATH 2550 or 2560)" [mathematics] {
+  slot from [MATH 2550, MATH 2560];
+}
+
+requirement vector_analysis "Introductory sequence: vector analysis or multivariable calculus (MATH 3020 or 1200)" [mathematics] {
+  slot from [MATH 3020, MATH 1200];
+}
+
+requirement algebra "Algebra: MATH 3500 (or a higher-level algebra course such as MATH 3700 with prior written DUS permission)" [mathematics] {
+  slot where course.code = "MATH3500" or attempt.approved_for contains "algebra";
+}
+
+requirement analysis_both "Intensive: both MATH 3050 and MATH 3100" [mathematics] {
+  courses exactly 2 from [MATH 3050, MATH 3100];
+}
+
+requirement distribution "Three courses carrying the Math distribution attribute" [mathematics] {
+  courses at least 3 where course.attributes contains "YC MATH Distribution" and course.subject = "MATH" and course.number >= 2250 and course.number <= 5999 and course.code != "MATH4700";
+}
+
+requirement graduate "Intensive: two graduate Mathematics courses (5000 or above) or equivalent independent study" [mathematics] {
+  courses at least 2
+    where course.subject = "MATH" and course.number >= 5000 and course.number <= 5999 or attempt.approved_for contains "graduate";
+}
+
+requirement senior "Senior requirement: a seminar numbered MATH 4800-4890, or MATH 4750 with DUS consent" [senior] {
+  slot where course.subject = "MATH" and course.number >= 4800 and course.number <= 4890
+    or course.code = "MATH4750" and attempt.approved_for contains "senior";
+}
+
+requirement physical_sciences "B.S.: two advanced courses in the physical sciences (others with DUS approval)" [science] when degree = "bs" {
+  courses at least 2 where course.code in ["ASTR4180", "ASTR4300", "CHEM3330", "CHEM4700", "PHYS4010", "PHYS4100", "PHYS4020", "PHYS4300", "PHYS4400", "PHYS4410", "PHYS4500"] or attempt.approved_for contains "physical_sciences";
+}
+
+constraint outside_limit "Up to two math-intensive courses from other departments, with DUS approval" in roles [mathematics]:
+  limit 2 attempts where course.subject != "MATH";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken elsewhere after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint ten_math "Ten mathematics courses including the senior requirement" in roles [mathematics, senior]:
+  total at least 10 attempts;

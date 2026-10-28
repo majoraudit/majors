@@ -1,24 +1,51 @@
-// Linguistics B.A. -- 12 term courses in linguistics and related areas, including the senior requirement.
-$breadth = [LING 1179, LING 2120, LING 2200, LING 2270, LING 2320, LING 2530, LING 2630, LING 2750, LING 2790, LING 3610];
-$elective = [RANGE(LING 0000, LING 9999), PLACEMENT("Related course (anthropology, classics, cognitive science, computer science, English, philosophy, psychology, or a foreign language) approved by the DUS")];
+// Linguistics B.A.: twelve term courses in linguistics and related areas, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/linguistics/
+program linguistics_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 4 FROM [$breadth, PLACEMENT("Breadth course substituted with DUS approval")] : "Breadth: four of the ten listed courses" : 2;
-SELECT 1 FROM [$breadth, LING 1100, LING 1160, PLACEMENT("Multi-subfield course approved by the DUS")] : "Breadth: one additional course (listed course, LING 1100, or LING 1160)" : 2;
+requirement breadth "Breadth: four of the ten listed courses" [core] {
+  courses at least 4 where course.code in ["LING1179", "LING2120", "LING2200", "LING2270", "LING2320", "LING2530", "LING2630", "LING2750", "LING2790", "LING3610"] or attempt.approved_for contains "breadth";
+}
 
-SELECT 1 FROM [
-    SELECT 2 FROM [TAG("YC LING Depth Historical Ling"), TAG("YC LING Depth Historical Ling")],
-    SELECT 2 FROM [TAG("YC LING Depth Comp Linguistic"), TAG("YC LING Depth Comp Linguistic")],
-    SELECT 2 FROM [TAG("YC LING Depth Phonetics"), TAG("YC LING Depth Phonetics")],
-    SELECT 2 FROM [TAG("YC LING Depth Phonology"), TAG("YC LING Depth Phonology")],
-    SELECT 2 FROM [TAG("YC LING Depth Syntax"), TAG("YC LING Depth Syntax")],
-    SELECT 2 FROM [TAG("YC LING Depth Semntcs/Pragmat"), TAG("YC LING Depth Semntcs/Pragmat")],
-    SELECT 2 FROM [TAG("YC LING Depth Morphology"), TAG("YC LING Depth Morphology")],
-    SELECT 2 FROM [TAG("YC LING Depth Lang&Mind/Brain"), TAG("YC LING Depth Lang&Mind/Brain")]
-] : "Depth: two courses beyond the introductory level in one area of linguistics" : 2;
+requirement breadth_additional "Breadth: one more listed course, or a course covering several subfields such as LING 1100 or 1160" [core] {
+  slot where course.code in ["LING1179", "LING2120", "LING2200", "LING2270", "LING2320", "LING2530", "LING2630", "LING2750", "LING2790", "LING3610"] or course.code in ["LING1100", "LING1160"] or attempt.approved_for contains "breadth";
+}
 
-SELECT 3 FROM [$elective, $elective, $elective] : "Three electives" : 3;
-SELECT 1 FROM [RANGE(LING 2000, LING 9999), PLACEMENT("Related elective at the 2000 level or above approved by the DUS")] : "At least one elective at the 2000 level or above" : 3;
-LIMIT 2 FROM [PLACEMENT("Foreign language course"), PLACEMENT("Foreign language course")] : "No more than two foreign language courses without specific DUS approval" : 3;
+requirement depth "Depth: two courses beyond the introductory level in one of the eight areas" [core] {
+  children at least 1;
+  requirement depth_historical "Historical" { courses at least 2 where course.attributes contains "YC LING Depth Historical Ling"; }
+  requirement depth_computational "Computational" { courses at least 2 where course.attributes contains "YC LING Depth Comp Linguistic"; }
+  requirement depth_phonetics "Phonetics" { courses at least 2 where course.attributes contains "YC LING Depth Phonetics"; }
+  requirement depth_phonology "Phonology" { courses at least 2 where course.attributes contains "YC LING Depth Phonology"; }
+  requirement depth_syntax "Syntax" { courses at least 2 where course.attributes contains "YC LING Depth Syntax"; }
+  requirement depth_semantics "Semantics and pragmatics" { courses at least 2 where course.attributes contains "YC LING Depth Semntcs/Pragmat"; }
+  requirement depth_morphology "Morphology" { courses at least 2 where course.attributes contains "YC LING Depth Morphology"; }
+  requirement depth_mind_brain "Language and mind/brain" { courses at least 2 where course.attributes contains "YC LING Depth Lang&Mind/Brain"; }
+}
 
-SELECT 1 FROM LING 4900 : "Senior research requirement: LING 4900" : 1;
-SELECT 1 FROM LING 4910 : "Senior essay and research colloquium (LING 4910)" : 1;
+requirement electives "Three electives relating to linguistics, one at the 2000 level or above (related departments with DUS approval)" [elective] {
+  courses at least 3 where course.subject = "LING" or attempt.approved_for contains "electives";
+  constraint advanced_elective "At least one at the 2000 level or above": at least 1 attempts where course.number >= 2000;
+  constraint foreign_language "No more than two foreign language courses without specific DUS approval":
+    at most 2 attempts where course.format = "language";
+}
+
+requirement senior_research "Senior research requirement: LING 4900" [senior] {
+  slot from [LING 4900];
+}
+
+requirement senior_essay "Senior essay and research colloquium: LING 4910" [senior] {
+  slot from [LING 4910];
+}
+
+constraint letter_grades "Only letter-graded courses count, unless the DUS specifically approves" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

@@ -1,15 +1,63 @@
-// Mathematics and Physics B.S. -- 15 term courses (14.5 credits) beyond the prerequisites, including the senior requirement.
-// Math courses must carry an undergraduate MATH number; graduate MATH 5000-5999 may count as electives, 6000+ may not.
-$math = [RANGE(MATH 2220, MATH 4690), RANGE(MATH 5000, MATH 5999)];
-$phys = [RANGE(PHYS 3000, PHYS 9999), PLACEMENT("Advanced physics course chosen in consultation with the major adviser")];
+// Mathematics and Physics B.S.: fifteen term courses (14.5 credits) beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics-physics/
+// Mathematics courses must carry a MATH number; graduate MATH 5000-5999 may count as electives, 6000+ may not.
+program mathematics_and_physics_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [MATH 1200, SELECT 3 FROM [MATH 3020, MATH 2250, MATH 2550]] : "Prerequisite: MATH 1200 (or MATH 3020, which then does not count toward the math courses)" : 1;
-SELECT 1 FROM [SELECT 2 FROM [PHYS 1800, PHYS 1810], SELECT 2 FROM [PHYS 2000, PHYS 2010], SELECT 2 FROM [PHYS 2600, PHYS 2610], SELECT 2 FROM [PHYS 1700, PHYS 1710]] : "Prerequisite: introductory physics lecture sequence (PHYS 1700, 1710 with Physics DUS permission)" : 1;
-SELECT 1 FROM [PHYS 2050L, PHYS 1650L] : "Prerequisite: PHYS 2050L (PHYS 1650L with Physics DUS permission)" : 1;
+requirement prereq_math "Prerequisite: MATH 1200 or an equivalent (MATH 3020 used here does not also count as a math course)" [prerequisite] {
+  slot where course.code in ["MATH1200", "MATH3020"] or attempt.approved_for contains "prereq_math";
+}
 
-SELECT 1 FROM PHYS 2060L : "PHYS 2060L (half credit)" : 1;
-SELECT 6 FROM [$math, $math, $math, $math, $math, $math] : "Six mathematics courses numbered 2220-4690" : 3;
-SELECT 5 FROM [$phys, $phys, $phys, $phys, $phys] : "Five advanced physics courses (six including the senior project)" : 3;
-SELECT 2 FROM [$math, $math, $phys, $phys] : "Two additional mathematics or physics courses" : 4;
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810 or above (PHYS 1700 and 1710 with Physics DUS permission)" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_2600 "PHYS 2600 and 2610" { courses exactly 2 from [PHYS 2600, PHYS 2610]; }
+  requirement prereq_physics_1700 "PHYS 1700 and 1710, with Physics DUS permission" {
+    courses exactly 2 where course.code in ["PHYS1700", "PHYS1710"] and attempt.approved_for contains "prereq_physics";
+  }
+}
 
-SELECT 1 FROM [PHYS 4710, PHYS 4720] : "Senior project (PHYS 4710 or 4720) acceptable to both departments" : 1;
+requirement prereq_lab "Prerequisite: PHYS 2050L (PHYS 1650L with Physics DUS permission)" [prerequisite] {
+  slot where course.code = "PHYS2050L" or course.code = "PHYS1650L" and attempt.approved_for contains "prereq_lab";
+}
+
+requirement lab "PHYS 2060L (half credit)" [physics] {
+  slot from [PHYS 2060L];
+}
+
+requirement math_courses "Six mathematics courses numbered 2220-4690" [mathematics] {
+  courses at least 6
+    where course.subject = "MATH" and (course.number >= 2220 and course.number <= 4690 or course.number >= 5000 and course.number <= 5999);
+}
+
+requirement physics_courses "Five advanced physics courses, chosen with the major adviser (six with the senior project)" [physics] {
+  courses at least 5
+    where course.subject = "PHYS" and course.number >= 3000 and not course.code in ["PHYS4710", "PHYS4720"]
+      or attempt.approved_for contains "physics_courses";
+}
+
+requirement electives "Two mathematics or physics electives" [elective] {
+  courses at least 2
+    where course.subject = "MATH" and course.number >= 2220 and course.number <= 5999 and course.number != 4700
+      or course.subject = "PHYS" and course.number >= 3000;
+}
+
+requirement senior "Senior project in PHYS 4710 or 4720, on a topic acceptable to both departments" [senior, physics] {
+  slot from [PHYS 4710, PHYS 4720];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken elsewhere after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen term courses beyond the prerequisites" in roles [mathematics, physics, elective, senior]:
+  total at least 15 attempts;
+
+constraint total_credits "14.5 course credits beyond the prerequisites" in roles [mathematics, physics, elective, senior]:
+  total at least 14.5 credits;

@@ -1,16 +1,81 @@
-// Biomedical Engineering B.S. -- Bioimaging concentration.
-// 13 term courses (at least 11 course credits) beyond the prerequisites, including the senior requirement.
-SELECT 1 FROM [SELECT 2 FROM [BIOL 1010, BIOL 1020], PLACEMENT("Higher-level MCDB or MB&B course approved by the DUS")] : "Prerequisite: BIOL 1010 and 1020" : 1;
-SELECT 1 FROM [RANGE(CHEM 1610, CHEM 9999)] : "Prerequisite: chemistry lecture numbered CHEM 1610 or higher" : 1;
-SELECT 1 FROM [MATH 1150, MATH 1160, PLACEMENT("Placement into MATH 1200 or ENAS 1510")] : "Prerequisite: MATH 1150 or 1160" : 1;
-SELECT 1 FROM [MATH 1200, ENAS 1510] : "Prerequisite: MATH 1200 or ENAS 1510" : 1;
-SELECT 1 FROM ENAS 1940 : "Prerequisite: ENAS 1940" : 1;
-SELECT 2 FROM [PHYS 1800, PHYS 1810] : "Prerequisite: PHYS 1800 and 1810" : 1;
-SELECT 1 FROM [SELECT 2 FROM [PHYS 2050L, PHYS 2060L], SELECT 2 FROM [PHYS 1650L, PHYS 1660L]] : "Prerequisite: physics laboratories" : 1;
+// Biomedical Engineering B.S. (Bioimaging concentration): thirteen term courses, at least eleven course credits,
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/biomedical-engineering/
+program biomedical_engineering_bs_bioimaging {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 9 FROM [BENG 2800, BENG 2080, BENG 3200, BENG 3600, BENG 3400, BENG 3500, BENG 3100, BENG 3110, BENG 4080] : "Required courses for all concentrations" : 1;
-LIMIT 1 FROM [MB&B 3000, PLACEMENT("Relevant course substituted with DUS permission")] : "At most one relevant substitution with DUS permission" : 2;
+fact calculus_placement "Placement into MATH 1200 or ENAS 1510": placement { test: "Yale mathematics placement", result: "MATH 1200" };
 
-SELECT 3 FROM [TAG("YC BENG Bioimaging"), TAG("YC BENG Bioimaging"), TAG("YC BENG Bioimaging"), BENG 4104, BENG 4106, BENG 4410, BENG 4420, BENG 4440, BENG 4450, BENG 4849, BENG 4475, BENG 4476, BENG 4485] : "Three Bioimaging concentration courses" : 2;
+requirement prereq_biology "Prerequisite: BIOL 1010 and 1020, or a higher-level MCDB or MB&B course with DUS permission" [prerequisite] {
+  children at least 1;
+  requirement prereq_biol_sequence "BIOL 1010 and 1020" { courses exactly 2 from [BIOL 1010, BIOL 1020]; }
+  requirement prereq_biol_higher "Higher-level MCDB or MB&B course approved by the DUS" {
+    slot where course.subject in ["MCDB", "MB&B"] and attempt.approved_for contains "prereq_biology";
+  }
+}
 
-SELECT 1 FROM [CLASS(BENG 4974), SELECT 2 FROM [BENG 4973, BENG 4974]] : "Senior project (BENG 4974, or BENG 4973 and 4974)" : 1;
+requirement prereq_chemistry "Prerequisite: a chemistry lecture numbered CHEM 1610 or higher" [prerequisite] {
+  slot where course.subject = "CHEM" and course.number >= 1610 and course.format != "lab";
+}
+
+requirement prereq_calculus "Prerequisite: MATH 1150 or 1160 (unless placed into MATH 1200 or ENAS 1510)" [prerequisite] {
+  slot from [MATH 1150, MATH 1160];
+}
+
+effect calculus_placed "Placement into MATH 1200 or ENAS 1510 waives MATH 1150 or 1160" when fact calculus_placement: waive prereq_calculus;
+
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement prereq_differential_equations "Prerequisite: ENAS 1940" [prerequisite] {
+  slot from [ENAS 1940];
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810" [prerequisite] {
+  courses exactly 2 from [PHYS 1800, PHYS 1810];
+}
+
+requirement prereq_physics_lab "Prerequisite: PHYS 2050L and 2060L, or PHYS 1650L and 1660L" [prerequisite] {
+  children at least 1;
+  requirement prereq_lab_2050 "PHYS 2050L and 2060L" { courses exactly 2 from [PHYS 2050L, PHYS 2060L]; }
+  requirement prereq_lab_1650 "PHYS 1650L and 1660L" { courses exactly 2 from [PHYS 1650L, PHYS 1660L]; }
+}
+
+// BENG 2080, 3100, 3110, and 4080 are half-credit courses.
+requirement core "Required for all concentrations: BENG 2800, 2080, 3200, 3600, 3400, 3500, 3100, 3110, and 4080" [core] {
+  courses at least 9
+    where course.code in ["BENG2800", "BENG2080", "BENG3200", "BENG3600", "BENG3400", "BENG3500", "BENG3100", "BENG3110", "BENG4080"]
+      or attempt.approved_for contains "core";
+  constraint one_substitution "One relevant course (e.g. MB&B 3000) may substitute, with DUS permission":
+    at most 1 attempts where attempt.approved_for contains "core";
+  constraint sophomore_seminar "BENG 2080 taken in the sophomore year":
+    all where not course.code = "BENG2080" or attempt.year_of_study = 2;
+  constraint senior_seminar "BENG 4080 taken in the senior year":
+    all where not course.code = "BENG4080" or attempt.year_of_study = 4;
+}
+
+requirement concentration "Three courses with the YC BENG Bioimaging attribute (e.g. BENG 4104, 4106, 4410, 4420, 4440, 4450, 4849, 4475, 4476, or 4485)" [concentration] {
+  courses at least 3 where course.attributes contains "YC BENG Bioimaging";
+}
+
+requirement senior "Senior project: BENG 4974 in the final term, or the yearlong BENG 4973 and 4974" [senior] {
+  children at least 1;
+  requirement senior_one_term "BENG 4974" { slot from [BENG 4974]; }
+  requirement senior_two_term "BENG 4973 and 4974" { courses exactly 2 from [BENG 4973, BENG 4974]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Thirteen term courses beyond the prerequisites" in roles [core, concentration, senior]:
+  total at least 13 attempts;
+
+constraint total_credits "At least eleven course credits beyond the prerequisites" in roles [core, concentration, senior]:
+  total at least 11 credits;

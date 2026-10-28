@@ -1,21 +1,76 @@
-// East Asian Studies B.A. -- 13 course credits beyond the prerequisite, including the senior requirement.
-// Up to six credits may come from a preapproved study abroad program. Areas of focus: China, Japan, or Korea.
-$lang = [RANGE(CHNS 0000, CHNS 9999), RANGE(JAPN 0000, JAPN 9999), RANGE(KREN 0000, KREN 9999), PLACEMENT("Content course on East Asia replacing language credit for students who placed out of L5 (DUS approval)")];
-$focus = PLACEMENT("Course in the country or area of focus approved by the DUS");
+// East Asian Studies B.A.: thirteen course credits beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/east-asian-studies/
+// The stated area of focus determines which courses the DUS accepts; those reach the audit as approvals.
+program east_asian_studies {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [DIST_DEPT("L2", "CHNS"), DIST_DEPT("L2", "JAPN"), DIST_DEPT("L2", "KREN"), PLACEMENT("L2-level proficiency in an East Asian language taught at Yale, or equivalent")] : "Prerequisite: L2 level of an East Asian language" : 1;
+choice focus_area "Country or area of focus": declared one of "china", "japan", "korea";
 
-SELECT 6 FROM [$lang, $lang, $lang, $lang, $lang, $lang] : "Six course credits in East Asian language courses" : 2;
-SELECT 2 FROM [DIST_DEPT("L5", "CHNS"), DIST_DEPT("L5", "JAPN"), DIST_DEPT("L5", "KREN"), DIST_DEPT("L5", "CHNS"), DIST_DEPT("L5", "JAPN"), DIST_DEPT("L5", "KREN"), PLACEMENT("Placed out of L5 study; replaced with East Asia content course (DUS approval)"), PLACEMENT("Placed out of L5 study; replaced with East Asia content course (DUS approval)")] : "Two language credits at the L5 level" : 2;
+fact l2_proficiency "L2-level proficiency in an East Asian language taught at Yale, or the equivalent":
+  language_proficiency { language: "East Asian language", level: "L2" };
+fact placed_out_l5 "Placed out of L5 study at Yale": placement { test: "EALL language placement", result: "beyond L5" };
 
-// Six credits in the area of focus, including the senior requirement below.
-SELECT 1 FROM PLACEMENT("Area-of-focus course in the premodern period") : "Area of focus: one premodern course" : 2;
-SELECT 2 FROM [PLACEMENT("Seminar in the area of focus, completed before the senior requirement term"), PLACEMENT("Seminar in the area of focus, completed before the senior requirement term")] : "Area of focus: two seminars (completed before the senior requirement)" : 2;
-SELECT 2 FROM [$focus, $focus] : "Area of focus: two additional courses" : 3;
-SELECT 1 FROM PLACEMENT("Course on East Asia outside the country or area of focus") : "One course on East Asia outside the area of focus" : 3;
+requirement prereq "Prerequisite: the L2 level of an East Asian language taught at Yale, or the equivalent" [prerequisite] {
+  slot where course.subject in ["CHNS", "JAPN", "KREN"] and course.distributionals contains "L2";
+}
 
-SELECT 1 FROM [
-    PLACEMENT("Seminar related to the area of focus culminating in a senior thesis using East Asian-language materials"),
-    CLASS(EAST 4900),
-    SELECT 2 FROM [EAST 4910, EAST 4920]
-] : "Senior requirement: senior seminar thesis, EAST 4900, or EAST 4910 and 4920" : 1;
+effect proficient when fact l2_proficiency: waive prereq;
+
+requirement language "Six course credits in East Asian language courses, two at the L5 level" [language] {
+  credits at least 6
+    where course.subject in ["CHNS", "JAPN", "KREN"] or attempt.approved_for contains "language";
+  constraint l5_credits "Two credits at the L5 level":
+    at least 2 credits where course.distributionals contains "L5" or attempt.approved_for contains "language";
+}
+
+// With DUS approval, students who placed out of L5 may replace language credits with content courses on East Asia.
+effect content_for_language "Students who placed out of L5 may replace language credits with East Asia content courses"
+    when fact placed_out_l5: permit language where attempt.approved_for contains "east_asia_content";
+
+requirement focus_premodern "Area of focus: one course in the premodern era" [concentration] {
+  slot where attempt.approved_for contains "focus_premodern";
+}
+
+requirement focus_seminars "Area of focus: two seminars, completed before the term of the senior requirement" [concentration] {
+  courses at least 2 where course.format = "seminar" and attempt.approved_for contains "focus";
+}
+
+requirement focus_additional "Area of focus: two additional courses" [concentration] {
+  courses at least 2 where attempt.approved_for contains "focus";
+}
+
+requirement outside_focus "One course on East Asia outside the country or area of focus" [elective] {
+  slot where attempt.approved_for contains "outside_focus";
+}
+
+requirement senior "Senior requirement in the senior year, using East Asian-language materials: a senior seminar thesis, EAST 4900, or EAST 4910 and 4920" [senior] {
+  children at least 1;
+  requirement senior_seminar "A seminar related to the area of focus culminating in a senior thesis" {
+    slot where course.format = "seminar" and attempt.approved_for contains "senior";
+  }
+  requirement senior_essay "One-term senior essay (EAST 4900)" { slot from [EAST 4900]; }
+  requirement senior_project "One-credit, two-term senior research project (EAST 4910 and 4920)" { courses exactly 2 from [EAST 4910, EAST 4920]; }
+  constraint senior_year "Completed in the senior year" in subtree senior: all where attempt.year_of_study = 4;
+}
+
+constraint seminars_first "Both focus seminars are completed before the senior requirement" in program:
+  order course.format = "seminar" and attempt.approved_for contains "focus"
+    before course.code in ["EAST4900", "EAST4910"] or attempt.approved_for contains "senior";
+
+constraint abroad_limit "Up to six course credits from a preapproved study abroad program" in program:
+  limit 6 credits where attempt.source = "study_abroad";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, with DUS permission" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Thirteen course credits beyond the prerequisite" in roles [language, concentration, elective, senior]:
+  total at least 13 credits;

@@ -1,18 +1,55 @@
-// Ethnicity, Race, and Migration B.A. -- 12 course credits including the senior requirement.
-$erm = RANGE(ER&M 0000, ER&M 9999);
-$interest = [$erm, PLACEMENT("Area-of-interest course approved by the DUS")];
-$related = [$erm, PLACEMENT("Course in another department with ethnicity, race, and migration content approved by the DUS")];
+// Ethnicity, Race, and Migration B.A.: twelve course credits including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/ethnicity-race-migration/
+program ethnicity_race_migration {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM ER&M 2000 : "Introductory course (ER&M 2000)" : 1;
-SELECT 1 FROM ER&M 3000 : "Junior seminar (ER&M 3000)" : 1;
+requirement intro "Introductory course: ER&M 2000" [core] {
+  slot from [ER&M 2000];
+}
 
-// Area-of-interest courses do not include the senior essay or project.
-SELECT 1 FROM [TAG("YC ER&M Methods Course")] : "Area of interest: one methods course" : 2;
-SELECT 5 FROM [$interest, $interest, $interest, $interest, $interest] : "Area of interest: five additional courses (six in total)" : 3;
-SELECT 2 FROM [$related, $related] : "Two additional courses with ER&M content" : 4;
-LIMIT 2 FROM [PLACEMENT("Course in another department approved by the DUS"), PLACEMENT("Course in another department approved by the DUS")] : "At most two courses from other departments" : 4;
+requirement junior_seminar "Junior seminar: ER&M 3000, in the junior year, for a letter grade" [core] {
+  slot from [ER&M 3000];
+  constraint junior_year "Taken in the junior year": all where attempt.year_of_study = 3;
+  constraint junior_letter "Not taken Credit/D/Fail": all where attempt.grading_mode = "letter";
+}
 
-SELECT 1 FROM [
-    SELECT 2 FROM [ER&M 4091, ER&M 4092],
-    SELECT 2 FROM [PLACEMENT("Upper-level ER&M seminar with a 20-25 page senior paper approved by the instructor"), RANGE(ER&M 3001, ER&M 4090)]
-] : "Senior requirement: ER&M 4091 and 4092, or two upper-level seminars (one with a senior paper)" : 1;
+// The area of interest is defined with the DUS and does not include the senior essay or project.
+requirement interest "Six courses in an area of interest, one a methods course" [concentration] {
+  courses at least 6 where course.subject = "ER&M" or attempt.approved_for contains "interest";
+  constraint methods "One methods course": at least 1 attempts where course.attributes contains "YC ER&M Methods Course";
+}
+
+requirement additional "Two additional courses with ethnicity, race, and migration content, approved by the DUS" [elective] {
+  courses at least 2 where course.subject = "ER&M" or attempt.approved_for contains "additional";
+}
+
+requirement senior "Senior requirement: ER&M 4091 and 4092, or two upper-level ER&M seminars with a 20-25 page senior paper in one" [senior] {
+  children at least 1;
+  requirement senior_yearlong "Senior colloquium ER&M 4091 (fall) and senior project seminar ER&M 4092 (spring)" {
+    courses exactly 2 from [ER&M 4091, ER&M 4092];
+  }
+  requirement senior_seminars "Two upper-level ER&M seminars, one with a senior paper approved by the instructor" {
+    courses exactly 2 where course.subject = "ER&M" and course.number >= 3001 and course.format = "seminar";
+    constraint senior_paper "One seminar carries the senior paper": at least 1 attempts where attempt.approved_for contains "senior";
+  }
+  constraint senior_letter "Courses for the senior requirement may not be taken Credit/D/Fail" in subtree senior:
+    all where attempt.grading_mode = "letter";
+}
+
+constraint other_departments "Up to two required courses from other departments, with ER&M content and DUS approval" in program:
+  limit 2 attempts where course.subject != "ER&M";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count, with DUS permission" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Twelve course credits including the senior requirement" in program:
+  total at least 12 credits;

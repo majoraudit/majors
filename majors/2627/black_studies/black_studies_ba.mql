@@ -1,13 +1,49 @@
-// Black Studies B.A. -- 12 term courses: 7 core courses (including the senior requirement) and 5 focus-area electives.
-// The catalog lists these courses under BLST; the parser's department list only accepts the former AFAM code.
-SELECT 2 FROM [AFAM 1160, AFAM 1162] : "History sequence (either order)" : 1;
-SELECT 1 FROM [DIST_DEPT("HU", "AFAM")] : "Black Studies literature course in the humanities" : 2;
-SELECT 1 FROM [DIST_DEPT("SO", "AFAM")] : "Black Studies course in the social sciences" : 2;
-SELECT 1 FROM AFAM 4310 : "Junior seminar" : 1;
+// Black Studies B.A.: twelve term courses, seven core courses (including the senior requirement) and five focus-area electives.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/african-american-studies/
+program black_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-// None of the core courses may count toward the area of focus.
-$focus = PLACEMENT("Area-of-focus course approved by the DUS");
-SELECT 5 FROM [RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), RANGE(AFAM 0000, AFAM 9999), $focus, $focus, $focus, $focus, $focus] : "Five electives in an area of focus" : 3;
+requirement history "History sequence BLST 1160 and 1162, in either order" [core] {
+  courses exactly 2 from [BLST 1160, BLST 1162];
+}
 
-SELECT 1 FROM AFAM 4380 : "Senior colloquium" : 1;
-SELECT 1 FROM AFAM 4391 : "Senior essay" : 1;
+requirement literature "One humanities course in Black Studies literature, approved by the DUS" [core] {
+  slot where course.subject = "BLST" and course.distributionals contains "Hu" or attempt.approved_for contains "literature";
+}
+
+requirement social_science "One social science course relevant to Black Studies, approved by the DUS" [core] {
+  slot where course.subject = "BLST" and course.distributionals contains "So" or attempt.approved_for contains "social_science";
+}
+
+requirement junior_seminar "Junior seminar (BLST 4310), in the junior year" [core] {
+  slot from [BLST 4310];
+  constraint junior_year "Taken in the junior year": all where attempt.year_of_study = 3;
+}
+
+// Core courses are exclusive of the focus area by default, as the catalog requires.
+requirement focus "Five electives in an area of focus approved by the DUS" [concentration] {
+  courses at least 5 where attempt.approved_for contains "focus";
+}
+
+requirement senior_colloquium "Senior colloquium (BLST 4380)" [senior] {
+  slot from [BLST 4380];
+}
+
+requirement senior_essay "Senior essay (BLST 4391), after the colloquium" [senior] {
+  slot from [BLST 4391];
+}
+
+constraint colloquium_first "The senior colloquium precedes the senior essay" in roles [senior]:
+  order course.code = "BLST4380" before course.code = "BLST4391";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in program:
+  total at least 12 attempts;

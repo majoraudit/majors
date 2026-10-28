@@ -1,24 +1,56 @@
-// Archaeological Studies B.A. -- 12 term courses including the senior project.
-$arcg = RANGE(ARCG 0000, ARCG 9999);
-$sub = PLACEMENT("Course from another department related to the student's research, approved by the DUS");
+// Archaeological Studies B.A.: twelve term courses including the senior project, plus a summer field school.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/archaeological-studies/
+program archaeological_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [TAG("YC ARCG Intro Survey")] : "Introductory survey course" : 1;
-SELECT 1 FROM ARCG 3116L : "Introductory laboratory" : 1;
-SELECT 1 FROM [TAG("YC ARCG Advanced Lab")] : "Advanced laboratory course" : 1;
-SELECT 1 FROM [TAG("YC ARCG Theory")] : "Theory course" : 1;
+fact field_school "Yale-affiliated summer research project or field school approved in advance by the DUS":
+  approval dus_approval { for: "field_research" };
 
-// Electives are courses multiple-titled with Archaeological Studies; up to three may be research-related substitutions.
-SELECT 7 FROM [$arcg, $arcg, $arcg, $arcg, $arcg, $arcg, $arcg, $sub, $sub, $sub] : "Seven archaeology electives" : 3;
-SELECT 3 FROM [
-    SELECT 1 FROM [RANGE(ANTH 0000, ANTH 9999)],
-    SELECT 1 FROM [RANGE(CLSS 0000, CLSS 9999), RANGE(CLCV 0000, CLCV 9999)],
-    SELECT 1 FROM [RANGE(EPS 0000, EPS 9999)],
-    SELECT 1 FROM [RANGE(EVST 0000, EVST 9999)],
-    SELECT 1 FROM [RANGE(HIST 0000, HIST 9999)],
-    SELECT 1 FROM [RANGE(HSAR 0000, HSAR 9999)],
-    SELECT 1 FROM [RANGE(NELC 0000, NELC 9999)],
-    SELECT 1 FROM [RANGE(RLST 0000, RLST 9999)]
-] : "Three of the electives from different departments or programs" : 2;
+requirement survey "Introductory survey course" [core] {
+  slot where course.attributes contains "YC ARCG Intro Survey";
+}
 
-SELECT 1 FROM PLACEMENT("Yale-affiliated summer research project or field school approved in advance by the DUS") : "Summer field research" : 1;
-SELECT 1 FROM ARCG 4491 : "Senior research project" : 1;
+requirement intro_lab "Introductory laboratory (ARCG 3116L)" [core] {
+  slot from [ARCG 3116L];
+}
+
+requirement advanced_lab "Advanced laboratory course" [core] {
+  slot where course.attributes contains "YC ARCG Advanced Lab";
+}
+
+requirement theory "Theory course" [core] {
+  slot where course.attributes contains "YC ARCG Theory";
+}
+
+requirement electives "Seven electives among the departments offering Archaeological Studies courses, three in different departments" [elective] {
+  courses at least 7
+    where course.subject in ["ARCG", "ANTH", "CLSS", "CLCV", "EPS", "EVST", "HIST", "HSAR", "NELC", "RLST"]
+      or attempt.approved_for contains "electives";
+  constraint different_departments "Three electives in different departments or programs":
+    group course.subject distinct at least 3;
+  constraint research_substitutes "Up to three research-related courses from other departments, with DUS permission":
+    at most 3 attempts
+      where not course.subject in ["ARCG", "ANTH", "CLSS", "CLCV", "EPS", "EVST", "HIST", "HSAR", "NELC", "RLST"];
+}
+
+requirement field_research "Summer field research: a Yale-affiliated project or approved field school" [field] {
+  slot where attempt.approved_for contains "field_research";
+}
+
+requirement senior "Senior research project (ARCG 4491)" [senior] {
+  slot from [ARCG 4491];
+}
+
+effect field_school_done "An approved field school satisfies the field requirement" when fact field_school: waive field_research;
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in roles [core, elective, senior]:
+  total at least 12 attempts;

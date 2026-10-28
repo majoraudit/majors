@@ -1,18 +1,69 @@
-// Environmental Studies B.S. -- at least 12 course credits beyond the prerequisites, including the two-term senior requirement.
-$conc = PLACEMENT("Concentration course planned with the DUS");
+// Environmental Studies B.S.: at least twelve course credits beyond the prerequisites, including the two-term senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-studies/
+program environmental_studies_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [RANGE(MATH 1120, MATH 9999), RANGE(PHYS 1700, PHYS 9999), RANGE(S&DS 1000, S&DS 9999), PLACEMENT("Completion of the Certificate in Data Science")] : "Prerequisite: mathematics, physics, or statistics course" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CHEM 1610, CHEM 1650], SELECT 2 FROM [CHEM 1630, CHEM 1670], RANGE(CHEM 1670, CHEM 9999)] : "Prerequisite: two-term chemistry lecture sequence (or CHEM 1670 or higher with advanced placement)" : 1;
-SELECT 4 FROM [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040] : "Prerequisite: BIOL 1010, 1020, 1030, and 1040" : 1;
-SELECT 1 FROM TAG("YC EVST BS Natural Sci Lab") : "Prerequisite: natural science laboratory" : 1;
+fact data_science_certificate "Completed the Certificate in Data Science": prior_coursework { description: "Certificate in Data Science" };
 
-SELECT 1 FROM TAG("YC EVST Core Humanities") : "Core: humanities" : 2;
-SELECT 1 FROM TAG("YC EVST Core Social Sci") : "Core: social sciences" : 2;
-SELECT 2 FROM [TAG("YC EVST Core BS Natural Sci"), TAG("YC EVST Core BS Natural Sci")] : "Core: two natural science courses" : 2;
+// The concentration is planned with the DUS; its theme does not change the audit.
+choice concentration_area "Area of concentration": declared one of
+  "biodiversity_conservation", "climate_change_energy", "environmental_humanities", "environmental_justice",
+  "environmental_policy", "food_agriculture", "human_health_environment", "sustainability_natural_resources",
+  "urban_environments", "self_designed";
 
-SELECT 3 FROM [DIST("SC"), DIST("SC"), DIST("SC")] : "Concentration: three courses with the SC designation numbered 2000 or higher" : 2;
-SELECT 2 FROM [PLACEMENT("Concentration course providing interdisciplinary context"), PLACEMENT("Concentration course providing interdisciplinary context")] : "Concentration: two courses providing interdisciplinary context" : 2;
-SELECT 1 FROM $conc : "Concentration: one additional course (six in total)" : 3;
-SELECT 1 FROM PLACEMENT("Elective approved by the DUS") : "One elective" : 4;
+requirement prereq_quantitative "Prerequisite: a mathematics, physics, or statistics course, or the Certificate in Data Science" [prerequisite] {
+  slot where course.subject = "MATH" and course.number >= 1120 or course.subject = "PHYS" and course.number >= 1700
+    or course.subject = "S&DS" and course.number >= 1000;
+}
 
-SELECT 2 FROM [EVST 4960, EVST 4960] : "Senior requirement: two-term research project (EVST 4960)" : 1;
+effect certificate when fact data_science_certificate: waive prereq_quantitative;
+
+requirement prereq_chemistry "Prerequisite: a two-term chemistry lecture sequence (or CHEM 1670 or higher with advanced placement)" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+  requirement prereq_chem_advanced "CHEM 1670 or higher, with advanced placement" {
+    slot where course.subject = "CHEM" and course.number >= 1670 and course.format != "lab";
+  }
+}
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+requirement prereq_lab "Prerequisite: a natural science laboratory" [prerequisite] {
+  slot where course.attributes contains "YC EVST BS Natural Sci Lab";
+}
+
+requirement core "Four core courses" [core] {
+  children exactly 3;
+  requirement core_humanities "Humanities" { slot where course.attributes contains "YC EVST Core Humanities"; }
+  requirement core_social "Social sciences" { slot where course.attributes contains "YC EVST Core Social Sci"; }
+  requirement core_natural "Two natural science courses" { courses at least 2 where course.attributes contains "YC EVST Core BS Natural Sci"; }
+}
+
+requirement concentration "Six concentration courses planned with the DUS: three with the Sc designation numbered 2000 or higher, two giving interdisciplinary context" [concentration] {
+  courses at least 6
+    where attempt.approved_for contains "concentration"
+      or course.distributionals contains "Sc" and course.number >= 2000;
+  constraint science_courses "Three with the Sc designation, numbered 2000 or higher":
+    at least 3 attempts where course.distributionals contains "Sc" and course.number >= 2000;
+  constraint interdisciplinary "Two providing interdisciplinary context":
+    at least 2 attempts where attempt.approved_for contains "interdisciplinary";
+}
+
+requirement senior "Senior requirement: two-term research project (EVST 4960)" [senior] {
+  courses exactly 2 where course.code = "EVST4960";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Twelve course credits beyond the prerequisites, including the senior requirement" in roles [core, concentration, senior]:
+  total at least 12 credits;

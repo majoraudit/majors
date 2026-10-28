@@ -1,12 +1,49 @@
-// Engineering Sciences (Mechanical) B.S. -- 12 approved course credits in engineering beyond the prerequisites, including the senior project.
-$meng = [TAG("YC MENG Eng Sci-Mech Crse"), RANGE(MENG 0000, MENG 4990), RANGE(MENG 4993, MENG 9999), PLACEMENT("Engineering course approved by the DUS")];
-SELECT 3 FROM [SELECT 1 FROM [MATH 1120, PLACEMENT("Equivalent of MATH 1120")], SELECT 1 FROM [MATH 1150, PLACEMENT("Equivalent of MATH 1150")], SELECT 1 FROM [ENAS 1510, PLACEMENT("Equivalent of ENAS 1510")]] : "Prerequisite: MATH 1120, MATH 1150, and ENAS 1510 (or equivalents)" : 1;
-SELECT 1 FROM [PHYS 1800, PHYS 2000, PHYS 2600, PLACEMENT("Equivalent physics lecture approved by the DUS")] : "Prerequisite: physics lecture (PHYS 1800, 2000, or 2600)" : 1;
-SELECT 1 FROM [PHYS 1810, PHYS 2010, PHYS 2610, PLACEMENT("Equivalent physics lecture approved by the DUS")] : "Prerequisite: physics lecture (PHYS 1810, 2010, or 2610)" : 1;
-SELECT 1 FROM [PHYS 1650L, PHYS 2050L, PLACEMENT("Equivalent physics laboratory approved by the DUS")] : "Prerequisite: physics laboratory (PHYS 1650L or 2050L)" : 1;
-SELECT 1 FROM [PHYS 1660L, PHYS 2060L, MENG 2616L, PLACEMENT("Equivalent laboratory approved by the DUS")] : "Prerequisite: laboratory (PHYS 1660L, 2060L, or MENG 2616L)" : 1;
+// Engineering Sciences (Mechanical) B.S.: twelve approved course credits in engineering beyond the prerequisites, including the senior project.
+// Students consult the DUS at the beginning of sophomore year; the courses must form a coherent program.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mechanical-engineering/
+program engineering_sciences_mechanical_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 11 FROM [$meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng, $meng] : "Eleven approved engineering courses forming a coherent program" : 3;
-LIMIT 1 FROM [MENG 4991, MENG 4992] : "At most one Special Projects course (MENG 4991 or 4992) may count" : 3;
+requirement prereq_math "Prerequisite: MATH 1120, MATH 1150, and ENAS 1510, or equivalents" [prerequisite] {
+  courses at least 3 where course.code in ["MATH1120", "MATH1150", "ENAS1510"] or attempt.approved_for contains "prereq_math";
+}
 
-SELECT 1 FROM [MENG 4154, MENG 4991, MENG 4992, PLACEMENT("Upper-level design course taken in the senior year, chosen with the DUS")] : "Senior project" : 1;
+requirement prereq_physics_1 "Prerequisite: physics lecture PHYS 1800, 2000, or 2600, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1800", "PHYS2000", "PHYS2600"] or attempt.approved_for contains "prereq_physics_1";
+}
+
+requirement prereq_physics_2 "Prerequisite: physics lecture PHYS 1810, 2010, or 2610, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1810", "PHYS2010", "PHYS2610"] or attempt.approved_for contains "prereq_physics_2";
+}
+
+requirement prereq_lab_1 "Prerequisite: physics laboratory PHYS 1650L or 2050L, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1650L", "PHYS2050L"] or attempt.approved_for contains "prereq_lab_1";
+}
+
+requirement prereq_lab_2 "Prerequisite: physics laboratory PHYS 1660L or 2060L (half credit), or MENG 2616L (one credit)" [prerequisite] {
+  slot where course.code in ["PHYS1660L", "PHYS2060L", "MENG2616L"] or attempt.approved_for contains "prereq_lab_2";
+}
+
+requirement electives "Eleven MENG electives selected with DUS approval" [elective] {
+  credits at least 11 where course.subject = "MENG" or attempt.approved_for contains "electives";
+}
+
+requirement senior "Senior project: MENG 4154, MENG 4991 or 4992, or another upper-level design course chosen with the DUS, in the senior year" [senior] {
+  slot where course.code in ["MENG4154", "MENG4991", "MENG4992"] or attempt.approved_for contains "senior";
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint one_special_project "At most one of MENG 4991 or 4992 counts toward the major" in program:
+  limit 1 attempts where course.code in ["MENG4991", "MENG4992"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "Twelve course credits in engineering beyond the prerequisites" in roles [elective, senior]:
+  total at least 12 credits;

@@ -1,13 +1,60 @@
-// Computing and the Arts B.A. -- Architecture concentration. 12 term courses beyond the prerequisites (6 CPSC, 6 in the arts), plus the two-term senior project.
+// Computing and the Arts B.A. (Architecture concentration): twelve term courses beyond the prerequisites
+// (six in Computer Science, six in the arts), plus the two-term senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/
+program computing_and_arts_architecture {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM CPSC 2010 : "CPSC 2010" : 1;
-SELECT 1 FROM [CPSC 2020, MATH 2440] : "Discrete mathematics (CPSC 2020 or MATH 2440)" : 1;
-SELECT 1 FROM CPSC 2230 : "CPSC 2230" : 1;
-SELECT 2 FROM [CPSC 3760, CPSC 4370, CPSC 4460, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790, CPSC 4840] : "Two computer graphics/visualization courses" : 2;
-SELECT 1 FROM [TAG("YC CPAR ARCH CS Elective"), RANGE(CPSC 2000, CPSC 4899), RANGE(CPSC 4901, CPSC 9999)] : "One additional intermediate or advanced CPSC course (not CPSC 4900)" : 3;
+requirement cs_intro "CPSC 2010" [computing] {
+  slot from [CPSC 2010];
+}
 
-SELECT 2 FROM [ARCH 1001, ARCH 2000] : "ARCH 1001 and ARCH 2000" : 1;
-SELECT 2 FROM [ARCH 2001, ARCH 2003, ARCH 3304, ARCH 3305] : "Two of ARCH 2001, 2003, 3304, 3305" : 2;
-SELECT 2 FROM [TAG("YC ARCH History & Theory"), TAG("YC ARCH History & Theory"), TAG("YC ARCH Urbanism & Landscap"), TAG("YC ARCH Urbanism & Landscap"), TAG("YC ARCH Materials & Design"), TAG("YC ARCH Materials & Design"), TAG("YC ARCH Structures & Computation"), TAG("YC ARCH Structures & Computation")] : "Two electives from the Architecture Design or History, Theory, Criticism, and Urbanism concentrations" : 3;
+requirement cs_discrete "CPSC 2020 (or MATH 2440), advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
 
-SELECT 2 FROM [CPSC 4900, ARCH 4901] : "Two-term senior project (CPSC 4900 and ARCH 4901)" : 1;
+requirement cs_data_structures "CPSC 2230, advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2230];
+}
+
+requirement cs_graphics "Two of CPSC 3760, 4370, 4460, 4510, 4750, 4780, 4790, or 4840" [computing] {
+  courses at least 2 from [CPSC 3760, CPSC 4370, CPSC 4460, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790, CPSC 4840];
+}
+
+requirement cs_elective "One additional intermediate or advanced Computer Science course for the track (not CPSC 4900)" [computing] {
+  slot where course.attributes contains "YC CPAR ARCH CS Elective"
+    or course.subject = "CPSC" and course.number >= 2000 and course.code != "CPSC4900";
+}
+
+requirement arch_intro "ARCH 1001 and 2000" [arts] {
+  courses exactly 2 from [ARCH 1001, ARCH 2000];
+}
+
+requirement arch_history "Two of ARCH 2001, 2003, 3304, and 3305" [arts] {
+  courses at least 2 from [ARCH 2001, ARCH 2003, ARCH 3304, ARCH 3305];
+}
+
+requirement arch_electives "Two electives from the Architecture Design or History, Theory, Criticism, and Urbanism concentrations" [arts] {
+  courses at least 2
+    where course.attributes overlaps ["YC ARCH History & Theory", "YC ARCH Urbanism & Landscape", "YC ARCH Materials & Design", "YC ARCHStructures&Computation"];
+}
+
+requirement senior "Two-term senior project approved by the DUS and acceptable to both departments: CPSC 4900 and ARCH 4901" [senior] {
+  children exactly 2;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_arts "ARCH 4901" { slot from [ARCH 4901]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in Computer Science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint six_arts "Six courses in the arts discipline" in roles [arts]:
+  total at least 6 attempts;

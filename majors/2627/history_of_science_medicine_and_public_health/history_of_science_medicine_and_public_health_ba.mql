@@ -1,29 +1,78 @@
-// History of Science, Medicine, and Public Health B.A. -- 12 term courses including the two-term senior requirement.
-// Standard concentrations: Colonialism, Knowledge, and Power; Environment and Society; Gender, Reproduction, and the Body;
-// Media, Information, and the Public; Medicine and Public Health; Minds and Brains; Science, Technology, and Society;
-// or a customized concentration designed with the DUS.
-$hshm = RANGE(HSHM 0000, HSHM 9999);
-$related = PLACEMENT("Concentration-related elective from any department, chosen with the adviser");
+// History of Science, Medicine, and Public Health B.A.: twelve term courses including the two-term senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/history-of-science-medicine-and-public-health/
+// All courses are chosen with the adviser; a concentration is selected or designed by the beginning of junior year.
+program history_of_science_medicine_and_public_health_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-// Concentration: seven courses.
-SELECT 1 FROM [
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Colonial Know & Power"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Colonial Know & Power")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Environ & Society"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Environ & Society")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Gender, Reprod & Body"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Gender, Reprod & Body")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Media Info & Public"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Media Info & Public")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Med & Public Health"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Med & Public Health")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Minds and Brains"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Minds and Brains")],
-    SELECT 2 FROM [RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Sci, Tech & Society"), RANGE_TAG(HSHM 0000, HSHM 9999, "YC HSHM Sci, Tech & Society")],
-    SELECT 2 FROM [PLACEMENT("HSHM course in a customized concentration approved by the DUS"), PLACEMENT("HSHM course in a customized concentration approved by the DUS")]
-] : "Concentration: two HSHM courses in the concentration" : 2;
-SELECT 1 FROM [PLACEMENT("HSHM or HIST seminar in the concentration")] : "Concentration: one seminar in HSHM or History" : 2;
-SELECT 1 FROM DIST("SC") : "Concentration: one full-credit science (SC) course" : 2;
-SELECT 3 FROM [$related, $related, $related] : "Concentration: three related electives from any department" : 3;
+choice concentration_area "Concentration": declared one of "colonialism", "environment", "gender", "media", "medicine", "minds", "sts", "customized";
 
-SELECT 3 FROM [$hshm, $hshm, $hshm] : "Three additional HSHM electives" : 3;
-SELECT 1 FROM PLACEMENT("One additional HSHM elective is a seminar") : "Additional electives: one seminar" : 3;
-SELECT 1 FROM PLACEMENT("One additional HSHM elective comes from a concentration other than the student's") : "Additional electives: one course outside the concentration" : 3;
-SELECT 1 FROM PLACEMENT("At least one HSHM or HIST seminar completed before the senior year") : "Seminar before the senior year" : 2;
+requirement concentration_hshm "Concentration: two HSHM courses in the concentration" [concentration] {
+  children at least 1;
+  requirement conc_hshm_colonialism "Colonialism, Knowledge, and Power" when concentration_area = "colonialism" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Colonial Know & Power";
+  }
+  requirement conc_hshm_environment "Environment and Society" when concentration_area = "environment" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Environ & Society";
+  }
+  requirement conc_hshm_gender "Gender, Reproduction, and the Body" when concentration_area = "gender" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Gender, Reprod & Body";
+  }
+  requirement conc_hshm_media "Media, Information, and the Public" when concentration_area = "media" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Media Info & Public";
+  }
+  requirement conc_hshm_medicine "Medicine and Public Health" when concentration_area = "medicine" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Med & Public Health";
+  }
+  requirement conc_hshm_minds "Minds and Brains" when concentration_area = "minds" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Minds and Brains";
+  }
+  requirement conc_hshm_sts "Science, Technology, and Society" when concentration_area = "sts" {
+    courses at least 2 where course.subject = "HSHM" and course.attributes contains "YC HSHM Sci, Tech & Society";
+  }
+  requirement conc_hshm_customized "Customized concentration designed with the DUS" when concentration_area = "customized" {
+    courses at least 2 where course.subject = "HSHM" and attempt.approved_for contains "concentration";
+  }
+}
+
+requirement concentration_seminar "Concentration: one seminar in HSHM or History" [concentration] {
+  slot where course.subject in ["HSHM", "HIST"] and course.format = "seminar" and attempt.approved_for contains "concentration";
+}
+
+requirement concentration_science "Concentration: one full-credit science (Sc) course" [concentration] {
+  slot where course.distributionals contains "Sc" and attempt.approved_for contains "concentration";
+}
+
+requirement concentration_related "Concentration: three related electives from any department, chosen with the adviser" [concentration] {
+  courses at least 3 where attempt.approved_for contains "concentration";
+}
+
+requirement electives "Three additional HSHM electives: one a seminar, one from another concentration" [elective] {
+  courses at least 3 where course.subject = "HSHM";
+  constraint elective_seminar "One is a seminar": at least 1 attempts where course.format = "seminar";
+  constraint other_concentration "One comes from a concentration other than the student's":
+    at least 1 attempts where attempt.approved_for contains "other_concentration";
+}
+
+requirement senior "Two-term senior project: HSHM 4900 and 4910" [senior] {
+  courses exactly 2 from [HSHM 4900, HSHM 4910];
+}
 
 // HSHM 4200 (half credit) may be taken in addition to the twelve courses.
-SELECT 2 FROM [HSHM 4900, HSHM 4910] : "Two-term senior project" : 1;
+
+constraint seminar_before_senior "At least one HSHM or History seminar before the senior year" in program:
+  at least 1 attempts where course.subject in ["HSHM", "HIST"] and course.format = "seminar" and attempt.year_of_study <= 3;
+
+constraint crdf_limit "At most one HSHM course taken Credit/D/Fail, before the fifth term" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_scope "The Credit/D/Fail course must be an HSHM course taken before the fifth term" in program:
+  all where attempt.grading_mode = "letter" or course.subject = "HSHM" and attempt.year_of_study <= 2;
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses and twelve credits" in program:
+  total at least 12 credits;

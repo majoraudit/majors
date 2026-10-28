@@ -1,26 +1,82 @@
-// Anthropology B.A. -- Concentration in Archaeological Anthropology -- 12 course credits including the senior requirement.
-$anth = RANGE(ANTH 0000, ANTH 9999);
-$adv = RANGE(ANTH 3000, ANTH 4999);
-$cognate = PLACEMENT("Cognate course in another department approved by the DUS");
+// Anthropology B.A. (concentration in Archaeological Anthropology): twelve course credits including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/anthropology/
+program anthropology_ba_archaeological_anthropology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Biological")] : "Introductory/intermediate course: evolution of human and nonhuman primates (biological)" : 1;
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Archaeology")] : "Introductory/intermediate course: archaeological study of human societies" : 1;
-SELECT 1 FROM [RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Sociocultural"), RANGE_TAG(ANTH 1000, ANTH 2999, "YC ANTH Linguistic")] : "Introductory/intermediate course: social, cultural, and linguistic dimensions" : 1;
+requirement intro "One introductory or intermediate course (1000-2999) in each of the three subfields" [core] {
+  children at least 3;
+  requirement intro_biological "Evolution of human and nonhuman primates" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes contains "YC ANTH Biological";
+  }
+  requirement intro_archaeological "Archaeological study of human societies and cultures" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes contains "YC ANTH Archaeology";
+  }
+  requirement intro_sociocultural "Social, cultural, and linguistic dimensions of human life" {
+    slot where course.subject = "ANTH" and course.number >= 1000 and course.number <= 2999
+      and course.attributes overlaps ["YC ANTH Sociocultural", "YC ANTH Linguistic"];
+  }
+}
 
-// ANTH 4071, ANTH 4091, and a seminar used for the senior essay do not count here.
-SELECT 3 FROM [RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999), RANGE(ANTH 3000, ANTH 4070), RANGE(ANTH 4072, ANTH 4090), RANGE(ANTH 4092, ANTH 4999)] : "Three advanced ANTH courses (3000-4000 level), excluding senior essay work" : 2;
-LIMIT 3 FROM [$cognate, $cognate, $cognate] : "At most three cognate courses from other departments" : 2;
+requirement advanced "Three advanced Anthropology courses (3000-4999), not senior essay courses or the seminar used for the senior essay" [core] {
+  courses at least 3
+    where course.subject = "ANTH" and course.number >= 3000 and course.number <= 4999
+      and not course.code in ["ANTH4071", "ANTH4091"];
+}
 
-// Remaining credits (ANTH 4071 counts here for the yearlong essay option).
-SELECT 5 FROM [$anth, $anth, $anth, $anth, $anth, $cognate, $cognate, $cognate] : "Anthropology electives or approved cognates" : 4;
+requirement electives "Anthropology electives or approved cognate courses toward the twelve credits" [elective] {
+  courses at least 0 where course.subject = "ANTH" or attempt.approved_for contains "cognate";
+}
 
-// Concentration requirements (six credits, overlapping with the major requirements above).
-SELECT 1 FROM [ANTH 1171, ANTH 1172] : "Archaeology: introductory survey course" : 1;
-SELECT 1 FROM ANTH 3116L : "Archaeology: foundational laboratory course" : 1;
-SELECT 1 FROM [TAG("YC ANTH Adv Lab/Data Analysis")] : "Archaeology: advanced laboratory or data analysis course" : 2;
-SELECT 1 FROM [TAG("YC ANTH Theory")] : "Archaeology: theory course" : 2;
-SELECT 1 FROM [RANGE_TAG(ANTH 3000, ANTH 4999, "YC ANTH Archaeology"), PLACEMENT("Archaeology seminar approved by the DUS")] : "Archaeology: seminar" : 2;
-SELECT 1 FROM PLACEMENT("Area-focused course approved by the DUS") : "Archaeology: area-focused course" : 3;
-SELECT 1 FROM PLACEMENT("Summer field school, or laboratory/museum work approved by the DUS") : "Archaeology: field experience (recommended)" : 5;
+requirement senior "Senior essay in ANTH 4091, or the yearlong ANTH 4071 and 4091 (seminar essays do not qualify)" [senior] {
+  children at least 1;
+  requirement senior_independent "Option 2: independent essay in ANTH 4091" {
+    slot from [ANTH 4091];
+  }
+  requirement senior_yearlong "Option 3: yearlong essay begun in ANTH 4071 and completed in ANTH 4091" {
+    courses exactly 2 from [ANTH 4071, ANTH 4091];
+  }
+  constraint senior_year "Completed in the senior year": all where attempt.year_of_study = 4;
+}
 
-SELECT 1 FROM [CLASS(ANTH 4091), SELECT 2 FROM [ANTH 4071, ANTH 4091], PLACEMENT("Alternative archaeology senior project format approved by the thesis adviser and DUS")] : "Senior essay pertinent to archaeology" : 1;
+constraint cognate_limit "At most three cognate courses from other departments, with DUS approval" in program:
+  limit 3 attempts where course.subject != "ANTH";
+
+constraint outside_limit "At most two courses taken outside Yale, with DUS approval" in program:
+  limit 2 attempts where attempt.source != "yale";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint total_credits "Twelve course credits in all" in program:
+  total at least 12 credits;
+
+// Concentration requirements are conditions on the twelve major courses, not additional courses.
+constraint arch_survey "Archaeology: an introductory survey (ANTH 1171 or 1172)" in program:
+  at least 1 attempts where course.code in ["ANTH1171", "ANTH1172"];
+constraint arch_foundation_lab "Archaeology: the foundational laboratory course (ANTH 3116L)" in program:
+  at least 1 attempts where course.code = "ANTH3116L";
+constraint arch_advanced_lab "Archaeology: an advanced laboratory or data analysis course" in program:
+  at least 1 attempts where course.attributes contains "YC ANTH Adv Lab/Data Analysis";
+constraint arch_theory "Archaeology: a theory course" in program:
+  at least 1 attempts where course.attributes contains "YC ANTH Theory";
+constraint arch_seminar "Archaeology: an advanced archaeology seminar or one approved by the DUS" in program:
+  at least 1 attempts
+    where course.subject = "ANTH" and course.number >= 3000 and course.attributes contains "YC ANTH Archaeology"
+      or attempt.approved_for contains "arch_seminar";
+constraint arch_area "Archaeology: an area-focused course approved by the DUS" in program:
+  at least 1 attempts where attempt.approved_for contains "arch_area";
+constraint arch_essay "Senior essay pertinent to archaeology, approved by the thesis adviser and DUS" in subtree senior:
+  all where attempt.approved_for contains "arch_essay";
+
+// A summer field school or laboratory/museum work is recommended, not required.
+advisory requirement arch_field "Archaeology: field school or laboratory/museum experience (recommended)" [concentration] {
+  slot where attempt.approved_for contains "arch_field";
+}

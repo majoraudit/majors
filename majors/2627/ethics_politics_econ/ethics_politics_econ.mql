@@ -1,31 +1,96 @@
-// Ethics, Politics, and Economics B.A. -- 15 courses including the eight introductory courses and the senior requirement.
-// Two full terms of Directed Studies fulfill the first three introductory requirements.
-$conc = PLACEMENT("Concentration seminar or course defined with DUS review (at most one lecture)");
+// Ethics, Politics, and Economics B.A.: fifteen courses including the eight introductory courses and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/ethics-politics-economics/
+program ethics_politics_econ {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [PHIL 1175, SELECT 2 FROM [DRST 0001, DRST 0002]] : "Introductory: ethics (PHIL 1175 or Directed Studies)" : 1;
-SELECT 1 FROM [RANGE(ANTH 0000, ANTH 9999), RANGE(ER&M 0000, ER&M 9999), RANGE(HIST 0000, HIST 9999), RANGE(SOCY 0000, SOCY 9999), RANGE(WGSS 0000, WGSS 9999), SELECT 2 FROM [DRST 0001, DRST 0002], PLACEMENT("Other Perspectives course from another discipline approved by the DUS")] : "Introductory: Other Perspectives course" : 1;
-SELECT 1 FROM [PHIL 1178, PLSC 1327, PLSC 1335, PLSC 1352, SELECT 2 FROM [DRST 0001, DRST 0002]] : "Introductory: political philosophy" : 1;
-SELECT 1 FROM [PLSC 1113, PLSC 1413, PLSC 1222] : "Introductory: political science (PLSC 1113, 1413, or 1222)" : 1;
-SELECT 1 FROM [ECON 1108, ECON 1110, ECON 1115] : "Introductory: microeconomics" : 1;
-SELECT 1 FROM [ECON 1111, ECON 1116] : "Introductory: macroeconomics" : 1;
-SELECT 1 FROM [ECON 1117, ECON 2123, ECON 2135, GLBL 2121, S&DS 2300, S&DS 2380] : "Introductory: econometrics" : 1;
-SELECT 1 FROM [EP&E 4220, EP&E 4231, EP&E 4295, EP&E 4297, ECON 2159] : "Introductory: game theory" : 1;
+// Two full terms of Directed Studies fulfill the ethics, Other Perspectives, and political philosophy requirements.
+choice humanistic_route "Humanistic introductory route": solver one of "separate", "directed_studies";
 
-SELECT 1 FROM [ECON 2121, ECON 2125] : "Intermediate microeconomics" : 1;
+requirement intro_humanistic "Introductory: ethics, Other Perspectives, and political philosophy (or two terms of Directed Studies)" [introductory] {
+  children at least 1;
+  requirement intro_directed_studies "Two full terms of Directed Studies" { courses exactly 2 from [DRST 0001, DRST 0002]; }
+  requirement intro_separate "Ethics, Other Perspectives, and political philosophy" {
+    children exactly 3;
+    requirement intro_ethics "Ethics: PHIL 1175" { slot from [PHIL 1175]; }
+    requirement intro_perspectives "Other Perspectives course (anthropology, ER&M, history, sociology, WGSS, or another discipline approved by the DUS)" {
+      slot where course.subject in ["ANTH", "ER&M", "HIST", "SOCY", "WGSS"] or attempt.approved_for contains "intro_perspectives";
+    }
+    requirement intro_political_philosophy "Political philosophy: PHIL 1178, PLSC 1327, 1335, or 1352" {
+      slot from [PHIL 1178, PLSC 1327, PLSC 1335, PLSC 1352];
+    }
+  }
+}
 
-SELECT 1 FROM [EP&E 3212, EP&E 3213, EP&E 3214, EP&E 3215, EP&E 3216, EP&E 3217] : "Core seminar from the EP&E Classics series" : 2;
-SELECT 2 FROM [
-    SELECT 1 FROM [TAG("YC EP&E Ethics Core")],
-    SELECT 1 FROM [TAG("YC EP&E Politics Core")],
-    SELECT 1 FROM [TAG("YC EP&E Economics Core")]
-] : "Two core seminars from two of the three core areas" : 2;
-SELECT 1 FROM [TAG("YC EP&E Advanced Seminar")] : "One core seminar must be an advanced seminar anchored in at least two core areas" : 2;
+requirement intro_political_science "Introductory: political science (PLSC 1113, 1413, or 1222)" [introductory] {
+  slot from [PLSC 1113, PLSC 1413, PLSC 1222];
+}
 
-SELECT 2 FROM [$conc, $conc] : "Two courses in the area of concentration (three including the senior essay course)" : 3;
-LIMIT 1 FROM PLACEMENT("Lecture course in the area of concentration") : "At most one concentration course may be a lecture" : 3;
+requirement intro_micro "Introductory: microeconomics (ECON 1108, 1110, or 1115)" [introductory] {
+  slot from [ECON 1108, ECON 1110, ECON 1115];
+}
 
-SELECT 1 FROM [
-    CLASS(EP&E 4491),
-    SELECT 2 FROM [EP&E 4492, EP&E 4493],
-    PLACEMENT("Senior essay written in a relevant seminar with instructor consent and DUS approval")
-] : "Senior essay in the area of concentration" : 1;
+requirement intro_macro "Introductory: macroeconomics (ECON 1111 or 1116)" [introductory] {
+  slot from [ECON 1111, ECON 1116];
+}
+
+requirement intro_econometrics "Introductory: econometrics (ECON 1117, 2123, 2135, GLBL 2121, S&DS 2300, or 2380)" [introductory] {
+  slot from [ECON 1117, ECON 2123, ECON 2135, GLBL 2121, S&DS 2300, S&DS 2380];
+}
+
+requirement intro_game_theory "Introductory: game theory (EP&E 4220, 4231, 4295, 4297, or ECON 2159)" [introductory] {
+  slot from [EP&E 4220, EP&E 4231, EP&E 4295, EP&E 4297, ECON 2159];
+}
+
+requirement inter_micro "Intermediate microeconomics: ECON 2121 or 2125" [core] {
+  slot from [ECON 2121, ECON 2125];
+}
+
+requirement classics_seminar "Core seminar from the EP&E Classics series (EP&E 3212-3217)" [core] {
+  slot from [EP&E 3212, EP&E 3213, EP&E 3214, EP&E 3215, EP&E 3216, EP&E 3217];
+}
+
+requirement core_seminars "Two core seminars from two of the three core areas, one an advanced seminar" [core] {
+  children at least 2;
+  requirement core_ethics "Ethics core seminar" { slot where course.attributes contains "YC EP&E Ethics Core"; }
+  requirement core_politics "Politics core seminar" { slot where course.attributes contains "YC EP&E Politics Core"; }
+  requirement core_economics "Economics core seminar" { slot where course.attributes contains "YC EP&E Economics Core"; }
+  constraint advanced_core "One of them an advanced seminar anchored in at least two core areas" in subtree core_seminars:
+    at least 1 attempts where course.attributes contains "YC EP&E Advanced Seminar";
+}
+
+// The concentration is defined with the DUS by the end of junior year and includes the senior essay course.
+requirement concentration "Two concentration courses, with the senior essay course making three" [concentration] {
+  courses at least 2 where attempt.approved_for contains "concentration";
+}
+
+requirement senior "Senior essay in the area of concentration: EP&E 4491, EP&E 4492 and 4493, or a relevant seminar with instructor consent and DUS approval" [senior, concentration] {
+  children at least 1;
+  requirement senior_term "EP&E 4491" { slot from [EP&E 4491]; }
+  requirement senior_year "EP&E 4492 and 4493" { courses exactly 2 from [EP&E 4492, EP&E 4493]; }
+  requirement senior_seminar "A relevant seminar with instructor consent and DUS approval" {
+    slot where course.format = "seminar" and attempt.approved_for contains "senior";
+  }
+  constraint senior_letter "The seminar in which the senior essay is written may not be taken Credit/D/Fail" in subtree senior:
+    all where attempt.grading_mode = "letter";
+}
+
+constraint one_lecture "At most one of the three concentration courses is a lecture" in roles [concentration]:
+  at most 1 attempts where course.format = "lecture";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen courses in all" when humanistic_route = "separate" in program:
+  total at least 15 attempts;
+
+constraint total_courses_drst "Fifteen course requirements, with Directed Studies covering three" when humanistic_route = "directed_studies" in program:
+  total at least 14 attempts;
+
+constraint route_matches "Directed Studies route uses both terms of Directed Studies" when humanistic_route = "directed_studies" in program:
+  at least 2 attempts where course.code in ["DRST0001", "DRST0002"];

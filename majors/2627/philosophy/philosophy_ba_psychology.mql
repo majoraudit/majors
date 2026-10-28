@@ -1,24 +1,82 @@
-// Philosophy B.A. -- psychology concentration. 12 term courses (7 philosophy, 5 psychology) including the prerequisites
-// and the senior requirement.
-$phil = RANGE(PHIL 0000, PHIL 9999);
-$psyc = RANGE(PSYC 0000, PSYC 9999);
-$seminar = RANGE(PHIL 3000, PHIL 4489);
+// Philosophy B.A. (psychology concentration): twelve term courses, seven in philosophy and five in psychology,
+// including the prerequisites and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/philosophy/
+program philosophy_ba_psychology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [RANGE(PHIL 0000, PHIL 2999), RANGE(PHIL 0000, PHIL 2999), RANGE(PSYC 0000, PSYC 2999), RANGE(PSYC 0000, PSYC 2999), DRST 0003, DRST 0004] : "Prerequisite: two introductory or intermediate courses in philosophy or psychology" : 1;
+requirement prereq "Prerequisite: two introductory or intermediate courses in philosophy or psychology (these count among the twelve)" [prerequisite] {
+  courses at least 2
+    where course.subject in ["PHIL", "PSYC"] and course.number <= 2999 or course.code in ["DRST0003", "DRST0004"];
+}
 
-SELECT 2 FROM [PHIL 1125, PHIL 1126, DRST 0003, DRST 0004, TAG("YC PHIL History of Philosophy"), TAG("YC PHIL History of Philosophy")] : "Philosophy: two courses in the history of philosophy (usually PHIL 1125 and 1126, or DRST 0003 and 0004)" : 2;
-SELECT 1 FROM [PHIL 1115, TAG("YC PHIL Logic")] : "Philosophy: one course in logic (preferably by fall of junior year)" : 2;
-SELECT 2 FROM [$seminar, $seminar, PLACEMENT("Psychology seminar approved by the DUS")] : "Two seminars (one may be in Psychology with DUS approval)" : 2;
-SELECT 2 FROM [TAG("YC PHIL Intersctn PSYC/PHIL"), TAG("YC PHIL Intersctn PSYC/PHIL"), PLACEMENT("Intermediate/advanced course on the intersection of philosophy and psychology approved by the DUS")] : "Two intermediate or advanced courses on the intersection of philosophy and psychology" : 2;
-SELECT 1 FROM [RANGE_TAG(PHIL 3000, PHIL 4999, "YC PHIL Intersctn PSYC/PHIL"), PLACEMENT("Philosophy seminar on the intersection of philosophy and psychology approved by the DUS")] : "At least one intersection course must be a philosophy seminar" : 2;
-SELECT 7 FROM [$phil, $phil, $phil, $phil, $phil, $phil, $phil, DRST 0003, DRST 0004] : "Seven philosophy courses in total" : 4;
+requirement history "Two courses in the history of philosophy (usually PHIL 1125 and 1126, or DRST 0003 and 0004)" [group, philosophy] {
+  courses at least 2
+    where course.code in ["PHIL1125", "PHIL1126", "DRST0003", "DRST0004"] or course.attributes contains "YC PHIL History of Philosophy";
+}
 
-SELECT 1 FROM [PSYC 1100, PLACEMENT("Equivalent of PSYC 1100 approved by the DUS")] : "Psychology: PSYC 1100 or equivalent" : 1;
-SELECT 4 FROM [$psyc, $psyc, $psyc, $psyc] : "Psychology: four additional psychology courses (five in total)" : 3;
+requirement logic "One course in logic (PHIL 1115 suggested), preferably by the fall of junior year" [group, philosophy] {
+  slot where course.code = "PHIL1115" or course.attributes contains "YC PHIL Logic";
+}
 
-SELECT 1 FROM [
-    PLACEMENT("Third philosophy seminar taken for the senior requirement with additional work"),
-    CLASS(PHIL 4490),
-    CLASS(PHIL 4491),
-    SELECT 2 FROM [PHIL 4490, PHIL 4491]
-] : "Senior requirement: a third seminar, or a one- or two-term independent project (PHIL 4490, 4491)" : 1;
+requirement seminars "Two seminars (one may be a psychology seminar with DUS approval)" [seminar, philosophy] {
+  courses at least 2
+    where course.subject = "PHIL" and course.number >= 3000 and course.number <= 4489 and course.format = "seminar"
+      or course.subject = "PSYC" and course.format = "seminar" and attempt.approved_for contains "seminars";
+  constraint one_psychology "At most one psychology seminar": at most 1 attempts where course.subject = "PSYC";
+}
+
+requirement intersection "Two intermediate or advanced courses on the intersection of philosophy and psychology, one a philosophy seminar" [intersection, philosophy] {
+  courses at least 2 where course.attributes contains "YC PHIL Intersctn PSYC/PHIL" or attempt.approved_for contains "intersection";
+  constraint intersection_seminar "At least one is a philosophy seminar":
+    at least 1 attempts where course.subject = "PHIL" and course.number >= 3000 and course.format = "seminar";
+  constraint intersection_letter "Credit/D/Fail courses cannot fulfill the intersection requirement": all where attempt.grading_mode = "letter";
+}
+
+requirement phil_electives "Further philosophy courses, for seven in all" [philosophy] {
+  courses at least 0 where course.subject = "PHIL" or course.code in ["DRST0003", "DRST0004"];
+}
+
+requirement psyc_intro "Psychology: PSYC 1100 or an equivalent" [psychology] {
+  slot where course.code = "PSYC1100" or attempt.approved_for contains "psyc_intro";
+}
+
+requirement psyc_courses "Psychology: four additional psychology courses (five in all)" [psychology] {
+  courses at least 4 where course.subject = "PSYC";
+}
+
+requirement senior "Senior requirement: a third seminar with additional work, or a one- or two-term independent project (PHIL 4490, 4491)" [senior, philosophy] {
+  children at least 1;
+  requirement senior_seminar "A third philosophy seminar taken for the senior requirement, with additional work" {
+    slot where course.subject = "PHIL" and course.number >= 3000 and course.number <= 4489 and attempt.approved_for contains "senior";
+  }
+  requirement senior_project "PHIL 4490 and/or 4491" { courses between 1 and 2 from [PHIL 4490, PHIL 4491]; }
+}
+
+// Prerequisite courses count toward the major, and seminars may also count as intersection courses.
+share prereq_with_history: prereq, history;
+share prereq_with_logic: prereq, logic;
+share prereq_with_psyc_intro: prereq, psyc_intro;
+share prereq_with_psyc_courses: prereq, psyc_courses;
+share prereq_with_phil_electives: prereq, phil_electives;
+share seminars_with_intersection: seminars, intersection;
+
+constraint seven_philosophy "Seven philosophy courses" in roles [prerequisite, philosophy]:
+  at least 7 attempts where course.subject in ["PHIL", "DRST"];
+
+constraint five_psychology "Five psychology courses" in roles [prerequisite, psychology, seminar]:
+  at least 5 attempts where course.subject = "PSYC";
+
+constraint groups_letter "Credit/D/Fail courses cannot fulfill the group, seminar, senior, or intersection requirements" in roles [group, seminar, senior]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the prerequisites and the senior requirement" in program:
+  total at least 12 attempts;
