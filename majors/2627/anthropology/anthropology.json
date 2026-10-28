@@ -1,0 +1,16 @@
+{
+    "name": "Anthropology",
+    "id": "anthropology",
+    "abbr": "ANTH",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Social Sciences",
+    "students": -1,
+    "about": "Anthropology is the study of human cultural, social, and biological diversity from the distant past to the present day and around the world. The major introduces students to biological anthropology, archaeology, and the social, cultural, and linguistic dimensions of human life.",
+    "dus": [["Jessica Thompson", "jessica.thompson@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/anthropology/",
+    "websiteLink": "https://anthropology.yale.edu/",
+    "specializations": []
+}

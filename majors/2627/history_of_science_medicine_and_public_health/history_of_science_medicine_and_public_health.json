@@ -1,0 +1,16 @@
+{
+    "name": "History of Science, Medicine, and Public Health",
+    "id": "history_of_science_medicine_and_public_health",
+    "abbr": "HSHM",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "History of Science, Medicine, and Public Health is an interdisciplinary program focused on how knowledge and technology have been created across cultures and how they have shaped the modern world. Its courses examine science, medicine, public health, and technology in their social and historical settings.",
+    "dus": [["Elaine Ayers", "elaine.ayers@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/history-of-science-medicine-public-health/",
+    "websiteLink": "https://hshm.yale.edu/",
+    "specializations": []
+}

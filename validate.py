@@ -60,7 +60,7 @@ def parse_extern(defines):
         key = "$" + name
         if key in result:
             logging.warning("overriding %s, duplicate", key)
-        result[key] = pylibmql.parse_extern_value(value)
+        result[key] = value #pylibmql.parse_extern_value(value)
 
     return result
 
@@ -75,7 +75,13 @@ def main():
     for dirpath, _dirnames, filenames in os.walk(target_dir):
         print(f"Current Folder: {dirpath}")
         for filename in filenames:
+            if filename.startswith("README"): 
+                continue
             full_path = os.path.join(dirpath, filename)
+            
+            if full_path.endswith('json'):
+                continue
+            
             with open(full_path, "r") as file:
                 pylibmql.parse_with_externals(file.read(), extern)
 

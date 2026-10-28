@@ -1,0 +1,16 @@
+{
+    "name": "History of Art",
+    "id": "history_of_art",
+    "abbr": "HSAR",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "Art history is the study of all forms of art, architecture, and visual culture in their social and historical contexts. The major can serve as a broad humanities program or as groundwork for more specialized training.",
+    "dus": [["Joanna Fiduccia", "joanna.fiduccia@yale.edu"], ["Craig Buckley", "craig.buckley@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/history-of-art/",
+    "websiteLink": "https://arthistory.yale.edu/",
+    "specializations": []
+}

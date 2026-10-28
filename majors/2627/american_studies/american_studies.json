@@ -1,0 +1,16 @@
+{
+    "name": "American Studies",
+    "id": "american_studies",
+    "abbr": "AMST",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "The American Studies program encourages interdisciplinary study of the cultures and politics of the United States, changing representations of national identity, and borderland and diasporic cultures over time. Students combine American Studies courses with relevant work in literature, history, the arts, and the social sciences.",
+    "dus": [["Greta LaFleur", "greta.lafleur@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/american-studies/",
+    "websiteLink": "https://americanstudies.yale.edu/",
+    "specializations": []
+}

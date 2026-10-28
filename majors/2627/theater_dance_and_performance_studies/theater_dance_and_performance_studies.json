@@ -1,0 +1,16 @@
+{
+    "name": "Theater, Dance, and Performance Studies",
+    "id": "theater_dance_and_performance_studies",
+    "abbr": "TDPS",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "The Theater, Dance, and Performance Studies program cultivates artists and scholars through collaboration, craft, integration of practice and theory, interdisciplinarity, and new work development. Students may work across theater, dance, performance studies, musical theater, intermedia arts, and design.",
+    "dus": [["Hal Brooks", "hal.brooks@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/theater-studies/",
+    "websiteLink": "https://tdps.yale.edu/",
+    "specializations": []
+}

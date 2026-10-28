@@ -1,0 +1,16 @@
+{
+    "name": "Spanish",
+    "id": "spanish",
+    "abbr": "SPAN",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "The Spanish major offers a wide range of courses in the language, literatures, and cultures of the Spanish-speaking world. Students develop linguistic proficiency and in-depth knowledge of cultural and literary topics spanning Europe, Latin America, and the Caribbean.",
+    "dus": [["Aurelie Vialette", "aurelie.vialette@yale.edu"], ["Alex Gil", "alex.gil@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/spanish/",
+    "websiteLink": "https://span-port.yale.edu/",
+    "specializations": []
+}

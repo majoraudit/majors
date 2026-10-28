@@ -1,0 +1,16 @@
+{
+    "name": "South Asian Studies",
+    "id": "south_asian_studies",
+    "abbr": "SAST",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "South Asian Studies combines a discipline-based first major with substantial coursework focused on South Asia and may be taken only as a second major. It provides a broad understanding of the region's history, cultures, languages, and contemporary social, political, and economic conditions.",
+    "dus": [["Aleksandar Uskokov", "aleksandar.uskokov@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/south-asian-studies/",
+    "websiteLink": "https://southasia.macmillan.yale.edu/",
+    "specializations": []
+}

@@ -1,0 +1,16 @@
+{
+    "name": "African Studies",
+    "id": "african_studies",
+    "abbr": "AFST",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "The program in African Studies enables students to undertake interdisciplinary study of the arts, history, cultures, politics, and development of Africa. Students gain cross-disciplinary exposure to Africa and develop a focus in a discipline or interdisciplinary topic.",
+    "dus": [["Veronica Waweru", "veronica.waweru@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/african-studies/",
+    "websiteLink": "https://www.yale.edu/macmillan/african",
+    "specializations": []
+}

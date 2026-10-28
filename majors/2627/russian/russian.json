@@ -1,0 +1,16 @@
+{
+    "name": "Russian",
+    "id": "russian",
+    "abbr": "RUSS",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "The Russian major acquaints students with Russian literature and culture, develops their appreciation of literary values and skill in literary analysis, and gives them basic competence in the Russian language.",
+    "dus": [["Nari Shelekpayev", "nariman.shelekpayev@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/slavic-languages-literatures/",
+    "websiteLink": "https://slavic.yale.edu/",
+    "specializations": []
+}

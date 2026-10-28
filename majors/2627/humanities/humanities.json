@@ -1,0 +1,16 @@
+{
+    "name": "Humanities",
+    "id": "humanities",
+    "abbr": "HUMS",
+    "degreeTypes": [["ba"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Humanities & the Arts",
+    "students": -1,
+    "about": "The Humanities major combines interdisciplinary breadth with intellectual depth, allowing students to integrate courses across humanistic disciplines into a coherent course of study. Literature, music, history, philosophy, visual art, and the history of ideas are brought into conversation.",
+    "dus": [["Austin Hinkley", "austin.hinkley@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/humanities/",
+    "websiteLink": "https://humanities.yale.edu/",
+    "specializations": []
+}

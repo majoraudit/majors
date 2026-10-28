@@ -1,0 +1,16 @@
+{
+    "name": "Special Divisional Major",
+    "id": "special_divisional_major",
+    "abbr": null,
+    "degreeTypes": [["ba", "bs"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Interdisciplinary",
+    "students": -1,
+    "about": "A Special Divisional Major is an alternative for students whose academic interests cannot be met by an existing departmental or special major. With faculty consultation and committee approval, students design an individual program that may draw from several departments around a culture, period, or problem.",
+    "dus": [["Sarah Mahurin", "sarah.mahurin@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/special-divisional-majors/",
+    "websiteLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/special-divisional-majors/",
+    "specializations": []
+}

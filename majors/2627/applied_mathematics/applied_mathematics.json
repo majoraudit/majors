@@ -1,0 +1,16 @@
+{
+    "name": "Applied Mathematics",
+    "id": "applied_mathematics",
+    "abbr": "AMTH",
+    "degreeTypes": [["ba", "bs"]],
+    "courses": -1,
+    "rating": -1,
+    "workload": -1,
+    "discipline": "Physical Sciences",
+    "students": -1,
+    "about": "Mathematical models are used throughout the natural sciences, social sciences, and engineering. The Applied Mathematics major provides a foundation in essential mathematical concepts and techniques and prepares students to apply them in a substantive field.",
+    "dus": [["John Wettlaufer", "john.wettlaufer@yale.edu"]],
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/applied-mathematics/",
+    "websiteLink": "https://applied.math.yale.edu/",
+    "specializations": []
+}

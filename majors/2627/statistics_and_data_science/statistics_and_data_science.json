@@ -1,7 +1,7 @@
 {
-    "name": "Psychology",
-    "id":"psychology",
-    "abbr": "PSYC",
+    "name": "Statistics and Data Science",
+    "id":"statistics_and_data_science",
+    "abbr": "S&DS",
     "degreeTypes": [
         ["ba", "bs"]
     ],
@@ -10,14 +10,17 @@
     "workload": -1,
     "discipline": "Social Sciences",
     "students": -1,
-    "about": "Psychology is the scientific study of the mind, the brain, and human behavior. The Psychology department offers coursework and research opportunities in the fields of clinical, cognitive, developmental, neuroscientific, and social psychology. By studying psychology, students better understand human behavior, including who we are, how we do the things we do, and how we enhance our lives and society. The Psychology major provides a foundation for careers in education and research; law; medicine and public health; politics and public policy; and in business fields such as marketing, finance, and management.",
+    "about": "Statistics is the science and art of prediction and explanation. Its mathematical foundation lies in probability theory, which is applied to inference and decision-making under uncertainty. Data science expands on statistics to encompass the entire life cycle of data, from specification, gathering, and cleaning through management and analysis to its use in decisions and policy. Students majoring in Statistics and Data Science study both mathematical and practical foundations, including computational methods, data visualization, machine learning, and data mining.",
     "dus": [
-        ["Yarrow Dunham", "yarrow.dunham@yale.edu"]
+        ["Sekhar Tatikonda", "sekhar.tatikonda@yale.edu"],
+        ["Brian MacDonald", "brian.macdonald@yale.edu"],
+        ["Xiang Zhou", "xiang.zhou.xz735@yale.edu"]
     ],
-    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/psychology/",
-    "websiteLink": "https://psychology.yale.edu/",
+    "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/statistics/",
+    "websiteLink": "https://statistics.yale.edu/",
     "specializations": [
-        "psychology_ba.mql",
-        "psychology_bs.mql"
+        "statistics_and_data_science_ba.mql",
+        "statistics_and_data_science_bs.mql",
+        "statistics_and_data_science_bs_ma.mql"
     ]
 }
