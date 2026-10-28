@@ -10,6 +10,27 @@ Each major has a folder that includes a main json and mql files. The json includ
 
 An example of a completed MajorTemplate can be seen with the computer_science major (bs_ms not yet implemented).
 
+## Catalog manifest
+
+`manifest.json` is the coverage source of truth for the 2026–2027 catalog. Its
+major inventory comes from Yale's **Majors in Yale College** page, while each
+major's `programs` list comes from manual review of the linked subject page.
+
+A program is listed separately when Yale describes materially different audit
+requirements for a degree, concentration, track, or intensive curriculum.
+Choices that share the same audit logic remain within one MQL program. This
+includes elective choices, senior-project options, distinction in the major,
+and concentrations that change only the subject of an otherwise identical set
+of requirements. Generic simultaneous-master's guidance is also not a separate
+program unless the subject page presents the combined degree as one of the
+major's offered degree programs.
+
+The manifest's program IDs are semantic identifiers, not filenames. Each
+major's `<major-id>.json` file maps those programs, in the same order, to the
+MQL filenames in `specializations`. `validate.py` checks that the catalog
+inventory, program counts, JSON mappings, files, and parsed MQL requirements
+agree.
+
 ## Set up testing environment
 1. Make a new Python project.
 2. Open your terminal and run:
