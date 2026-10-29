@@ -11,9 +11,7 @@
     "discipline": "Interdisciplinary",
     "students": -1,
     "about": "Computing and the Arts is an interdisciplinary major that combines computer science with one of five arts concentrations: Art, Architecture, History of Art, Music, or Theater, Dance & Performance Studies. The major provides a rigorous foundation in both computer science and the chosen arts discipline, allowing students to explore the creative and technical intersections of computation and artistic expression. Students develop skills in programming, algorithms, and software design alongside training in their chosen art form. The program prepares graduates for careers in digital media, interactive design, game development, digital humanities, and other fields at the intersection of technology and the arts.",
-    "dus": [
-        ["TBD", "TBD"]
-    ],
+    "dus": [["Scott Petersen","scott.petersen@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/",
     "websiteLink": "https://computingandthearts.yale.edu/",
     "specializations": [

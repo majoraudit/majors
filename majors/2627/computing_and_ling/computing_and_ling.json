@@ -11,9 +11,7 @@
     "discipline": "Interdisciplinary",
     "students": -1,
     "about": "Computing and Linguistics is an interdisciplinary major that combines computer science with linguistics, preparing students to work at the intersection of language and computation. The program provides training in core areas of both computer science and linguistics, including syntax, semantics, phonology, algorithms, data structures, and artificial intelligence. Students explore topics such as natural language processing, computational linguistics, speech recognition, and machine translation. The B.A. program emphasizes the linguistic and theoretical dimensions, while the B.S. program provides a stronger technical foundation in computer science. Graduates are well prepared for careers in technology, artificial intelligence, and language-related industries, as well as for graduate study.",
-    "dus": [
-        ["TBD", "TBD"]
-    ],
+    "dus": [["Robert Frank","robert.frank@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/computing-linguistics/",
     "websiteLink": "https://linguistics.yale.edu/",
     "specializations": [

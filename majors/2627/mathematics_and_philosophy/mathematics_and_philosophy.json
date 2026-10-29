@@ -12,9 +12,8 @@
     "students": 0,
     "about": "The Mathematics and Philosophy major allows students to explore the deep connections between mathematical reasoning and philosophical inquiry, particularly in mathematical and philosophical logic and the philosophy of mathematics. Students gain training in both formal mathematical methods and philosophical argumentation, developing skills applicable to research, teaching, and analytical fields. The program emphasizes core courses in set theory, logic, and philosophy of mathematics, along with opportunities for advanced study in both departments.",
     "dus": [
-        ["Sebastian Hurtado-Salazar", "sebastian.hurtado-salazar@yale.edu"],
-        ["Miki Havlickova", "miki.havlickova@yale.edu"],
-        ["Keith DeRose", "keith.derose@yale.edu"]
+        ["Miki Havlickova","miki.havlickova@yale.edu"],
+        ["Daniel Greco","daniel.greco@yale.edu"]
     ],
     "majorEmail": "math.dus@yale.edu",
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics-philosophy/",

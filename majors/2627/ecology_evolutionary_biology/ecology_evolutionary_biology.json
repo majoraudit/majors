@@ -11,9 +11,7 @@
     "discipline": "STEM",
     "students": -1,
     "about": "Ecology and Evolutionary Biology (E&EB) is the study of the diversity of life from molecules to ecosystems. At the core of this discipline are evolutionary biology, the study of how populations change through time and of the relationships among species; ecology, the study of the interactions between organisms and their environments; and systematics, the classification and study of the diversity of all life forms. The curriculum is designed for students seeking a broad education in ecology and evolutionary biology that may serve as an end in itself or as a foundation for professional or graduate study in the biological sciences, environmental science, medicine, or related fields. The major offers two concentrations: Biodiversity and Environment, and Organismal Biology.",
-    "dus": [
-        ["TBD", "TBD"]
-    ],
+    "dus": [["Martha Munoz","martha.munoz@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/ecology-evolutionary-biology/",
     "websiteLink": "https://eeb.yale.edu/",
     "specializations": [

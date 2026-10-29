@@ -11,9 +11,7 @@
     "discipline": "Languages",
     "students": -1,
     "about": "The Department of East Asian Languages and Literatures offers a major that provides intensive training in one of three East Asian languages—Chinese, Japanese, or Korean—together with the study of the literature and culture associated with that language. Students develop advanced proficiency in their chosen language and engage with literary and cultural texts from classical to contemporary periods. The major encourages students to consider the literary traditions of East Asia in broad historical and comparative contexts. The program prepares students for careers in education, translation, international affairs, business, and graduate study in East Asian literatures and cultures.",
-    "dus": [
-        ["TBD", "TBD"]
-    ],
+    "dus": [["Lucas Bender","lucas.bender@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/east-asian-languages-literatures/",
     "websiteLink": "https://eall.yale.edu/",
     "specializations": [

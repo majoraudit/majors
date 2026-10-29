@@ -13,7 +13,8 @@
     "students": -1,
     "about": "The Engineering Sciences (Electrical) major offers students a comprehensive education in electrical engineering fundamentals within Yale's liberal arts framework. The program covers core areas including circuit analysis, electronics, signal processing, electromagnetics, and computer engineering. Students gain both theoretical knowledge and practical skills through laboratory courses and a senior project. The B.S. degree provides a more intensive technical curriculum, while the B.A. degree offers greater flexibility for students who wish to combine electrical engineering with other academic interests.",
     "dus": [
-        ["TBD", "TBD"]
+        ["Fengnian Xia","fengnian.xia@yale.edu"],
+        ["Rajit Manohar","rajit.manohar@yale.edu"]
     ],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering/",
     "websiteLink": "https://engineering.yale.edu/academic-study/departments/electrical-engineering",
