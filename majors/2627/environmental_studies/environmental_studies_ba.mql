@@ -1,26 +1,61 @@
-SELECT 1 FROM [
-  DIST("QR")
-] : "Core QR Course" : 2;
+// Environmental Studies B.A.: thirteen course credits beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-studies/
+program environmental_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [
-  DIST("HU"),
-  DIST("SO")
-] : "Core HU or SO Courses" : 3;
+fact data_science_certificate "Completed the Certificate in Data Science": prior_coursework { description: "Certificate in Data Science" };
 
-SELECT 3 FROM [
-  DIST("SC")
-] : "Core Science Courses" : 4;
+// The concentration is planned with the DUS; its theme does not change the audit.
+choice concentration_area "Area of concentration": declared one of
+  "biodiversity_conservation", "climate_change_energy", "environmental_humanities", "environmental_justice",
+  "environmental_policy", "food_agriculture", "human_health_environment", "sustainability_natural_resources",
+  "urban_environments", "self_designed";
 
-SELECT 6 FROM [
-  DEPT("EVST"),
-  TAG("YC EVST Core Human/Social Sci"),
-  TAG("YC EVST Core BA Natural Scie")
-] : "Concentration Courses" : 5;
+requirement prereq "Prerequisite: S&DS 1000 or higher, or the Certificate in Data Science" [prerequisite] {
+  slot where course.subject = "S&DS" and course.number >= 1000;
+}
 
-SELECT 1 FROM [
-  CLASS(EVST 4960)
-] : "Senior Essay" : 1;
+effect certificate when fact data_science_certificate: waive prereq;
 
-SELECT 1 FROM [
-  TAG_DEPT("YC EVST Advanced Seminar", "EVST")
-] : "Advanced Environmental Seminar" : 6;
+requirement core "Five core courses" [core] {
+  children exactly 5;
+  requirement core_humanities "Humanities" { slot where course.attributes contains "YC EVST Core Humanities"; }
+  requirement core_social "Social sciences" { slot where course.attributes contains "YC EVST Core Social Sci"; }
+  requirement core_life "Life science and ecology" { slot where course.attributes contains "YC EVST Core BA Life Sci"; }
+  requirement core_climate "Earth and climate science" { slot where course.attributes contains "YC EVST Core BA Climate Sci"; }
+  requirement core_physical "Physical science, technology, and environment" { slot where course.attributes contains "YC EVST Core BA Physical Sci"; }
+}
+
+requirement concentration "Six concentration courses planned with the DUS, including an advanced seminar and a second advanced seminar or a quantitative research methods course" [concentration] {
+  courses at least 6
+    where attempt.approved_for contains "concentration"
+      or course.attributes overlaps ["YC EVST Advanced Seminar", "YC EVST BA QR Methods"];
+  constraint advanced_seminar "At least one advanced seminar":
+    at least 1 attempts where course.attributes contains "YC EVST Advanced Seminar";
+  constraint second_seminar_or_methods "A second advanced seminar or an intermediate or advanced quantitative research methods course":
+    at least 2 attempts where course.attributes overlaps ["YC EVST Advanced Seminar", "YC EVST BA QR Methods"];
+}
+
+requirement senior "Senior requirement: EVST 4960 with an additional advanced seminar beyond the concentration, or a two-term research project approved by the DUS before the end of junior year" [senior] {
+  children at least 1;
+  requirement senior_one_term "EVST 4960 and an additional advanced seminar in the environment" {
+    children exactly 2;
+    requirement senior_colloquium "EVST 4960" { slot from [EVST 4960]; }
+    requirement senior_seminar "Additional advanced seminar" { slot where course.attributes contains "YC EVST Advanced Seminar"; }
+  }
+  requirement senior_two_term "Two-term senior research project" {
+    courses exactly 2 where course.code = "EVST4960" or attempt.approved_for contains "senior_two_term";
+  }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Thirteen course credits beyond the prerequisites, including the senior requirement" in roles [core, concentration, senior]:
+  total at least 13 credits;

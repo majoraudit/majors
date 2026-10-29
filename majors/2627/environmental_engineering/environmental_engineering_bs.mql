@@ -1,4 +1,81 @@
-SELECT 9 FROM [CLASS(MATH 1120), CLASS(MATH 1150), SELECT 1 FROM [CLASS(MATH 1200), CLASS(ENAS 1510)], CLASS(ENAS 1940), SELECT 1 FROM [CLASS(ENAS 1300), CLASS(S&DS 2300)], SELECT 1 FROM [SELECT 4 FROM [CLASS(CHEM 1610), CLASS(CHEM 1610L), CLASS(CHEM 1650), CLASS(CHEM 1650L)], SELECT 2 FROM [SELECT 1 FROM [SELECT 2 FROM [CLASS(CHEM 1740), CLASS(1740L)], SELECT 2 FROM [CLASS(CHEM 2200), CLASS(CHEM 2200L)]], SELECT 1 FROM [SELECT 2 FROM [CLASS(CHEM 1750), CLASS(CHEM 1750L)], SELECT 2 FROM [CLASS(CHEM 2210), CLASS(CHEM 2210L)], SELECT 2 FROM [CLASS(CHEM 2300), CLASS(CHEM 2300L)]]], SELECT 3 FROM [SELECT 1 FROM [SELECT 2 FROM [CLASS(CHEM 3320), CLASS(CHEM 3320L)], SELECT 2 FROM [CLASS(CHEM 3280), CLASS(CHEM 3280L)]], CLASS(CHEM 3330), CLASS(CHEM 3330L)]], CLASS(PHYS 1800), CLASS(PHYS 1810), SELECT 1 FROM [SELECT 2 FROM [CLASS(BIOL 1010), CLASS(BIOL 1020)], SELECT 2 FROM [CLASS(BIOL 1030), CLASS(BIOL 1040)]]] : "Prerequisites" : 1;
-SELECT 8 FROM [SELECT 1 FROM [CLASS(CENG 3000), CLASS(MENG 2511)], CLASS(ENVE 1200), CLASS(ENVE 3600), CLASS(ENVE 3730), SELECT 1 FROM [CLASS(ENVE 3140), CLASS(ENVE 4480)], CLASS(ENVE 4380), CLASS(ENVE 4410), CLASS(ENVE 6420)] : "Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("Elective with DUS Approval"), PLACEMENT("Technical Elective with DUS Approval"), PLACEMENT("Technical Elective with DUS Approval"), PLACEMENT("Technical Elective with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(ENVE 4160), CLASS(ENVE 4900)] : "Senior Requirement" : 1;
+// Environmental Engineering B.S.: at least thirteen term course credits beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/environmental-engineering/
+program environmental_engineering_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+// Electives may build toward an optional emphasis; the emphasis does not change the audit.
+choice emphasis "Optional area of emphasis": declared one of "none", "climate_energy", "environmental_science_technology", "sustainability_policy", "self_designed";
+
+requirement prereq_calculus "Prerequisite: MATH 1120 and 1150" [prerequisite] {
+  courses exactly 2 from [MATH 1120, MATH 1150];
+}
+
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement prereq_differential_equations "Prerequisite: ENAS 1940" [prerequisite] {
+  slot from [ENAS 1940];
+}
+
+requirement prereq_computing "Prerequisite: ENAS 1300 or S&DS 2300" [prerequisite] {
+  slot from [ENAS 1300, S&DS 2300];
+}
+
+requirement prereq_chemistry "Prerequisite: a two-term lecture sequence in chemistry, with corresponding labs" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+}
+
+requirement prereq_chemistry_lab "Prerequisite: chemistry laboratories CHEM 1340L and 1360L" [prerequisite] {
+  courses exactly 2 from [CHEM 1340L, CHEM 1360L];
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1800 and 1810" [prerequisite] {
+  courses exactly 2 from [PHYS 1800, PHYS 1810];
+}
+
+requirement prereq_biology "Prerequisite: BIOL 1010 and 1020, or BIOL 1030 and 1040" [prerequisite] {
+  children at least 1;
+  requirement prereq_biol_1010 "BIOL 1010 and 1020" { courses exactly 2 from [BIOL 1010, BIOL 1020]; }
+  requirement prereq_biol_1030 "BIOL 1030 and 1040" { courses exactly 2 from [BIOL 1030, BIOL 1040]; }
+}
+
+requirement thermodynamics "CENG 3000 or MENG 2511" [core] {
+  slot from [CENG 3000, MENG 2511];
+}
+
+requirement enve_core "ENVE 1200, 3600, 3730, 4410, and 4420" [core] {
+  courses exactly 5 from [ENVE 1200, ENVE 3600, ENVE 3730, ENVE 4410, ENVE 4420];
+}
+
+requirement enve_3140 "ENVE 3140 or 4480" [core] {
+  slot from [ENVE 3140, ENVE 4480];
+}
+
+requirement enve_4380 "ENVE 4380 or 4400" [core] {
+  slot from [ENVE 4380, ENVE 4400];
+}
+
+requirement electives "At least four electives chosen with the DUS, three of them technical electives" [elective] {
+  courses at least 4 where attempt.approved_for contains "electives" or attempt.approved_for contains "technical_electives";
+  constraint technical "At least three technical electives":
+    at least 3 attempts where attempt.approved_for contains "technical_electives";
+}
+
+requirement senior "Senior requirement: ENVE 4160 or 4900" [senior] {
+  slot from [ENVE 4160, ENVE 4900];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Thirteen term course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 13 credits;

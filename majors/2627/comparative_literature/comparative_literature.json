@@ -17,6 +17,9 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/literature/",
     "websiteLink": "https://complit.yale.edu/",
     "specializations": [
-        "african_american_studies_ba.mql"
+        "comparative_literature_ba_literature_and_comparative_cultures.mql",
+        "comparative_literature_ba_intensive_language.mql",
+        "comparative_literature_ba_film.mql",
+        "comparative_literature_ba_literary_translation.mql"
     ]
 }

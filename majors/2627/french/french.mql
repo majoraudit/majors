@@ -1,99 +1,81 @@
-SELECT 1 FROM [CLASS(FREN 1500), PLACEMENT("Equivalent prerequisite approved by DUS")] : "Prerequisite" : 1;
+// French B.A.: the standard major (ten term courses numbered 1600 or above) or the intensive major (twelve), either
+// optionally with the translation concentration; totals include the senior requirement but not the prerequisite.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/french/
+program french {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [
-    SELECT 10 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 4 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 1 FROM [CLASS(FREN 4910)]
-    ],
-    SELECT 10 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 4 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
-        SELECT 1 FROM [RANGE(FREN 1600 , FREN 9999)],
-        SELECT 1 FROM [CLASS(FREN 4920)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 4 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 1 FROM [CLASS(FREN 4910)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 2 FROM [CLASS(FREN 4930), CLASS(FREN 4940)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 2 FROM [TAG("YC FREN Translation Course"), TAG("YC FREN Translation Course")],
-        SELECT 2 FROM [RANGE(FREN 1600 , FREN 9999), RANGE(FREN 1600 , FREN 9999)],
-        SELECT 1 FROM [CLASS(FREN 4920)]
-    ],
-    SELECT 12 FROM [
-        SELECT 1 FROM [CLASS(FREN 1700), PLACEMENT("Equivalent to FREN 1700 approved by DUS")],
-        SELECT 5 FROM [
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus"),
-            TAG("YC FREN Group B 2000 Plus")
-        ],
-        SELECT 1 FROM [TAG("YC FREN Pre 1800 Course")],
-        SELECT 3 FROM [
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999),
-            RANGE(FREN 1600 , FREN 9999)
-        ],
-        SELECT 2 FROM [CLASS(FREN 4950), CLASS(FREN 4960)]
-    ]
-] : "French Major Plan" : 1;
+choice track "Major track": declared one of "standard", "intensive";
+choice translation "Translation concentration": declared one of "no", "yes";
+
+fact french_placement "Placement beyond FREN 1500": placement { test: "French placement", result: "beyond FREN 1500" };
+
+requirement prereq "Prerequisite: FREN 1500 or an equivalent" [prerequisite] {
+  slot from [FREN 1500];
+}
+
+effect placed when fact french_placement: waive prereq;
+
+requirement fren_1700 "FREN 1700, early in the major, or an equivalent course in French (2000-4999) chosen with the DUS" [core] {
+  slot where course.code = "FREN1700" or attempt.approved_for contains "fren_1700";
+}
+
+requirement group_b "Group B courses (taught in French) numbered 2000 or above: four (standard) or five (intensive)" [core] {
+  courses at least (track: "standard" => 4, "intensive" => 5)
+    where course.subject = "FREN" and course.number >= 2000 and course.attributes contains "YC FREN Taught in French";
+}
+
+requirement translation_courses "Translation concentration: two courses in French translation (e.g. FREN 3010 and 3012)" [core]
+    when translation = "yes" {
+  courses at least 2 where course.code in ["FREN3010", "FREN3012"] or attempt.approved_for contains "translation_courses";
+}
+
+// Courses outside the department need prior DUS approval and must bear on the student's principal interest.
+requirement other_courses "Further courses numbered FREN 1600 or above, or approved outside courses, toward the total" [elective] {
+  courses at least 0 where course.subject = "FREN" and course.number >= 1600 or attempt.approved_for contains "other_courses";
+}
+
+requirement senior "Senior requirement" [senior] {
+  children at least 1;
+  requirement senior_essay "One-term senior essay (FREN 4910)" when translation = "no" { slot from [FREN 4910]; }
+  requirement senior_essay_two_term "Intensive major: two-term senior essay (FREN 4930 and 4940)" when translation = "no" and track = "intensive" {
+    courses exactly 2 from [FREN 4930, FREN 4940];
+  }
+  requirement senior_translation "Senior translation project (FREN 4920)" when translation = "yes" { slot from [FREN 4920]; }
+  requirement senior_translation_two_term "Intensive major: two-term senior translation project (FREN 4950 and 4960)" when translation = "yes" and track = "intensive" {
+    courses exactly 2 from [FREN 4950, FREN 4960];
+  }
+}
+
+constraint pre_1800 "Period requirement: one course dealing predominantly with materials before 1800 (Group B or C)" in program:
+  at least 1 attempts where course.attributes contains "YC FREN Pre-1800";
+
+constraint range_1800 "At most two courses numbered FREN 1800-1999" in program:
+  limit 2 attempts where course.subject = "FREN" and course.number >= 1800 and course.number <= 1999;
+
+constraint english_limit "At most two courses conducted entirely in English (Group C)" in program:
+  limit 2 attempts where course.attributes contains "YC FREN Taught in English";
+
+constraint other_departments "At most two courses from other Yale departments" in program:
+  limit 2 attempts where course.subject != "FREN" and attempt.source = "yale";
+
+// The DUS may allow more for students who spend two academic terms in an approved study abroad program.
+constraint outside_limit "At most four courses from other departments and study abroad combined" in program:
+  limit 4 attempts where course.subject != "FREN" or attempt.source != "yale";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, excluding the senior essay" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint senior_letter "The senior requirement is not taken Credit/D/Fail" in subtree senior:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with prior DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_standard "Ten term courses numbered 1600 or above" when track = "standard" in roles [core, elective, senior]:
+  total at least 10 attempts;
+
+constraint total_intensive "Twelve term courses numbered 1600 or above" when track = "intensive" in roles [core, elective, senior]:
+  total at least 12 attempts;

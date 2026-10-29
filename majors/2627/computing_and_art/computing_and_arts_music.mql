@@ -1,4 +1,59 @@
-SELECT 1 FROM [CLASS(CPSC 1001)] : "Prerequisite" : 1;
-SELECT 6 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), CLASS(CPSC 4310), CLASS(CPSC 4320), TAG("YC CPAR MUSI CS Elective")] : "Computer Science Courses" : 2;
-SELECT 6 FROM [SELECT 2 FROM [RANGE(MUSI 2100, MUSI 2199), RANGE(MUSI 2100, MUSI 2199), RANGE(MUSI 3100, MUSI 3199), RANGE(MUSI 3100, MUSI 3199), RANGE(MUSI 4100, MUSI 4199), RANGE(MUSI 4100, MUSI 4199)], SELECT 3 FROM[RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 2100, MUSI 2299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 3100, MUSI 3299), RANGE(MUSI 4100, MUSI 4299), RANGE(MUSI 4100, MUSI 4299), RANGE(MUSI 4100, MUSI 4299)], SELECT 1 FROM [RANGE(MUSI 2300, MUSI 2499), RANGE(MUSI 3300, MUSI 3499), RANGE(MUSI 4300, MUSI 4499)]] : "Music Courses" : 2;
-SELECT 2 FROM [CLASS(CPSC 4900), CLASS(ARCH 4910)] : "Senior Requirements" : 1;
+// Computing and the Arts B.A. (Music concentration): twelve term courses beyond the prerequisites
+// (six in Computer Science, six in the arts), plus the two-term senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/
+program computing_and_arts_music {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement cs_intro "CPSC 2010" [computing] {
+  slot from [CPSC 2010];
+}
+
+requirement cs_discrete "CPSC 2020 (or MATH 2440), advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement cs_data_structures "CPSC 2230, advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2230];
+}
+
+requirement cs_music "CPSC 4310 and 4320" [computing] {
+  courses exactly 2 from [CPSC 4310, CPSC 4320];
+}
+
+requirement cs_elective "One additional intermediate or advanced Computer Science course for the track (not CPSC 4900)" [computing] {
+  slot where course.attributes contains "YC CPAR MUSI CS Elective"
+    or course.subject = "CPSC" and course.number >= 2000 and course.code != "CPSC4900";
+}
+
+requirement music_theory "Two courses from Group I (Music Theory)" [arts] {
+  courses at least 2 where course.attributes overlaps ["YC MUSI Intermediate Grp I", "YC MUSI Advanced Grp I"];
+}
+
+requirement music_creative "Three more courses from Group I or Group II (Creative Practices)" [arts] {
+  courses at least 3 where course.attributes overlaps ["YC MUSI Intermediate Grp I", "YC MUSI Advanced Grp I"] or course.attributes overlaps ["YC MUSI Intermediate Grp II", "YC MUSI Advanced Grp II"];
+}
+
+requirement music_history "One course from Group III (Western Art Music) or Group IV (World and Popular Music)" [arts] {
+  slot where course.attributes overlaps ["YC MUSI Intermediate Grp III", "YC MUSI Advanced Grp III", "YC MUSI Intermediate Grp IV", "YC MUSI Advanced Grp IV"];
+}
+
+requirement senior "Two-term senior project approved by the DUS and acceptable to both departments: CPSC 4900 and one of MUSI 4996-4999" [senior] {
+  children exactly 2;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_arts "one of MUSI 4996-4999" { slot where course.subject = "MUSI" and course.number >= 4996 and course.number <= 4999; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in Computer Science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint six_arts "Six courses in the arts discipline" in roles [arts]:
+  total at least 6 attempts;

@@ -1,13 +1,65 @@
-SELECT 4 FROM [CLASS(CPSC 2010), CLASS(CPSC 2230), CLASS(CPSC 3230), SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]] : "Core CS Classes" : 2;
-SELECT 1 FROM [CLASS(CPSC 4300), CLASS(CPSC 4400), CLASS(CPSC 4520), CLASS(CPSC 4550), CLASS(CPSC 4600), CLASS(CPSC 4630), CLASS(CPSC 4650), CLASS(CPSC 4680), CLASS(CPSC 4690), CLASS(CPSC 4860)] : "Advanced CPSC Course with Significant Mathematical Content" : 3;
-SELECT 1 FROM [TAG("YC CPSC&MATH Adv CS Elective")] : "CPSC Electives" : 4;
-SELECT 3 FROM [SELECT 1 FROM [CLASS(MATH 1200), RANGE(MATH 2250, MATH 4690), RANGE(MATH 5000, MATH 5999)], SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)], CLASS(MATH 2440)] : "Core Math Classes" : 2;
-SELECT 5 FROM [
-    SELECT 0-5 FROM [
-        RANGE(MATH 2250, MATH 4690)
-    ],
-    SELECT 0-5 FROM [
-        RANGE(MATH 5000, MATH 5999)
-    ]
-] : "Math Electives" : 4;
-SELECT 1 FROM [CLASS(CPSC 4900), CLASS(MATH 4750)] : "Senior Requirement" : 1;
+// Computer Science and Mathematics B.S.: fourteen term courses (six CPSC, eight MATH) plus the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computer-science-mathematics/
+// Courses must carry a CPSC or MATH number to count on that side; substitutions from other departments are not allowed.
+// The DUS in each department approves the entire program.
+program cs_and_math {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement cs_core "CPSC 2010, 2230, and 3230" [computing] {
+  courses exactly 3 from [CPSC 2010, CPSC 2230, CPSC 3230];
+}
+
+requirement algorithms "Algorithms: CPSC 3650 or 3660 (only one may count)" [computing] {
+  slot from [CPSC 3650, CPSC 3660];
+}
+
+requirement cs_mathematical "An advanced CPSC course with significant mathematical content" [computing] {
+  slot where course.subject = "CPSC" and course.attributes contains "YC CPSC&MATH Adv CS Elective"
+    or course.code in ["CPSC4300", "CPSC4400", "CPSC4520", "CPSC4550", "CPSC4600", "CPSC4630", "CPSC4650", "CPSC4680", "CPSC4690", "CPSC4860"]
+    or course.subject = "CPSC" and attempt.approved_for contains "cs_mathematical";
+}
+
+requirement cs_advanced "One additional advanced CPSC course other than CPSC 4900" [computing] {
+  slot where course.subject = "CPSC" and course.number >= 3000 and course.code != "CPSC4900";
+}
+
+requirement multivariable "Multivariable calculus: MATH 1200 (or MATH 3020, after MATH 2250 and 2550, with the Math DUS)" [mathematics] {
+  slot from [MATH 1200, MATH 3020];
+}
+
+requirement linear_algebra "Linear algebra: MATH 2250 or 2260" [mathematics] {
+  slot from [MATH 2250, MATH 2260];
+}
+
+requirement math_2440 "MATH 2440" [mathematics] {
+  slot from [MATH 2440];
+}
+
+requirement math_electives "Five additional MATH courses numbered 2250-4690 (not MATH 4700 or 4800-4890), or graduate MATH 5000-5999" [mathematics] {
+  courses at least 5
+    where course.subject = "MATH"
+      and (course.number >= 2250 and course.number <= 4690 and course.code != "MATH4700"
+           or course.number >= 5000 and course.number <= 5999);
+}
+
+requirement senior "Senior project or essay acceptable to both departments (typically CPSC 4900 or MATH 4750), with written DUS permission" [senior] {
+  slot where course.code in ["CPSC4900", "MATH4750"] or attempt.approved_for contains "senior";
+}
+
+constraint one_algorithms "Only one of CPSC 3650 or 3660 counts toward the major" in program:
+  limit 1 attempts where course.code in ["CPSC3650", "CPSC3660"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in computer science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint eight_math "Eight courses in mathematics" in roles [mathematics]:
+  total at least 8 attempts;

@@ -12,5 +12,11 @@
     "dus": [["Jessica Thompson", "jessica.thompson@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/anthropology/",
     "websiteLink": "https://anthropology.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "anthropology_ba_standard.mql",
+        "anthropology_ba_archaeological_anthropology.mql",
+        "anthropology_ba_biological_anthropology.mql",
+        "anthropology_ba_sociocultural_anthropology.mql",
+        "anthropology_ba_medical_anthropology_and_global_health.mql"
+    ]
 }

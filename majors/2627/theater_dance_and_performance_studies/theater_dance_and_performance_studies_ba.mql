@@ -1,0 +1,48 @@
+// Theater, Dance, and Performance Studies B.A.: ten term courses beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/theater-dance-performance-studies/
+// A course listed in several domains counts toward only one domain requirement (the exclusive default).
+program theater_dance_and_performance_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq "Prerequisites: TDPS 1000 and 1001" [prerequisite] {
+  courses exactly 2 from [TDPS 1000, TDPS 1001];
+}
+
+requirement domain_artistic_practice "Two courses in the Artistic Practice domain" [core] {
+  courses at least 2 where course.attributes contains "YC TDPS Artistic Practice";
+}
+
+requirement domain_interarts "Two courses in the Interarts domain" [core] {
+  courses at least 2 where course.attributes contains "YC TDPS Interarts";
+}
+
+requirement domain_histories "Two courses in the Histories domain" [core] {
+  courses at least 2 where course.attributes contains "YC TDPS Histories";
+}
+
+requirement domain_performance_theory "Two courses in the Performance Theory domain" [core] {
+  courses at least 2 where course.attributes contains "YC TDPS Performance Theory";
+}
+
+// Courses from other departments that carry a TDPS domain attribute also count.
+requirement elective "One related TDPS elective (not TDPS 1000, 1001, 4701, or 4900-4902)" [elective] {
+  slot where (course.attributes overlaps ["YC TDPS Elective", "YC TDPS Artistic Practice", "YC TDPS Interarts", "YC TDPS Histories", "YC TDPS Performance Theory"]
+      or course.subject = "TDPS")
+    and not course.code in ["TDPS1000", "TDPS1001", "TDPS4701", "TDPS4900", "TDPS4901", "TDPS4902"];
+}
+
+requirement senior "Senior requirement: TDPS 4900, 4901 (with a 15-25 page essay), or 4902, or a senior essay in an upper-level seminar or a production seminar approved by the DUS" [senior] {
+  slot where course.code in ["TDPS4900", "TDPS4901", "TDPS4902"] or attempt.approved_for contains "senior";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Ten term courses beyond the prerequisites, including the senior requirement" in roles [core, elective, senior]:
+  total at least 10 attempts;

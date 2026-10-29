@@ -1,0 +1,69 @@
+// American Studies B.A. (standard): fourteen term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/american-studies/
+program american_studies_ba_standard {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+// The concentration is declared; its courses are approved by the DUS, so its subject does not change the audit.
+choice concentration_area "Area of concentration": declared one of
+  "national_formations", "international_united_states", "material_cultures_built_environments",
+  "politics_american_communities", "visual_audio_literary_performance_cultures", "public_humanities", "independent";
+
+requirement gateway "Four gateway courses (AMST 1000-2999), preferably by the end of sophomore year and no later than junior year" [core] {
+  children at least 3;
+  requirement gateway_cultural "Two gateway courses in cultural history/cultural studies" {
+    courses at least 2
+      where course.subject = "AMST" and course.number >= 1000 and course.number <= 2999
+        and course.attributes contains "YC AMST Cultural Hist/Studies";
+  }
+  requirement gateway_survey "One broad survey course in American literature" {
+    slot where course.subject = "AMST" and course.number >= 1000 and course.number <= 2999
+      and course.attributes contains "YC AMST Survey of Am Lit";
+  }
+  requirement gateway_preparatory "One preparatory course for the area of concentration, chosen with the DUS" {
+    slot where course.subject = "AMST" and course.number >= 1000 and course.number <= 2999
+      or attempt.approved_for contains "gateway";
+  }
+  constraint early_americas "One gateway course carries the Early Americas attribute" in subtree gateway:
+    at least 1 attempts where course.attributes contains "YC AMST Early Americas";
+  constraint first_year_seminar "A First-Year Seminar may replace one gateway course with DUS permission" in subtree gateway:
+    at most 1 attempts where not (course.subject = "AMST" and course.number >= 1000 and course.number <= 2999);
+}
+
+requirement junior_seminars "Two junior seminars (AMST 3000-3999), one in the area of concentration" [core] {
+  courses at least 2 where course.subject = "AMST" and course.number >= 3000 and course.number <= 3999;
+  constraint junior_year "Taken in the junior year (or spring of sophomore year before a junior term abroad)":
+    all where attempt.year_of_study = 3 or attempt.approved_for contains "junior_seminars";
+  constraint seminar_in_concentration "At least one junior seminar in the area of concentration":
+    at least 1 attempts where attempt.approved_for contains "concentration";
+}
+
+requirement concentration "Five courses in the area of concentration from diverse disciplines" [concentration] {
+  courses at least 5 where attempt.approved_for contains "concentration";
+  constraint concentration_letter "Concentration courses taken for a letter grade":
+    all where attempt.grading_mode = "letter";
+  constraint non_us "One concentration course on a comparable topic from a non-U.S. perspective":
+    at least 1 attempts where attempt.approved_for contains "non_us_perspective";
+}
+
+requirement electives "Two American Studies electives" [elective] {
+  courses at least 2 where course.subject = "AMST";
+}
+
+requirement senior "Senior requirement in the area of concentration: a senior seminar (AMST 4000-4999) or the one-term senior project (AMST 4491)" [senior] {
+  slot where course.subject = "AMST" and course.number >= 4000 and course.number <= 4999
+    and not course.code in ["AMST4493", "AMST4494"];
+  constraint senior_year "Completed in the senior year":
+    all where attempt.year_of_study = 4;
+}
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen term courses in all" in program:
+  total at least 14 attempts;

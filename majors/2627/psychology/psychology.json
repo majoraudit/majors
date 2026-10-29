@@ -17,8 +17,9 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/psychology/",
     "websiteLink": "https://psychology.yale.edu/",
     "specializations": [
-        "psychology_ba.mql",
-        "psychology_bs.mql"
-
+        "psychology_standard_ba.mql",
+        "psychology_standard_bs.mql",
+        "psychology_neuroscience_ba.mql",
+        "psychology_neuroscience_bs.mql"
     ]
 }

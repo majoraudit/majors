@@ -1,0 +1,44 @@
+// Women's, Gender, and Sexuality Studies B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/womens-gender-sexuality-studies/
+// The area of focus draws mostly on program offerings; substitutions require written DUS permission.
+program womens_gender_and_sexuality_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement intermediate "Two intermediate courses: WGSS 2205, 2206, 2207, or 3340" [core] {
+  courses at least 2 from [WGSS 2205, WGSS 2206, WGSS 2207, WGSS 3340];
+}
+
+requirement methodology "One methodology course relevant to the area of focus and the senior essay, by the junior year, approved by the DUS" [core] {
+  slot where attempt.approved_for contains "methodology" and attempt.year_of_study <= 3;
+}
+
+requirement focus "Seven courses in an area of focus, including an upper-level WGSS seminar numbered 3350 or above" [concentration] {
+  courses at least 7
+    where course.subject = "WGSS" and not course.code in ["WGSS4490", "WGSS4491"] or attempt.approved_for contains "focus";
+  constraint focus_seminar "At least one upper-level WGSS seminar numbered 3350 or above":
+    at least 1 attempts where course.subject = "WGSS" and course.number >= 3350 and course.format = "seminar";
+}
+
+requirement senior "Senior requirement: WGSS 4490 and 4491, or a single-term senior essay (30+ pages) in an approved upper-level seminar plus one more WGSS course" [senior] {
+  children at least 1;
+  requirement senior_two_term "WGSS 4490 and 4491" { courses exactly 2 from [WGSS 4490, WGSS 4491]; }
+  requirement senior_one_term "A single-term senior essay in an upper-level seminar, and one more WGSS course" {
+    children exactly 2;
+    requirement senior_essay_seminar "Upper-level WGSS seminar carrying the senior essay" {
+      slot where course.subject = "WGSS" and course.format = "seminar" and attempt.approved_for contains "senior";
+    }
+    requirement senior_additional "One additional WGSS course" { slot where course.subject = "WGSS"; }
+  }
+}
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

@@ -1,0 +1,46 @@
+// Religious Studies B.A.: twelve term courses including the two-term senior essay.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/religious-studies/
+// Core courses must originate in Religious Studies (RLST subject code).
+program religious_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement core_intro "Core: one introductory course (RLST 0001-1999)" [core] {
+  slot where course.subject = "RLST" and course.number >= 1 and course.number <= 1999;
+}
+
+requirement core_breadth "Core: one RLST course introducing breadth into the core area of study" [core] {
+  slot where course.subject = "RLST" and attempt.approved_for contains "core_breadth";
+}
+
+requirement core_area "Core: three related RLST courses leading to the area of the senior essay" [core] {
+  courses at least 3 where course.subject = "RLST" and not course.code in ["RLST4900", "RLST4910", "RLST4920"];
+}
+
+requirement junior_seminar "Junior seminar (RLST 4900), not Credit/D/Fail" [core] {
+  slot from [RLST 4900];
+  constraint junior_letter "RLST 4900 may not be taken Credit/D/Fail": all where attempt.grading_mode = "letter";
+}
+
+requirement electives "Four electives (RLST, or languages, other disciplines, or Divinity School courses complementing the area of expertise, with DUS approval)" [elective] {
+  courses at least 4
+    where course.subject = "RLST" and not course.code in ["RLST4900", "RLST4910", "RLST4920"]
+      or attempt.approved_for contains "electives";
+  constraint shared_electives "At most two electives also counted for a second major or a certificate":
+    at most 2 attempts where attempt.approved_for contains "shared_elsewhere";
+}
+
+requirement senior "Two-term senior essay (RLST 4910 and 4920)" [senior] {
+  courses exactly 2 from [RLST 4910, RLST 4920];
+}
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the two-term senior essay" in program:
+  total at least 12 attempts;

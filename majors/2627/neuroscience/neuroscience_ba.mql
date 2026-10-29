@@ -1,9 +1,71 @@
-SELECT 2 FROM [CLASS(NSCI 1600), CLASS(NSCI 3200)] : "Core Classes" : 1;
-SELECT 1 FROM [CLASS(NSCI 2280L), CLASS(NSCI 2290L), CLASS(NSCI 2400), CLASS(NSCI 2580), CLASS(NSCI 2600), CLASS(NSCI 2700), CLASS(NSCI 3210L), CLASS(PSYC 2538)] : "Labs" : 2;
-SELECT 2 FROM TAG("YC NSCI Systems/Circuit/Behav") : "Tag 1 Elective" : 3;
-SELECT 2 FROM TAG("YC NSCI Molecular/Cell/Biol") : "Tag 2 Elective" : 4;
-SELECT 1 FROM TAG("YC NSCI Quantitative") : "Tag 3 Elective" : 5;
-SELECT 1 FROM TAG("YC NSCI NSCI Computational") : "Tag 4 Elective" : 6;
-SELECT 1 FROM TAG("YC NSCI Basic Allied Core") : "Tag 5 Elective" : 7;
-SELECT 2 FROM TAG("YC NSCI Other Allied") : "Tag 6 Elective" : 8;
-SELECT 2 FROM [CLASS(NSCI 4900), CLASS(NSCI 4910), CLASS(NSCI 4800), CLASS(NSCI 4810)] : "Senior Requirement" : 9;
+// Neuroscience B.A.: at least 18.5 credits including the prerequisites (or substitutes), fifteen lecture or seminar
+// courses (including the senior requirement), and one laboratory.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/neuroscience/
+// NSCI 4700 and 4710 (research before senior year) do not count toward any requirement.
+program neuroscience_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact biology_placement "Placed out of the four BIOL modules (placement exams or DUS permission)":
+  placement { test: "BIOL placement", result: "four modules" };
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+effect biology_placed when fact biology_placement: waive prereq_biology;
+
+requirement biology_substitute "Two upper-level MCDB courses (core or 2000+ lecture or seminar) in place of the four BIOL modules" [prerequisite]
+    when fact biology_placement {
+  courses at least 2 where course.subject = "MCDB" and course.number >= 2000 and course.format in ["lecture", "seminar"];
+}
+
+requirement prereq_statistics "Statistics: S&DS 1000, 2200, 2300, or 2380" [prerequisite] {
+  slot from [S&DS 1000, S&DS 2200, S&DS 2300, S&DS 2380];
+}
+
+requirement foundation "Foundation courses: NSCI 1600 and 3200" [core] {
+  courses exactly 2 from [NSCI 1600, NSCI 3200];
+}
+
+requirement lab "One neuroscience laboratory" [core] {
+  slot where course.attributes contains "YC NSCI Neuroscience Lab"
+    or course.code in ["NSCI2280L", "NSCI2290L", "NSCI2400", "NSCI2580", "NSCI2600", "NSCI2700", "NSCI3210L", "PSYC2538"];
+}
+
+requirement electives "Eleven electives from the core groupings" [elective] {
+  courses at least 11 where course.attributes overlaps ["YC NSCI Systems/Circuit/Behav", "YC NSCI Molecular/Cell/Biol", "YC NSCI Quantitative", "YC NSCI Computational", "YC NSCI Basic Allied Core", "YC NSCI Other Allied"] and not course.code in ["NSCI4700", "NSCI4710"];
+  constraint electives_systems "At least 2 Systems/Circuits/Behavior core courses":
+    at least 2 attempts where course.attributes contains "YC NSCI Systems/Circuit/Behav";
+  constraint electives_molecular "At least 2 Molecular/Cellular/Biological core courses":
+    at least 2 attempts where course.attributes contains "YC NSCI Molecular/Cell/Biol";
+  constraint electives_quantitative "At least 1 Quantitative core course":
+    at least 1 attempts where course.attributes contains "YC NSCI Quantitative";
+  constraint electives_computational "At least 1 Computational core course":
+    at least 1 attempts where course.attributes contains "YC NSCI Computational";
+  constraint electives_basic_allied "At least 1 Basic Allied core course":
+    at least 1 attempts where course.attributes contains "YC NSCI Basic Allied Core";
+  constraint other_allied "No more than two Other Allied core courses":
+    at most 2 attempts where course.attributes contains "YC NSCI Other Allied";
+}
+
+requirement senior "Senior requirement: NSCI 4800 and 4810, or one nonempirical (NSCI 4800 or 4810) and one empirical (NSCI 4900 or 4910) research course" [senior] {
+  children at least 1;
+  requirement senior_nonempirical "NSCI 4800 and 4810" { courses exactly 2 from [NSCI 4800, NSCI 4810]; }
+  requirement senior_mixed "One nonempirical and one empirical research course" {
+    children exactly 2;
+    requirement senior_mixed_nonempirical "NSCI 4800 or 4810" { slot from [NSCI 4800, NSCI 4810]; }
+    requirement senior_mixed_empirical "NSCI 4900 or 4910" { slot from [NSCI 4900, NSCI 4910]; }
+  }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "At least 18.5 credits including the prerequisites" in program:
+  total at least 18.5 credits;

@@ -1,27 +1,63 @@
-SELECT 1 FROM [
-  CLASS(MATH 1200),
-  TAG("Equivalent Placement or Credit")
-] : "Prerequisites" : 1;
+// Mathematics and Philosophy B.A.: twelve term courses including the prerequisite and the senior seminar.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics-philosophy/
+// Mathematics courses must carry a MATH number; graduate MATH 5000-5999 may count as electives, 6000+ may not.
+program mathematics_and_philosophy_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 10 FROM [
-  CLASS(MATH 2700),
-  CLASS(PHIL 2267),
-  CLASS(PHIL 4427),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  RANGE(MATH 2220 , MATH 4690),
-  TAG("YC PHIL Logic"),
-  TAG("YC PHIL Metaphysics&Epistemol"),
-  TAG("YC PHIL Ethics & Value Theory"),
-  TAG("YC PHIL Logic")
-] : "Core Classes" : 10;
+requirement prereq "Prerequisite: MATH 1200 (or MATH 3020, after MATH 2250 and 2550); counts among the twelve" [prerequisite] {
+  slot from [MATH 1200, MATH 3020];
+}
 
-SELECT 1 FROM [
-  RANGE(PHIL 1000 , PHIL 4999),
-  RANGE(MATH 2220 , MATH 4690)
-] : "Electives" : 1;
+requirement set_theory "Set Theory: MATH 2700, before the end of junior year, for a letter grade" [mathematics, letter_required] {
+  slot from [MATH 2700];
+  constraint set_theory_by_junior_year "Before the end of junior year": all where attempt.year_of_study <= 3;
+}
 
-SELECT 1 FROM [
-  RANGE(MATH 4800 , MATH 4890),
-  TAG("YC PHIL Senior Seminar")
-] : "Senior Requirement" : 1;
+requirement math_courses "Three additional mathematics courses numbered 2220 or higher, for letter grades" [mathematics, letter_required] {
+  courses at least 3
+    where course.subject = "MATH" and (course.number >= 2220 and course.number <= 4690 or course.number >= 5000 and course.number <= 5999);
+}
+
+requirement mathematical_logic "Mathematical Logic: PHIL 2267, before the end of junior year, for a letter grade" [philosophy, letter_required] {
+  slot from [PHIL 2267];
+  constraint logic_by_junior_year "Before the end of junior year": all where attempt.year_of_study <= 3;
+}
+
+requirement computability "Computability and Logic: PHIL 4427, for a letter grade" [philosophy, letter_required] {
+  slot from [PHIL 4427];
+}
+
+requirement phil_courses "Three additional philosophy courses (not PHIL 1115)" [philosophy] {
+  courses at least 3 where course.subject = "PHIL" and course.code != "PHIL1115";
+}
+
+requirement elective "One mathematics or philosophy elective" [elective] {
+  slot where course.subject = "MATH" and course.number >= 2220 and course.number <= 5999 and course.number != 4700
+    or course.subject = "PHIL" and course.code != "PHIL1115";
+}
+
+requirement senior "Senior seminar with additional work agreed with the instructor: MATH 4800-4890, or a designated philosophy seminar" [senior, letter_required] {
+  slot where course.subject = "MATH" and course.number >= 4800 and course.number <= 4890
+    or course.subject = "PHIL" and attempt.approved_for contains "senior";
+}
+
+// The advanced-logic course may be one of the three philosophy courses or the senior seminar.
+constraint advanced_logic "One philosophy course besides PHIL 4427 with an advanced logic component, for a letter grade" in requirements [phil_courses, senior]:
+  at least 1 attempts
+    where course.subject = "PHIL" and (course.attributes contains "YC PHIL Logic" or attempt.approved_for contains "advanced_logic")
+      and attempt.grading_mode = "letter";
+
+constraint letter_required "MATH 2700, PHIL 2267, PHIL 4427, the required mathematics courses, and the senior seminar are taken for letter grades" in roles [letter_required]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts (including the prerequisite), with permission of the DUSs" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses taken elsewhere after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the prerequisite and the senior seminar" in program:
+  total at least 12 attempts;

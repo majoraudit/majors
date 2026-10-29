@@ -1,29 +1,73 @@
-SELECT 3 FROM [
-    CLASS(CPSC 1001),
-    CLASS(ART 1111),
-    CLASS(ART 1514)
-] : "Prerequisites" : 1;
+// Computing and the Arts B.A. (Art concentration): twelve term courses beyond the prerequisites
+// (six in Computer Science, six in the arts), plus the two-term senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/
+program computing_and_arts_art {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 6 FROM [
-    CLASS(CPSC 2010),
-    SELECT 1 FROM [
-        CLASS(CPSC 2020), 
-        CLASS(MATH 2440)
-    ],
-    CLASS(CPSC 2230),
-    SELECT 2 FROM [
-        CLASS(CPSC 3760),
-        CLASS(CPSC 4370), 
-        CLASS(CPSC 4460), 
-        CLASS(CPSC 4510), 
-        CLASS(CPSC 4750), 
-        CLASS(CPSC 4780), 
-        CLASS(CPSC 4790),
-        CLASS(CPSC 4840)
-    ],
-    TAG("YC CPAR ART CS Elective")
-] : "Computer Science Courses" : 2;
+fact sophomore_review "Favorable sophomore review of studio work by the School of Art":
+  approval committee_approval { for: "sophomore_review" };
 
-SELECT 7 FROM [PLACEMENT("Sophomore Review at the School of Art"), SELECT 2 FROM [RANGE(ART 1000, ART 1110), RANGE(ART 1000, ART 1110), RANGE(ART 1112, ART 1513), RANGE(ART 1112, ART 1513), RANGE(ART 1515, ART 1999), RANGE(ART 1515, ART 1999)], SELECT 2 FROM [RANGE(ART 2000, ART 3994), RANGE(ART 2000, ART 3994), RANGE(ART 3996, ART 3999), RANGE(ART 3996, ART 3999)], CLASS(ART 3995), CLASS(ART 4995)] : "Art Courses" : 2;
+requirement prereq_art "Prerequisite: ART 1111 and 1514" [prerequisite] {
+  courses exactly 2 from [ART 1111, ART 1514];
+}
 
-SELECT 2 FROM [CLASS(CPSC 4900), CLASS(ART 4996)] : "Senior Requirements" : 1;
+requirement review "Prerequisite: sophomore review" [prerequisite] {
+  slot where attempt.approved_for contains "sophomore_review";
+}
+
+effect review_passed when fact sophomore_review: waive review;
+
+requirement cs_intro "CPSC 2010" [computing] {
+  slot from [CPSC 2010];
+}
+
+requirement cs_discrete "CPSC 2020 (or MATH 2440), advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement cs_data_structures "CPSC 2230, advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2230];
+}
+
+requirement cs_graphics "Two of CPSC 3760, 4370, 4460, 4510, 4750, 4780, 4790, or 4840" [computing] {
+  courses at least 2 from [CPSC 3760, CPSC 4370, CPSC 4460, CPSC 4510, CPSC 4750, CPSC 4780, CPSC 4790, CPSC 4840];
+}
+
+requirement cs_elective "One additional intermediate or advanced Computer Science course for the track (not CPSC 4900)" [computing] {
+  slot where course.attributes contains "YC CPAR ART CS Elective"
+    or course.subject = "CPSC" and course.number >= 2000 and course.code != "CPSC4900";
+}
+
+requirement art_seminars "ART 3995 and 4995" [arts] {
+  courses exactly 2 from [ART 3995, ART 4995];
+}
+
+requirement art_intro "Two Art courses at the 1000 level, beyond the prerequisites" [arts] {
+  courses at least 2 where course.subject = "ART" and course.number >= 1000 and course.number <= 1999;
+}
+
+requirement art_intermediate "Two Art courses at the 2000 or 3000 level" [arts] {
+  courses at least 2
+    where course.subject = "ART" and course.number >= 2000 and course.number <= 3999 and course.code != "ART3995";
+}
+
+requirement senior "Two-term senior project approved by the DUS and acceptable to both departments: CPSC 4900 and ART 4996" [senior] {
+  children exactly 2;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_arts "ART 4996" { slot from [ART 4996]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in Computer Science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint six_arts "Six courses in the arts discipline" in roles [arts]:
+  total at least 6 attempts;

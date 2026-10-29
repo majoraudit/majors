@@ -1,0 +1,108 @@
+// Computer Science and Economics B.S.: fourteen term courses beyond the prerequisites, plus the senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computerscienceandeconomics/
+// With DUS and adviser permission a more advanced course in the same area may replace a required course;
+// it then counts toward the nine required courses, not the electives.
+program computer_science_and_economics_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact discrete_preparation "Prior preparation in discrete mathematics accepted by the DUS (e.g., AP Computer Science)":
+  prior_coursework { description: "discrete mathematics" };
+fact calculus_preparation "Prior preparation in calculus accepted by the DUS (e.g., AP Calculus 4 or 5)":
+  prior_coursework { description: "calculus" };
+fact micro_preparation "Prior preparation in microeconomics accepted by the DUS (e.g., AP Microeconomics 4 or 5)":
+  prior_coursework { description: "microeconomics" };
+fact macro_preparation "Prior preparation in macroeconomics accepted by the DUS (e.g., AP Macroeconomics 4 or 5)":
+  prior_coursework { description: "macroeconomics" };
+
+requirement prereq_discrete "Prerequisite: basic knowledge of discrete mathematics (CPSC 2020 or MATH 2440)" [prerequisite] {
+  slot from [CPSC 2020, MATH 2440];
+}
+requirement prereq_calculus "Prerequisite: basic knowledge of calculus (MATH 1120)" [prerequisite] {
+  slot from [MATH 1120];
+}
+requirement prereq_micro "Prerequisite: basic knowledge of microeconomics (ECON 1110 or 1115)" [prerequisite] {
+  slot from [ECON 1110, ECON 1115];
+}
+requirement prereq_macro "Prerequisite: basic knowledge of macroeconomics (ECON 1111 or 1116)" [prerequisite] {
+  slot from [ECON 1111, ECON 1116];
+}
+
+effect discrete_known when fact discrete_preparation: waive prereq_discrete;
+effect calculus_known when fact calculus_preparation: waive prereq_calculus;
+effect micro_known when fact micro_preparation: waive prereq_micro;
+effect macro_known when fact macro_preparation: waive prereq_macro;
+
+requirement cs_core "CPSC 2010, 2230, and 3230" [core] {
+  courses at least 3 where course.code in ["CPSC2010", "CPSC2230", "CPSC3230"] or attempt.approved_for contains "cs_core";
+}
+
+requirement algorithms "Algorithms: CPSC 3650 or 3660 (only one may count)" [core] {
+  slot where course.code in ["CPSC3650", "CPSC3660"] or attempt.approved_for contains "algorithms";
+}
+
+requirement micro "Intermediate microeconomics: ECON 2121 or 2125, taken at Yale" [core] {
+  slot where course.code in ["ECON2121", "ECON2125"] or attempt.approved_for contains "micro";
+  constraint micro_at_yale "Not satisfied by courses taken outside Yale": all where attempt.source = "yale";
+}
+
+requirement econometrics "Econometrics: ECON 1117 and 2123, or ECON 2135 and 2136 (S&DS 2410 and 2420 may replace ECON 2135), taken at Yale" [core] {
+  children at least 1;
+  requirement econometrics_1117 "ECON 1117 and 2123" { courses exactly 2 from [ECON 1117, ECON 2123]; }
+  requirement econometrics_2135 "ECON 2135 and 2136" { courses exactly 2 from [ECON 2135, ECON 2136]; }
+  requirement econometrics_sds "S&DS 2410 and 2420 with ECON 2136" { courses exactly 3 from [S&DS 2410, S&DS 2420, ECON 2136]; }
+  constraint econometrics_at_yale "Not satisfied by courses taken outside Yale" in subtree econometrics:
+    all where attempt.source = "yale";
+}
+
+requirement game_theory "Game theory: ECON 3351 or CPSC 4550" [core] {
+  slot where course.code in ["ECON3351", "CPSC4550"] or attempt.approved_for contains "game_theory";
+}
+
+// Exclusive by default, so this course cannot also be an elective or the game theory course.
+requirement intersection "A course in the intersection of computer science and economics (e.g., CPSC 4550, ECON 4417, 4433, 4486, 4441, 4435, 4478, CPSC 4740), taken at Yale" [core] {
+  slot where course.attributes contains "YC CSEC Elctv intrsectn CS/EC"
+    or course.code in ["CPSC4550", "ECON4417", "ECON4433", "ECON4486", "ECON4441", "ECON4435", "ECON4478", "CPSC4740"];
+  constraint intersection_at_yale "Not satisfied by courses taken outside Yale": all where attempt.source = "yale";
+}
+
+requirement electives "Five electives that count in the Computer Science or Economics majors" [elective] {
+  courses at least 5
+    where course.attributes contains "YC CPSC Elective"
+      or course.subject = "ECON" and course.number >= 2000
+      or course.code in ["ECON2122", "ECON2259", "ECON6672", "S&DS3650"]
+      or course.attributes contains "YC CSEC Elective not CS or EC";
+  constraint cs_electives "At least two electives in Computer Science":
+    at least 2 attempts where course.attributes contains "YC CPSC Elective";
+  constraint econ_electives "At least one elective in Economics":
+    at least 1 attempts where course.subject = "ECON";
+  constraint related_electives "At most two electives in related departments, with adviser permission":
+    at most 2 attempts where not course.attributes contains "YC CPSC Elective" and course.subject != "ECON";
+}
+
+requirement senior "Senior project (CSEC 4910) combining computer science and economics, in the senior year" [senior] {
+  slot from [CSEC 4910];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint one_algorithms "Only one of CPSC 3650 or 3660 counts toward the major" in program:
+  limit 1 attempts where course.code in ["CPSC3650", "CPSC3660"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses outside Yale count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+fact year_abroad "Student completed a year abroad": prior_coursework { description: "year abroad" };
+
+constraint outside_limit "At most two courses from outside Yale" when not fact year_abroad in program:
+  limit 2 attempts where attempt.source != "yale";
+
+constraint outside_limit_year "At most three courses from outside Yale after a year abroad" when fact year_abroad in program:
+  limit 3 attempts where attempt.source != "yale";
+
+constraint total_courses "Fourteen term courses beyond the prerequisites, not counting the senior project" in roles [core, elective]:
+  total at least 14 attempts;

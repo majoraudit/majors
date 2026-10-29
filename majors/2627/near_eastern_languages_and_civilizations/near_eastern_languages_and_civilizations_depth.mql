@@ -1,3 +1,41 @@
-SELECT 6 FROM [RANGE(ARBC 1000 , ARBC 4999), RANGE(HEBR 1000 , HEBR 4999), RANGE(PERS 1000 , PERS 4999), RANGE(TKSH 1000 , TKSH 4999), RANGE(NELC 1000 , NELC 4999)] : "Languages" : 1;
-SELECT 5 FROM [RANGE(NELC 1000 , NELC 4999)] : "NELC Courses" : 2;
-SELECT 1 FROM [CLASS(NELC 4920), CLASS(NELC 4930)] : "Senior Requirement" : 3;
+// Near Eastern Languages and Civilizations B.A. (Depth concentration): twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/near-eastern-languages-civilizations/
+// Students develop a coherent program with the DUS.
+program near_eastern_languages_and_civilizations_depth {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement language "Six term courses in one or two Near Eastern languages" [language] {
+  courses at least 6 where course.subject in ["ARBC", "HEBR", "PERS", "TKSH", "AKKD", "EGYP", "ARMN", "OTTM"] or attempt.approved_for contains "language";
+}
+
+requirement foundations "One NELC Foundations course" [core] {
+  slot where course.attributes contains "YC NELC Foundations Course";
+}
+
+requirement electives "Four NELC electives chosen with the DUS, no more than two from other departments or programs" [elective] {
+  courses at least 4 where course.subject = "NELC" and not course.code in ["NELC4920", "NELC4930"] or attempt.approved_for contains "nelc_elective";
+  constraint other_departments "No more than two from other departments or programs": at most 2 attempts where course.subject != "NELC";
+}
+
+requirement senior "Senior project: NELC 4920 and/or 4930, or an expanded upper-level seminar paper approved in advance by the instructor and the DUS" [senior] {
+  children at least 1;
+  requirement senior_project "NELC 4920 and/or 4930" { courses between 1 and 2 from [NELC 4920, NELC 4930]; }
+  requirement senior_seminar "An expanded upper-level seminar research paper" {
+    slot where course.subject = "NELC" and course.format = "seminar" and attempt.approved_for contains "senior";
+  }
+}
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_limit "At most two outside credits (other institutions or study abroad), with DUS approval" in program:
+  limit 2 credits where attempt.source != "yale";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

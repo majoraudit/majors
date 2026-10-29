@@ -1,0 +1,51 @@
+// Special Divisional Major (B.A. or B.S.): at least twelve advanced term courses and a senior project, in a program designed
+// by the student and approved by the Committee on Honors and Academic Standing.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/special-divisional-major/
+// Course content is set by each approved proposal, so the courses reach the audit as adviser and Committee approvals.
+program special_divisional_major_ba_or_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact proposal_approved "Program proposal approved by the Committee on Honors and Academic Standing, with a primary adviser from the Yale College faculty":
+  approval committee_approval { for: "proposal" };
+fact preparation_accepted "Preparation for the proposed advanced courses and senior project accepted by the advisers and the Committee":
+  approval committee_approval { for: "preparation" };
+fact senior_plan "Senior project plan given to the Committee by midterm of the seventh term":
+  approval committee_approval { for: "senior_plan" };
+
+requirement proposal "Approved program proposal" [admission] {
+  slot where attempt.approved_for contains "proposal";
+}
+
+requirement preparation "Prerequisite preparation for the advanced courses and senior project" [prerequisite] {
+  slot where attempt.approved_for contains "preparation";
+}
+
+effect proposal_done when fact proposal_approved: waive proposal;
+effect preparation_done when fact preparation_accepted: waive preparation;
+
+requirement advanced "At least twelve advanced term courses in the approved program (graduate courses, tutorials, or Residential College Seminars when approved; not prerequisites or beginning language courses)" [core] {
+  courses at least 12 where attempt.approved_for contains "advanced";
+}
+
+requirement senior "Senior project: SPEC 4910 and/or 4920, or a written or oral examination, graduate course, or tutorial approved by the Committee" [senior] {
+  children at least 1;
+  requirement senior_spec "SPEC 4910 and/or 4920" { courses between 1 and 2 from [SPEC 4910, SPEC 4920]; }
+  requirement senior_alternative "A graduate course or tutorial approved by the Committee as the senior project" {
+    slot where attempt.approved_for contains "senior";
+  }
+}
+
+requirement senior_plan_submitted "Senior project plan submitted to the Committee" [admission] {
+  slot where attempt.approved_for contains "senior_plan";
+}
+
+effect senior_plan_done when fact senior_plan: waive senior_plan_submitted;
+
+constraint letter_grades "Courses taken Credit/D/Fail may not be counted toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";

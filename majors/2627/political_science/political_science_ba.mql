@@ -1,6 +1,66 @@
-SELECT 2 FROM [RANGE(PLSC 1000 , PLSC 1999)] : "Intro Courses" : 1;
-SELECT 2 FROM [RANGE(PLSC 2000 , PLSC 2999)] : "Core Lectures" : 2;
-SELECT 2 FROM [RANGE(PLSC 3000 , PLSC 4999)] : "Seminars" : 3;
-SELECT 1 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Methodology / Formal Theory" : 4;
-SELECT 5 FROM [RANGE(PLSC 2000 , PLSC 4999)] : "Electives" : 5;
-SELECT 1 FROM [CLASS(PLSC 4900), CLASS(PLSC 4901)] : "Senior Requirement" : 6;
+// Political Science B.A. (standard program, standard major): twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/political-science/
+// Residential College Seminars taught by Political Science faculty count routinely; one taught outside the department,
+// one term of DRST 0005 or 0006, and courses in other departments count by petition (approvals).
+program political_science_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement introductory "Two introductory courses (first digit 1)" [core] {
+  courses at least 2 where course.subject = "PLSC" and course.number >= 1000 and course.number <= 1999
+    or course.attributes contains "YC PLSC Intro Courses";
+}
+
+requirement core_lectures "Two non-introductory core lectures" [core] {
+  courses at least 2 where course.attributes contains "YC PLSC Core Lecture";
+}
+
+requirement methods "One course in the methodology and formal theory subfield" [core] {
+  slot where course.attributes contains "YC PLSC Method &Formal Theory";
+}
+
+requirement seminars "Two seminars taught by Political Science faculty, one in the senior year, not taken Credit/D/Fail" [core] {
+  courses at least 2
+    where course.subject = "PLSC" and course.number >= 3000 and course.number <= 4899 and course.format = "seminar"
+      or attempt.approved_for contains "seminars";
+  constraint senior_year_seminar "At least one in the senior year": at least 1 attempts where attempt.year_of_study = 4;
+  constraint seminar_letter "Seminars taken Credit/D/Fail do not count": all where attempt.grading_mode = "letter";
+}
+
+requirement subfields "Two courses in each of any two subfields" [core] {
+  children at least 2;
+  requirement subfield_american "American government" { courses at least 2 where course.attributes contains "YC PLSC American Govt"; }
+  requirement subfield_comparative "Comparative politics" { courses at least 2 where course.attributes contains "YC PLSC Comparative Govt"; }
+  requirement subfield_international "International relations" { courses at least 2 where course.attributes contains "YC PLSC Internatl Relations"; }
+  requirement subfield_philosophy "Political philosophy" { courses at least 2 where course.attributes contains "YC PLSC Political Philosophy"; }
+}
+
+requirement electives "Further Political Science courses toward the 12" [elective] {
+  courses at least 0 where course.subject = "PLSC" or course.code in ["DRST0005", "DRST0006"] or attempt.approved_for contains "outside_plsc";
+}
+
+requirement senior "Senior requirement: a senior seminar, a one-term essay (PLSC 4900), or a two-term essay (PLSC 4900 and 4901), with a passing grade" [senior] {
+  children at least 1;
+  requirement senior_seminar "A senior seminar taught by Political Science faculty" {
+    slot where course.subject = "PLSC" and course.format = "seminar" and attempt.year_of_study = 4 and attempt.approved_for contains "senior";
+  }
+  requirement senior_essay "PLSC 4900" { slot from [PLSC 4900]; }
+  requirement senior_essay_two_term "PLSC 4900 and 4901" { courses exactly 2 from [PLSC 4900, PLSC 4901]; }
+}
+
+constraint outside_limit "At most two courses from other departments, with DUS permission" in program:
+  limit 2 attempts where course.subject != "PLSC";
+
+constraint crdf_lectures "Up to two lecture courses taken Credit/D/Fail count; seminars taken Credit/D/Fail do not" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_seminars "No seminar taken Credit/D/Fail counts" in program:
+  all where attempt.grading_mode = "letter" or course.format != "seminar";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

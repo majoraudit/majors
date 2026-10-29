@@ -1,9 +1,82 @@
-SELECT 1 FROM [CLASS(PHYS 2060L)] : "Physics Lab" : 1;
-SELECT 1 FROM [CLASS(PHYS 4000)] : "Advanced Math in Physics" : 2;
-SELECT 1 FROM [CLASS(PHYS 4390), CLASS(PHYS 4400)] : "Quantum Mechanics" : 3;
-SELECT 5 FROM [RANGE(PHYS 3000 , PHYS 4999)] : "Additional Advanced Physics" : 4;
-SELECT 2 FROM [CLASS(PHIL 1125), CLASS(PHIL 1126)] : "History of Philosophy Intro" : 5;
-SELECT 1 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Logic Above Intro Level" : 6;
-SELECT 1 FROM [RANGE(PHIL 3000 , PHIL 4999)] : "Philosophy Seminar" : 7;
-SELECT 2 FROM [RANGE(PHIL 1000 , PHIL 4999), RANGE(HSHM 1000 , HSHM 4999)] : "Additional PHIL/HSHM" : 8;
-SELECT 1 FROM [CLASS(PHIL 4480), CLASS(PHIL 4490), CLASS(PHIL 4491), RANGE(PHIL 3000 , PHIL 4999)] : "Senior Requirement (B.A.)" : 9;
+// Physics and Philosophy B.A.: fifteen courses (14.5 credits) beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/physics-philosophy/
+program physics_and_philosophy_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_math "Prerequisite: MATH 1200" [prerequisite] {
+  slot from [MATH 1200];
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710, or higher" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1700 "PHYS 1700 and 1710" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_2600 "PHYS 2600 and 2610" { courses exactly 2 from [PHYS 2600, PHYS 2610]; }
+}
+
+requirement prereq_lab "Prerequisite: PHYS 1650L and 1660L, or PHYS 2050L" [prerequisite] {
+  children at least 1;
+  requirement prereq_lab_1650 "PHYS 1650L and 1660L" { courses exactly 2 from [PHYS 1650L, PHYS 1660L]; }
+  requirement prereq_lab_2050 "PHYS 2050L" { slot from [PHYS 2050L]; }
+}
+
+requirement physics_lab "PHYS 2060L" [physics] {
+  slot from [PHYS 2060L];
+}
+
+requirement methods "PHYS 4000 or an equivalent" [physics] {
+  slot where course.code = "PHYS4000" or attempt.approved_for contains "methods";
+}
+
+requirement quantum "PHYS 4390 or 4400" [physics] {
+  slot from [PHYS 4390, PHYS 4400];
+}
+
+requirement physics_advanced "Five additional physics courses numbered 3000 or higher" [physics] {
+  courses at least 5
+    where course.subject = "PHYS" and course.number >= 3000 and not course.code in ["PHYS4710", "PHYS4720"]
+      or attempt.approved_for contains "physics_advanced";
+}
+
+requirement history_of_philosophy "PHIL 1125 and 1126" [philosophy] {
+  courses exactly 2 from [PHIL 1125, PHIL 1126];
+}
+
+requirement phil_additional "Four additional courses in Philosophy or HSHM, including a logic course above the introductory level and a philosophy seminar" [philosophy] {
+  courses at least 4 where course.subject in ["PHIL", "HSHM"];
+  constraint logic "One logic course above the introductory level":
+    at least 1 attempts where course.subject = "PHIL" and course.code != "PHIL1115" and course.attributes contains "YC PHIL Logic"
+      or attempt.approved_for contains "logic";
+  constraint seminar "One philosophy seminar, selected with the approval of the DUSs":
+    at least 1 attempts where course.subject = "PHIL" and course.number >= 3000 and course.format = "seminar";
+}
+
+requirement senior "Senior requirement: PHIL 4490 or 4491, or an appropriate philosophy seminar approved by the Philosophy DUS and the instructor" [senior] {
+  slot where course.code in ["PHIL4490", "PHIL4491"]
+    or course.subject = "PHIL" and course.format = "seminar" and attempt.approved_for contains "senior";
+}
+
+// Members of the Classes of 2027 and 2028 who declared before fall 2026 may instead use PHIL 4480.
+effect legacy_senior "Earlier declarants may use PHIL 4480" when fact declared_before_fall_2026:
+  permit senior where course.code = "PHIL4480";
+
+fact declared_before_fall_2026 "Class of 2027 or 2028, declared before fall 2026": prior_coursework { description: "declared before fall 2026" };
+
+constraint physics_letter "Physics courses, including prerequisites, count only for a letter grade" in program:
+  all where course.subject != "PHYS" or attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, with permission of the DUSs" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen courses beyond the prerequisites" in roles [physics, philosophy, senior]:
+  total at least 15 attempts;
+
+constraint total_credits "14.5 course credits beyond the prerequisites" in roles [physics, philosophy, senior]:
+  total at least 14.5 credits;

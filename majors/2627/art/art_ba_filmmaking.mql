@@ -1,0 +1,59 @@
+// Art B.A. (Filmmaking concentration): fourteen courses including the prerequisites and the senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/art/
+program art_ba_filmmaking {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact sophomore_review "Favorable faculty review of studio work before the end of sophomore year":
+  approval committee_approval { for: "sophomore_review" };
+
+requirement review "Prerequisite: sophomore review" [prerequisite] {
+  slot where attempt.approved_for contains "sophomore_review";
+}
+
+effect review_passed when fact sophomore_review: waive review;
+
+requirement prereq_core "Prerequisite: ART 1111 and 1514, taken at Yale" [prerequisite] {
+  courses exactly 2 from [ART 1111, ART 1514];
+  constraint prereq_at_yale "Outside studio credit cannot replace the two prerequisites": all where attempt.source = "yale";
+}
+
+requirement prereq_intro "Prerequisite: three additional introductory courses (0001-1999), which may also be concentration courses" [prerequisite] {
+  courses at least 3 where course.subject = "ART" and course.number <= 1999;
+}
+
+requirement upper "Four courses numbered 2000 or above (a sixth introductory course may count)" [elective] {
+  courses at least 4 where course.subject = "ART" and not course.code in ["ART3995", "ART4995", "ART4996"];
+  constraint one_extra_intro "At most one introductory course counts here": at most 1 attempts where course.number <= 1999;
+}
+
+requirement junior_seminar "Junior Seminar (ART 3995)" [core] {
+  slot from [ART 3995];
+}
+
+requirement history_of_art "Two courses in the history of art, or two non-production courses in Film and Media Studies" [core] {
+  courses at least 2
+    where course.subject = "HSAR" or course.subject = "FILM" and course.format != "studio"
+      or attempt.approved_for contains "history_of_art";
+}
+
+requirement senior "Two-term senior project (ART 4995 and 4996)" [senior] {
+  courses exactly 2 from [ART 4995, ART 4996];
+}
+
+// The five concentration courses are chosen among the courses above; they add no courses.
+constraint film_core "Filmmaking: ART 1942, 3941, and 3942" in program:
+  at least 3 attempts where course.code in ["ART1942", "ART3941", "ART3942"];
+constraint film_advanced "Filmmaking: ART 4942 or 4943" in program:
+  at least 1 attempts where course.code in ["ART4942", "ART4943"];
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution, study abroad, or the Norfolk fellowship count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen courses in all" in program:
+  total at least 14 attempts;

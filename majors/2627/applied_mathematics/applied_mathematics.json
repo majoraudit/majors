@@ -12,5 +12,8 @@
     "dus": [["John Wettlaufer", "john.wettlaufer@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/applied-mathematics/",
     "websiteLink": "https://applied.math.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "applied_mathematics_ba.mql",
+        "applied_mathematics_bs.mql"
+    ]
 }

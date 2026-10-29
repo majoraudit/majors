@@ -1,4 +1,65 @@
-SELECT 1 FROM [SELECT 2 FROM [CLASS(MATH 1100), CLASS(MATH 1110)], CLASS(MATH 1120), CLASS(MATH 1150), CLASS(MATH 1160), CLASS(ENAS 1510), CLASS(MATH 1180), CLASS(MATH 1200), RANGE(MATH 2000, MATH 9999)] : "Math Requirement" : 1;
-SELECT 5 FROM [SELECT 1 FROM [CLASS(ECON 1108), CLASS(ECON 1110), CLASS(ECON 1115), RANGE(ECON 1159, ECON 9999)], SELECT 1 FROM [CLASS(ECON 1111), CLASS(ECON 1116), RANGE(ECON 1159, ECON 9999)], SELECT 1 FROM [CLASS(ECON 2121), CLASS(ECON 2125)], SELECT 1 FROM [CLASS(ECON 2122), CLASS(ECON 2126)], SELECT 1 FROM [CLASS(ECON 1117), CLASS(ECON 2123), CLASS(ECON 2136)]] : "ECON Core Courses" : 2;
-SELECT 4 FROM [RANGE(ECON 1159, ECON 9999), RANGE(ECON 1159, ECON 9999), RANGE(ECON 1159, ECON 9999), SELECT 1 FROM [RANGE(ECON 1159, ECON 9999), PLACEMENT("Non-ECON Class with DUS Approval")]] : "Electives" : 3;
-SELECT 2 FROM [RANGE(ECON 4400, ECON 4491), RANGE(ECON 4400, ECON 4491)] : "Senior Requirement" : 1;
+// Economics B.A.: twelve term courses, including the mathematics requirement and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/economics
+program economics_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+// Students who skip an introductory course (by placement or after taking it Credit/D/Fail) take an extra elective instead.
+requirement intro_micro "Introductory microeconomics: ECON 1108, 1110, or 1115 (or an extra ECON elective if skipped)" [core] {
+  slot where course.code in ["ECON1108", "ECON1110", "ECON1115"] or course.subject = "ECON" and course.number >= 2000;
+}
+
+requirement intro_macro "Introductory macroeconomics: ECON 1111 or 1116 (or an extra ECON elective if skipped)" [core] {
+  slot where course.code in ["ECON1111", "ECON1116"] or course.subject = "ECON" and course.number >= 2000;
+}
+
+requirement inter_micro "Intermediate microeconomics: ECON 2121 or 2125, taken at Yale" [core] {
+  slot from [ECON 2121, ECON 2125];
+}
+
+requirement inter_macro "Intermediate macroeconomics: ECON 2122 or 2126, taken at Yale" [core] {
+  slot from [ECON 2122, ECON 2126];
+}
+
+requirement econometrics "Econometrics: ECON 1117, 2123, or 2136, taken at Yale" [core] {
+  slot from [ECON 1117, ECON 2123, ECON 2136];
+}
+
+requirement mathematics "Mathematics: MATH 1180 or 1200 (preferred), MATH 1100 and 1110 (one credit), MATH 1120, 1150, 1160 or above, or ENAS 1510, taken at Yale" [core] {
+  children at least 1;
+  requirement math_single "MATH 1120 or above, or ENAS 1510" {
+    slot where course.subject = "MATH" and course.number >= 1120 or course.code = "ENAS1510";
+  }
+  requirement math_1100 "MATH 1100 and 1110, together for one credit" { courses exactly 2 from [MATH 1100, MATH 1110]; }
+}
+
+requirement electives "Four electives: ECON courses numbered 2000 or above not used for core requirements" [elective] {
+  courses at least 4 where course.subject = "ECON" and course.number >= 2000 or attempt.approved_for contains "electives";
+  constraint one_outside "One non-ECON course related to economics may replace an elective, with DUS approval":
+    at most 1 attempts where course.subject != "ECON";
+}
+
+requirement senior "Senior requirement: two courses numbered ECON 4400-4491, one in the senior year, taken at Yale" [senior] {
+  courses at least 2 where course.subject = "ECON" and course.number >= 4400 and course.number <= 4491;
+  constraint senior_year "At least one taken in the senior year": at least 1 attempts where attempt.year_of_study = 4;
+}
+
+// The senior essay is optional; it is needed only for Distinction in the Major and requires two econometrics courses.
+optional requirement senior_essay "Optional senior essay (required for Distinction)" [senior] {
+  slot where course.subject = "ECON" and course.format = "senior_project";
+}
+
+constraint yale_only "Intermediate theory, econometrics, mathematics, and senior courses must be taken at Yale"
+    in requirements [inter_micro, inter_macro, econometrics, math_single, math_1100, senior]:
+  all where attempt.source = "yale";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken outside Yale count only by petition to the DUS" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in roles [core, elective, senior]:
+  total at least 12 attempts;

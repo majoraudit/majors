@@ -1,0 +1,88 @@
+// Comparative Literature B.A. (Intensive Language concentration): twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/comparative-literature/
+// Prospective majors must reach advanced (L5) competence in the language of the literature requirement.
+program comparative_literature_ba_intensive_language {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact l5_competence "Advanced (L5) competence in the language of the literature requirement":
+  language_proficiency { language: "literature language", level: "L5" };
+
+requirement l5_language "Advanced (L5) competence in the language of the literature requirement" [prerequisite] {
+  slot where course.distributionals contains "L5";
+}
+
+effect l5_shown when fact l5_competence: waive l5_language;
+
+// L5 competence is usually shown by an in-language literature course, so that course may also count here.
+share l5_from_literature "An L5 literature course also shows L5 competence": l5_language, literature;
+
+requirement foundation "Foundational seminar CPLT 1300" [core] {
+  slot from [CPLT 1300];
+}
+
+requirement seminar "Second foundational seminar: CPLT 1400" [core] {
+  slot from [CPLT 1400];
+}
+
+requirement periods "Period requirement: one course in each of three of five historical periods" [core] {
+  children at least 3;
+  requirement period_antiquity "Antiquity (to about the 6th century AD)" { slot where course.attributes contains "YC CPLT Antiquity"; }
+  requirement period_medieval "Medieval (about the 6th-15th centuries)" { slot where course.attributes contains "YC CPLT Medieval"; }
+  requirement period_early_modern "Early Modern (about the 14th-18th centuries)" { slot where course.attributes contains "YC CPLT Early Modern"; }
+  requirement period_nineteenth "19th century" { slot where course.attributes contains "YC CPLT 19th Century"; }
+  requirement period_modern "20th-21st centuries" { slot where course.attributes contains "YC CPLT 20th & 21st Centuries"; }
+}
+
+requirement literature "Three in-language literature courses in a single language other than English, two at L5" [language] {
+  courses at least 3
+    where course.distributionals overlaps ["L4", "L5"] and course.language != "English"
+      or attempt.approved_for contains "literature";
+  constraint literature_l5 "At least 2 at the L5 level or equivalent": at least 2 attempts
+    where course.distributionals contains "L5" or attempt.approved_for contains "literature";
+  constraint literature_l4 "At most one L4 course": at most 1 attempts where course.distributionals contains "L4";
+  constraint literature_language "All in a single language other than English": group course.language same;
+}
+
+requirement literature_second "Two literature courses in a second language other than English, one at L5" [language] {
+  courses at least 2
+    where course.distributionals overlaps ["L4", "L5"] and course.language != "English"
+      or attempt.approved_for contains "literature_second";
+  constraint literature_second_l5 "At least 1 at the L5 level or equivalent": at least 1 attempts
+    where course.distributionals contains "L5" or attempt.approved_for contains "literature_second";
+  constraint literature_second_l4 "At most one L4 course": at most 1 attempts where course.distributionals contains "L4";
+  constraint literature_second_language "All in a single language other than English": group course.language same;
+}
+
+requirement theory "One course with a significant component of literary or cultural theory" [core] {
+  slot where course.attributes contains "YC CPLT Theory" or attempt.approved_for contains "theory";
+}
+
+constraint two_languages "The two literature requirements use different languages" in requirements [literature, literature_second]:
+  group course.language distinct at least 2;
+
+requirement senior "Senior essay: CPLT 4910 (one term), or CPLT 4920 and 4930 (two terms)" [senior] {
+  children at least 1;
+  requirement senior_one_term "CPLT 4910" { slot from [CPLT 4910]; }
+  requirement senior_two_term "CPLT 4920 and 4930" { courses exactly 2 from [CPLT 4920, CPLT 4930]; }
+}
+
+constraint required_letter "None of the specific required courses may be taken Credit/D/Fail" in requirements [foundation, seminar, senior_one_term, senior_two_term]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count, with DUS permission" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint abroad_literature "One study-abroad course may count toward in-language literature, with DUS permission" in roles [language]:
+  limit 1 attempts where attempt.source = "study_abroad";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in roles [core, language, elective, senior]:
+  total at least 12 attempts;

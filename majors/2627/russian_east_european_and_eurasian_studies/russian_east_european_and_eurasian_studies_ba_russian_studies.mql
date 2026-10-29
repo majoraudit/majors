@@ -1,0 +1,62 @@
+// Russian, East European, and Eurasian Studies B.A. (Russian Studies concentration): twelve term courses (thirteen credits)
+// including the senior requirement but not the prerequisites; twelve credits if RUSS 1500 and 1510 are placed out of.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/russian-east-european-eurasian-studies/
+program russian_east_european_and_eurasian_studies_ba_russian_studies {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact russian_placement "Second-year Russian completed by placement examination or RUSS S140": placement { test: "Russian placement", result: "second year" };
+fact russian_equivalency "Russian proficiency shown by the equivalency examination": language_proficiency { language: "Russian", level: "third year" };
+
+requirement prereq "Prerequisite: RUSS 1400, 1420, or 1450" [prerequisite] {
+  slot from [RUSS 1400, RUSS 1420, RUSS 1450];
+}
+
+effect placed when fact russian_placement: waive prereq;
+
+requirement language "Language: RUSS 1500 and 1510 (1.5 credits each), or the equivalency exam" [language] {
+  courses exactly 2 from [RUSS 1500, RUSS 1510];
+}
+
+// Proficiency without coursework is replaced by additional courses toward the twelve.
+effect equivalency when fact russian_equivalency: waive language;
+
+requirement history "Two courses in Russian, East European, or Eurasian history" [core] {
+  courses at least 2 where attempt.approved_for contains "history";
+}
+
+requirement social_science "One RSEE-area focused course in the social sciences (anthropology, economics, sociology, political science, global affairs, and others), with DUS approval" [core] {
+  slot where attempt.approved_for contains "social_science";
+}
+
+requirement literature "One course in Russian, East European, or Eurasian literature or culture, selected with the DUS" [core] {
+  slot where course.subject = "RUSS" and (course.number <= 999 or course.number >= 2000 and course.number <= 4899)
+    or attempt.approved_for contains "literature";
+}
+
+requirement electives "Electives chosen with the DUS to reach twelve courses (RUSS 1600 and 1610, Russian content courses at 1700-1900, other regional languages at the second-year level or above)" [elective] {
+  courses at least 0
+    where course.subject = "RSEE" and not course.code in ["RSEE4900", "RSEE4910"]
+      or course.code in ["RUSS1600", "RUSS1610"] or course.subject = "RUSS" and course.number >= 1700 and course.number <= 1900
+      or course.subject in ["CZEC", "PLSH", "ROMN", "SBCR", "HGRN", "UKRN", "TKSH"] and course.number >= 1300
+      or attempt.approved_for contains "electives";
+}
+
+constraint language_limit "At most five language courses count toward the major" in program:
+  limit 5 attempts where course.format = "language" or course.code in ["RUSS1500", "RUSS1510", "RUSS1600", "RUSS1610"];
+
+// Only one of RSEE 4900 and 4910 counts, except as an extra course for students in two majors.
+requirement senior "Senior essay: RSEE 4900 or 4910" [senior] {
+  slot from [RSEE 4900, RSEE 4910];
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in roles [language, core, elective, senior]:
+  total at least 12 attempts;

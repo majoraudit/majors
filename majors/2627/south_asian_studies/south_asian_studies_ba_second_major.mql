@@ -1,0 +1,47 @@
+// South Asian Studies B.A. (second major only): seven term courses numbered 2000 or above, plus the senior requirement
+// and the language requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/south-asian-studies/
+program south_asian_studies_ba_second_major {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact language_exam "Advanced (L5) proficiency in a South Asian language shown by examination (e.g., Telugu or Tamil)":
+  language_proficiency { language: "South Asian language", level: "L5" };
+
+requirement courses_2000 "Seven South Asian Studies courses numbered 2000 or above, including two on premodern South Asia and two seminars" [core] {
+  courses at least 7
+    where course.subject = "SAST" and course.number >= 2000 and course.code != "SAST4910"
+      or attempt.approved_for contains "courses_2000";
+  constraint premodern "At least two courses on premodern South Asia":
+    at least 2 attempts where course.attributes contains "YC SAST Premodern South Asia";
+  constraint seminars "At least two seminars": at least 2 attempts where course.format = "seminar";
+  constraint other_department "At most one relevant course from another department or program, by petition":
+    at most 1 attempts where course.subject != "SAST" and attempt.source = "yale";
+}
+
+requirement language "Language requirement: a South Asian language at the advanced (L5) level (an approved substitute such as Persian or Arabic by petition)" [language] {
+  slot where course.subject in ["HNDI", "SKRT", "TAML", "PNJB", "SNHL", "BURM", "MTBT", "TBTN"] and course.distributionals contains "L5"
+    or attempt.approved_for contains "language";
+}
+
+// Students who show L5 proficiency by examination take one additional South Asian Studies course instead.
+requirement language_exam_course "One additional South Asian Studies course in place of L5 coursework" [language] when fact language_exam {
+  slot where course.subject = "SAST" and course.number >= 2000 and course.code != "SAST4910";
+}
+
+effect language_by_exam when fact language_exam: waive language;
+
+requirement senior "Senior requirement: a senior essay in a seminar approved by the DUS, or SAST 4910" [senior] {
+  slot where course.code = "SAST4910" or course.format = "seminar" and attempt.approved_for contains "senior";
+}
+
+constraint abroad_limit "Up to three study abroad credits, with DUS approval" in program:
+  limit 3 credits where attempt.source = "study_abroad";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";

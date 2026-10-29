@@ -12,5 +12,8 @@
     "dus": [["Nari Shelekpayev", "nariman.shelekpayev@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/russian-east-european-studies/",
     "websiteLink": "https://slavic.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "russian_east_european_and_eurasian_studies_ba_russian_studies.mql",
+        "russian_east_european_and_eurasian_studies_ba_east_european_or_eurasian_studies.mql"
+    ]
 }

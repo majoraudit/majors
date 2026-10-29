@@ -1,6 +1,76 @@
-SELECT 3 FROM [CLASS(PHIL 1125), CLASS(PHIL 1126), RANGE(PHIL 2000 , PHIL 4999)] : "History of Philosophy" : 1;
-SELECT 2 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Metaphysics & Epistemology" : 2;
-SELECT 2 FROM [RANGE(PHIL 2000 , PHIL 4999)] : "Ethics & Value Theory" : 3;
-SELECT 1 FROM [CLASS(PHIL 1115), RANGE(PHIL 2000 , PHIL 4999)] : "Logic" : 4;
-SELECT 2 FROM [RANGE(PHIL 3000 , PHIL 4999)] : "Advanced Seminars" : 5;
-SELECT 1 FROM [RANGE(PHIL 3000 , PHIL 4999), CLASS(PHIL 4490), CLASS(PHIL 4491)] : "Senior Requirement" : 6;
+// Philosophy B.A. (standard major): twelve term courses including the prerequisites and the senior requirement.
+// No course counts toward two group requirements; outside courses normally do not count toward groups.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/philosophy/
+program philosophy_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq "Prerequisite: two introductory or intermediate philosophy courses (these count among the twelve)" [prerequisite] {
+  courses at least 2 where course.subject = "PHIL" and course.number <= 2999 or course.code in ["DRST0003", "DRST0004"];
+}
+
+requirement history_core "History of philosophy: PHIL 1125 and 1126 (or DRST 0003 and 0004)" [group] {
+  children at least 1;
+  requirement history_phil "PHIL 1125 and 1126" { courses exactly 2 from [PHIL 1125, PHIL 1126]; }
+  requirement history_drst "DRST 0003 and 0004" { courses exactly 2 from [DRST 0003, DRST 0004]; }
+}
+
+requirement history_third "History of philosophy: a third course" [group] {
+  slot where course.attributes contains "YC PHIL History of Philosophy";
+}
+
+requirement metaphysics "Two courses in metaphysics and epistemology" [group] {
+  courses at least 2 where course.attributes contains "YC PHIL Metaphysics&Epistemol";
+}
+
+requirement ethics "Two courses in ethics and value theory" [group] {
+  courses at least 2 where course.attributes contains "YC PHIL Ethics & Value Theory";
+}
+
+requirement logic "One course in logic (PHIL 1115 suggested), preferably by the fall of junior year" [group] {
+  slot where course.code = "PHIL1115" or course.attributes contains "YC PHIL Logic";
+}
+
+requirement seminars "Two advanced philosophy seminars at the 3000 level or above (they may also count toward groups)" [seminar] {
+  courses at least 2
+    where course.subject = "PHIL" and course.number >= 3000 and course.number <= 4489 and course.format = "seminar";
+}
+
+requirement electives "Further philosophy courses toward the twelve (up to two approved courses from other departments)" [elective] {
+  courses at least 0 where course.subject = "PHIL" or course.code in ["DRST0003", "DRST0004"] or attempt.approved_for contains "electives";
+  constraint outside_courses "Normally no more than two courses from other departments": at most 2 attempts where not course.subject in ["PHIL", "DRST"];
+}
+
+requirement senior "Senior requirement: a third seminar with additional work, or a one- or two-term independent project (PHIL 4490, 4491)" [senior] {
+  children at least 1;
+  requirement senior_seminar "A third philosophy seminar taken for the senior requirement, with additional work" {
+    slot where course.subject = "PHIL" and course.number >= 3000 and course.number <= 4489 and attempt.approved_for contains "senior";
+  }
+  requirement senior_project "PHIL 4490 and/or 4491" { courses between 1 and 2 from [PHIL 4490, PHIL 4491]; }
+}
+
+// Prerequisite courses count toward the major, and seminars may also count toward the groups.
+share prereq_with_history_phil: prereq, history_phil;
+share prereq_with_history_drst: prereq, history_drst;
+share prereq_with_history_third: prereq, history_third;
+share prereq_with_metaphysics: prereq, metaphysics;
+share prereq_with_ethics: prereq, ethics;
+share prereq_with_logic: prereq, logic;
+share seminars_with_history_third: seminars, history_third;
+share seminars_with_metaphysics: seminars, metaphysics;
+share seminars_with_ethics: seminars, ethics;
+share seminars_with_logic: seminars, logic;
+
+constraint groups_letter "Credit/D/Fail courses cannot fulfill the group, seminar, senior requirements" in roles [group, seminar, senior]:
+  all where attempt.grading_mode = "letter";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the prerequisites and the senior requirement" in program:
+  total at least 12 attempts;

@@ -1,5 +1,96 @@
-SELECT 3 FROM [SELECT 2 FROM [CLASS(MATH 1200), PLACEMENT("Upper-Level Math Course with MATH DUS Approval")], SELECT 1 FROM [CLASS(ECON 1110), CLASS(ECON 1115), PLACEMENT("Upper-Level Economics Course")], SELECT 1 FROM [CLASS(ECON 1111), CLASS(ECON 1116), PLACEMENT("Upper-Level Economics Course")]] : "Prerequisites" : 1;
-SELECT 7 FROM [SELECT 1 FROM [CLASS(ECON 2121), CLASS(ECON 2125)], SELECT 1 FROM [CLASS(ECON 2122), CLASS(ECON 2126)], SELECT 1 FROM [CLASS(ECON 3351), CLASS(ECON 4425)], SELECT 1 FROM [CLASS(ECON 3350), CLASS(ECON 4417), CLASS(ECON 4433)], SELECT 1 FROM [CLASS(ECON 2135), SELECT 2 FROM [CLASS(S&DS 2410), CLASS(S&DS 2420)]], CLASS(ECON 2136), RANGE(ECON 2120, ECON 9999)] : "ECON Core Courses" : 2;
-SELECT 2 FROM [SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)], SELECT 1 FROM [CLASS(MATH 2550), CLASS(MATH 2560)]] : "MATH Core Courses" : 2;
-SELECT 2 FROM [SELECT 1 FROM [RANGE(MATH 2250, MATH 2409), RANGE(MATH 2411, MATH 2419), RANGE(MATH 2421, MATH 4699), RANGE(MATH 4701, MATH 4999)], SELECT 1 FROM [RANGE(MATH 2250, MATH 2409), RANGE(MATH 2411, MATH 2419), RANGE(MATH 2421, MATH 4699), RANGE(MATH 4701, MATH 4999)]] : "MATH Electives" : 3;
-SELECT 1 FROM [CLASS(MATH 4800), CLASS(MATH 4810), TAG("YC ECON Theory Seminar")] : "Senior Requirement" : 1;
+// Economics and Mathematics B.A.: twelve term courses beyond the prerequisites, seven ECON (above 2000)
+// and five MATH (2250-4690, not MATH 2410, 2420, or 4700).
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/economics-mathematics/
+// A course must carry a MATH number to count on the mathematics side; graduate MATH 5000-5999 may count, 6000+ may not.
+program econ_and_math {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+// A mathematics senior seminar reduces the MATH electives to two; an Economics one waives the ECON elective.
+choice senior_kind "Senior seminar department": solver one of "math", "econ";
+
+requirement prereq_multivariable "Prerequisite: MATH 1200 (or MATH 3020, after MATH 2250 and 2550)" [prerequisite] {
+  slot from [MATH 1200, MATH 3020];
+}
+
+requirement prereq_micro "Prerequisite: ECON 1110 or 1115" [prerequisite] {
+  slot from [ECON 1110, ECON 1115];
+}
+
+requirement prereq_macro "Prerequisite: ECON 1111 or 1116" [prerequisite] {
+  slot from [ECON 1111, ECON 1116];
+}
+
+requirement micro "Intermediate microeconomics: ECON 2125 (preferred) or 2121" [economics] {
+  slot from [ECON 2125, ECON 2121];
+}
+
+requirement macro "Intermediate macroeconomics: ECON 2126 (preferred) or 2122" [economics] {
+  slot from [ECON 2126, ECON 2122];
+}
+
+requirement math_econ_1 "Mathematical economics: ECON 3351 or 4425" [economics] {
+  slot from [ECON 3351, ECON 4425];
+}
+
+requirement math_econ_2 "Mathematical economics: ECON 3350 or 4433" [economics] {
+  slot from [ECON 3350, ECON 4433];
+}
+
+// No other selector accepts S&DS courses, so S&DS 2410 and 2420 cannot also count in parallel with ECON 2135.
+requirement econometrics_1 "Econometrics: ECON 2135, or S&DS 2410 and 2420 (counting as one economics course)" [economics] {
+  children at least 1;
+  requirement econometrics_2135 "ECON 2135" { slot from [ECON 2135]; }
+  requirement econometrics_sds "S&DS 2410 and 2420" { courses exactly 2 from [S&DS 2410, S&DS 2420]; }
+}
+
+requirement econometrics_2 "Econometrics: ECON 2136" [economics] {
+  slot from [ECON 2136];
+}
+
+requirement econ_elective "One economics elective above 2000 (waived when the senior seminar is an Economics course)" [economics] {
+  courses at least (senior_kind: "math" => 1, "econ" => 0) where course.subject = "ECON" and course.number >= 2000;
+}
+
+requirement linear_algebra "Proof-based linear algebra: MATH 2250 or 2260" [mathematics] {
+  slot from [MATH 2250, MATH 2260];
+}
+
+requirement analysis "Real analysis: MATH 2550 or 2560" [mathematics] {
+  slot from [MATH 2550, MATH 2560];
+}
+
+requirement math_electives "Three mathematics electives (two when the senior seminar is MATH 4800 or 4810)" [mathematics] {
+  courses at least (senior_kind: "math" => 2, "econ" => 3)
+    where course.subject = "MATH"
+      and (course.number >= 2250 and course.number <= 4690 and not course.code in ["MATH2410", "MATH2420", "MATH4700"]
+           or course.number >= 5000 and course.number <= 5999);
+}
+
+// Exclusivity keeps a course from serving as both a mathematical economics course and the senior seminar.
+requirement senior_math "Senior seminar in mathematics: MATH 4800 or 4810" [senior, mathematics] when senior_kind = "math" {
+  slot from [MATH 4800, MATH 4810];
+}
+
+requirement senior_econ "Economic theory seminar (YC ECON Theory Seminar)" [senior, economics] when senior_kind = "econ" {
+  slot where course.attributes contains "YC ECON Theory Seminar";
+}
+
+// The senior essay in Economics is optional; it is needed only for Distinction in the Major.
+optional requirement senior_essay "Optional senior essay in Economics (required for Distinction)" [senior] {
+  slot where course.subject = "ECON" and course.format = "senior_project";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken elsewhere after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint seven_econ "Seven economics courses above 2000" in roles [economics]:
+  total at least 7 attempts;
+
+constraint five_math "Five mathematics courses (2250-4690)" in roles [mathematics]:
+  total at least 5 attempts;

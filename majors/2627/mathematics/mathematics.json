@@ -22,9 +22,6 @@
     "specializations": [
         "mathematics_ba.mql",
         "mathematics_bs.mql",
-        "mathematics_intensive.mql",
-        "mathematics_ba_distinction.mql",
-        "mathematics_bs_distinction.mql",
-        "mathematics_intensive_distinction.mql"
+        "mathematics_intensive.mql"
     ]
 }

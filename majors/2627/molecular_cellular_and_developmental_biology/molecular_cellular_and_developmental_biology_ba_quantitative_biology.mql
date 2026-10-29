@@ -1,7 +1,105 @@
-SELECT 2 FROM [CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Core Classes" : 1;
-SELECT 1 FROM [CLASS(MCDB 3310)] : "Quantitative Biology Concentration Required Course" : 2;
-SELECT 1 FROM [TAG("YC MCDB Quantitative Biology Concentration Elective"), RANGE(MCDB 2500, MCDB 4999)] : "Concentration Elective" : 3;
-SELECT 1 FROM [RANGE(MCDB 2500, MCDB 4999), CLASS(MCDB 2000), CLASS(MCDB 2020), CLASS(MCDB 2050), CLASS(MCDB 2100), CLASS(MCDB 2900), CLASS(MCDB 3000), CLASS(MB&B 3000)] : "Elective" : 4;
-SELECT 1 FROM [RANGE(MCDB 3500, MCDB 4999)] : "Special Electives" : 5;
-SELECT 1 FROM [RANGE(MCDB 2000, MCDB 3999), RANGE(MB&B 3000, MB&B 3999), RANGE(BENG 3000, BENG 3999), RANGE(ANTH 3000, ANTH 3999), RANGE(E&EB 3000, E&EB 3999)] : "Biology Lab" : 6;
-SELECT 1 FROM [CLASS(MCDB 4750), TAG("MCDB Senior Essay")] : "Senior Requirement" : 7;
+// Molecular, Cellular, and Developmental Biology B.A. (Quantitative Biology concentration): at least 5.5 course credits
+// beyond the prerequisites, not counting the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/molecular-cellular-developmental-biology/
+// A course cannot satisfy both a prerequisite and a core or elective requirement (the exclusive default).
+// Research courses MCDB 4750, 4850, 4860, 4950, and 4960 count only toward the senior requirement; MCDB 4740 never counts.
+program molecular_cellular_and_developmental_biology_ba_quantitative_biology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact biology_two_modules "Placed out of two BIOL modules (placement exam with AP Biology 5, or DUS permission)":
+  placement { test: "BIOL placement", result: "two modules" };
+fact biology_four_modules "Placed out of all four BIOL modules (placement exam with AP Biology 5, or DUS permission)":
+  placement { test: "BIOL placement", result: "four modules" };
+fact chemistry_placement "Placed out of the chemistry prerequisite": placement { test: "Chemistry placement", result: "pass" };
+fact physics_placement "Placed out of the physics prerequisite": placement { test: "Physics placement", result: "pass" };
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+effect biology_two_placed "Two modules placed out reduce the biology prerequisite to two" when fact biology_two_modules:
+  set lower of prereq_biology to 2;
+effect biology_four_placed when fact biology_four_modules: waive prereq_biology;
+
+// Every two BIOL modules placed out are replaced by one MCDB core course or MCDB lecture or seminar numbered 2000 or above.
+requirement biology_substitute_one "One MCDB core or 2000+ MCDB lecture or seminar in place of two BIOL modules" [prerequisite]
+    when fact biology_two_modules {
+  slot where course.subject = "MCDB" and course.number >= 2000 and course.format in ["lecture", "seminar"];
+}
+
+requirement biology_substitute_two "Two MCDB core or 2000+ MCDB lectures or seminars in place of four BIOL modules" [prerequisite]
+    when fact biology_four_modules {
+  courses at least 2 where course.subject = "MCDB" and course.number >= 2000 and course.format in ["lecture", "seminar"];
+}
+
+requirement prereq_math "Prerequisite: MATH 1150 or above, or a Yale statistics course approved by the DUS (not S&DS 1600)" [prerequisite] {
+  slot where course.subject = "MATH" and course.number >= 1150
+    or course.code in ["S&DS1000", "S&DS1080", "S&DS1090", "S&DS2380"] or attempt.approved_for contains "prereq_math";
+}
+
+requirement prereq_chemistry "Prerequisite: a two-term lecture sequence in chemistry (CHEM 1610 and 1650, or CHEM 1700)" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1700 "CHEM 1700" { slot from [CHEM 1700]; }
+}
+
+requirement prereq_physics "Prerequisite: one term of physics, PHYS 1700 or above" [prerequisite] {
+  slot where course.subject = "PHYS" and course.number >= 1700 and course.format != "lab";
+}
+
+effect chemistry_placed when fact chemistry_placement: waive prereq_chemistry;
+effect physics_placed when fact physics_placement: waive prereq_physics;
+
+requirement core "Two core courses: MCDB 2000, 2020, 2050, 2100, 2900, 3000, or MB&B 3000" [core] {
+  courses at least 2 where course.code in ["MCDB2000", "MCDB2020", "MCDB2050", "MCDB2100", "MCDB2900", "MCDB3000", "MB&B3000"];
+}
+
+// MCDB 3420L with 3430L, or 3440L with 3450L, pair for a single elective credit.
+requirement general_electives "Two general electives: MCDB 2500 or above or additional core courses or paired labs, or concentration-related electives" [elective] {
+  credits at least 2
+    where course.subject = "MCDB" and course.number >= 2500 and not course.code in ["MCDB4740", "MCDB4750", "MCDB4850", "MCDB4860", "MCDB4950", "MCDB4960"]
+      or course.code in ["MCDB2000", "MCDB2020", "MCDB2050", "MCDB2100", "MCDB2900", "MCDB3000", "MB&B3000"]
+      or course.code in ["MCDB3420L", "MCDB3430L", "MCDB3440L", "MCDB3450L"]
+      or course.code in ["BENG4630", "BENG4767", "CPSC4750", "MATH2460", "MATH2510", "MB&B3520", "MB&B4350", "MB&B5230", "MCDB3200", "MCDB3620"]
+      or attempt.approved_for contains "general_electives";
+}
+
+requirement special_elective "One special elective: an MCDB course numbered 3500 or above (or a concentration-related elective)" [elective] {
+  slot where course.subject = "MCDB" and course.number >= 3500 and not course.code in ["MCDB4740", "MCDB4750", "MCDB4850", "MCDB4860", "MCDB4950", "MCDB4960"] or course.code in ["BENG4630", "BENG4767", "CPSC4750", "MATH2460", "MATH2510", "MB&B3520", "MB&B4350", "MB&B5230", "MCDB3200", "MCDB3620"];
+}
+
+requirement labs "One laboratory from MCDB, MB&B, or BENG, or from ANTH or EEB with DUS permission (labs used as an elective do not also count here)" [core] {
+  slot where course.code in ["MCDB2010L", "MCDB2030L", "MCDB2210L", "MCDB2310L", "MCDB2510L", "MCDB2910L", "MCDB3030L", "MCDB3210L", "MCDB3410L", "MCDB3420L", "MCDB3430L", "MCDB3440L", "MCDB3450L"]
+    or course.subject in ["MB&B", "BENG"] and course.format = "lab"
+    or course.subject in ["ANTH", "EEB"] and course.format = "lab" and attempt.approved_for contains "labs";
+}
+
+fact senior_essay "Senior essay (15-20 pages, no course credit) approved through the Senior Essay Form":
+  approval dus_approval { for: "senior" };
+
+requirement senior "Senior requirement: MCDB 4750, or a senior essay that does not carry course credit" [senior] {
+  slot from [MCDB 4750];
+}
+
+effect essay_done "An approved senior essay satisfies the senior requirement" when fact senior_essay: waive senior;
+
+// The concentration course is required for all degrees; the concentration elective fills a general or special elective.
+requirement concentration_course "Quantitative Biology concentration: MCDB 3310" [concentration] {
+  slot from [MCDB 3310];
+}
+
+constraint concentration_elective "Quantitative Biology concentration: one concentration-related elective in place of a general or special elective"
+    in requirements [general_electives, special_elective]:
+  at least 1 attempts where course.code in ["BENG4630", "BENG4767", "CPSC4750", "MATH2460", "MATH2510", "MB&B3520", "MB&B4350", "MB&B5230", "MCDB3200", "MCDB3620"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken elsewhere count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "At least 5.5 course credits beyond the prerequisites" in roles [core, elective, concentration]:
+  total at least 5.5 credits;

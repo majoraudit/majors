@@ -1,4 +1,41 @@
-SELECT 1 FROM CLASS(PORT 1300) : "The prerequisite for the major is PORT 1300 or the equivalent" : 3;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999)] : "Portuguese Lit/Culture" : 1;
-SELECT 5 FROM [RANGE(PORT 2000 , PORT 4999), RANGE(ANTH 2000 , ANTH 4999), RANGE(HIST 2000 , HIST 4999), RANGE(HSAR 2000 , HSAR 4999)] : "Electives" : 2;
-SELECT 1 FROM [CLASS(PORT 4910), CLASS(PORT 4920)] : "Senior Requirement" : 3;
+// Portuguese B.A.: ten term courses beyond the prerequisite, including the senior essay.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/portuguese/
+program portugese_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact portuguese_placement "Placement equivalent to PORT 1300": placement { test: "Portuguese placement", result: "PORT 1300" };
+
+requirement prereq "Prerequisite: PORT 1300 or an equivalent" [prerequisite] {
+  slot from [PORT 1300];
+}
+
+effect placed when fact portuguese_placement: waive prereq;
+
+requirement portuguese_world "Five term courses in the literatures or cultures of the Portuguese world" [core] {
+  courses at least 5 where course.subject = "PORT" and course.number >= 1400 and not course.code in ["PORT4910", "PORT4920"];
+}
+
+requirement electives "Further Portuguese courses, or up to four related courses from other departments or study abroad approved by the DUS" [elective] {
+  courses at least 0
+    where course.subject = "PORT" and course.number >= 1400 and not course.code in ["PORT4910", "PORT4920"]
+      or attempt.approved_for contains "related";
+}
+
+requirement senior "Senior essay: PORT 4910 and/or 4920" [senior] {
+  courses between 1 and 2 from [PORT 4910, PORT 4920];
+}
+
+constraint related_limit "At most four relevant courses from other departments or study abroad" in program:
+  limit 4 attempts where course.subject != "PORT" or attempt.source = "study_abroad";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Ten term courses beyond the prerequisite, including the senior essay" in roles [core, elective, senior]:
+  total at least 10 attempts;

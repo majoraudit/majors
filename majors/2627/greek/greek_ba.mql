@@ -1,0 +1,56 @@
+// Ancient and Modern Greek B.A.: at least twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/classics/
+// Modern Greek courses carry the HELN code (an alias of MGRK in the institution schema).
+program greek_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement ancient_greek "Four ancient Greek courses numbered 3000 or above, including GREK 4995" [language] {
+  courses at least 4 where course.subject = "GREK" and course.number >= 3000;
+  constraint grek_4995 "Including GREK 4995": at least 1 attempts where course.code = "GREK4995";
+}
+
+requirement greece "A course covering broadly the literature and/or culture of ancient Greece (CLCV, 1000 or 2000 level)" [core] {
+  slot where course.subject = "CLCV" and course.number >= 1000 and course.number <= 2999
+    and course.attributes contains "YC CLSS Lit/Cult Anc Greece";
+}
+
+requirement rome "A course covering broadly the literature and/or culture of ancient Rome (CLCV, 1000 or 2000 level)" [core] {
+  slot where course.subject = "CLCV" and course.number >= 1000 and course.number <= 2999
+    and course.attributes contains "YC CLSS Lit/Cult Anc Rome";
+}
+
+requirement greek_history "A course in ancient Greek history" [core] {
+  slot where course.attributes contains "YC CLSS Ancient Hist Greece";
+}
+
+requirement postclassical "A course in the history, art, literature, or culture of the Greek-speaking Balkans or Hellenic diaspora (medieval, Ottoman, or modern)" [core] {
+  slot where course.subject in ["HELN", "MGRK"] and course.number >= 2000 or attempt.approved_for contains "postclassical";
+}
+
+requirement modern_greek "Two modern Greek courses at the intermediate level (HELN 1300, 1400) or above" [language] {
+  courses at least 2 where course.subject in ["HELN", "MGRK"] and course.number >= 1300;
+}
+
+requirement senior "Senior Tutorial: two terms (CLSS 4998 and 4999), or one term and an additional course" [senior] {
+  children at least 1;
+  requirement senior_two_term "Two terms of Senior Tutorial" { courses exactly 2 from [CLSS 4998, CLSS 4999]; }
+  requirement senior_one_term "One term of Senior Tutorial and an additional course" {
+    children exactly 2;
+    requirement senior_tutorial "CLSS 4998 or 4999" { slot from [CLSS 4998, CLSS 4999]; }
+    requirement senior_additional "An additional course in Classics, Hellenic Studies, or a relevant field approved by the DUS" {
+      slot where course.subject in ["CLCV", "CLSS", "GREK", "LATN", "HELN", "MGRK"] or attempt.approved_for contains "senior_additional";
+    }
+  }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "At least twelve term courses" in program:
+  total at least 12 attempts;

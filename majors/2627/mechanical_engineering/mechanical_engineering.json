@@ -19,8 +19,6 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/mechanical-engineering/",
     "websiteLink": "https://seas.yale.edu/departments/mechanical-engineering-and-materials-science",
     "specializations": [
-        "mechanical_engineering_bs.mql",
-        "engineering_sciences_mechanical_bs.mql",
-        "engineering_sciences_mechanical_ba.mql"
+        "mechanical_engineering_bs.mql"
     ]
 }

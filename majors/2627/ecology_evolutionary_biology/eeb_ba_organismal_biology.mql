@@ -1,3 +1,81 @@
-SELECT 6 FROM [SELECT 4 FROM [SELECT 1 FROM[CLASS(BIOL 1010), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1020), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1030), PLACEMENT("Satisfactory Yale Bio Placement Test Score")], SELECT 1 FROM[CLASS(BIOL 1040), PLACEMENT("Satisfactory Yale Bio Placement Test Score")]],SELECT 1 FROM [SELECT 2 FROM [SELECT 1 FROM[CLASS(CHEM 1610), PLACEMENT("Equivalent Qualification")], SELECT 1 FROM[CLASS(CHEM 1650), PLACEMENT("Equivalent Qualification")]], SELECT 2 FROM [SELECT 1 FROM[CLASS(CHEM 1630), PLACEMENT("Equivalent Qualification")], SELECT 1 FROM[CLASS(CHEM 1670), PLACEMENT("Equivalent Qualification")]]], CLASS(CHEM 1340L), CLASS(CHEM 1360L), SELECT 1 FROM [CLASS(MATH 1150), CLASS(MATH 1160), CLASS(MATH 1200), CLASS(S&DS 1000), CLASS(S&DS 2300), PLACEMENT("Equivalent Qualification")], SELECT 4 FROM [SELECT 0-2 FROM [SELECT 1 FROM [CLASS(MATH 1150), CLASS(MATH 1160)], SELECT 1 FROM [CLASS(MATH 1180), CLASS(MATH 1200)], SELECT 1 FROM [CLASS(MATH 2220), CLASS(MATH 2250)], CLASS(MATH 2350), CLASS(MATH 2410), CLASS(MATH 2420), CLASS(MATH 2440), CLASS(MATH 2460), CLASS(MATH 2470), CLASS(MATH 2550), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(S&DS 1000), CLASS(S&DS 2200), CLASS(S&DS 2300), CLASS(S&DS 2380), CLASS(S&DS 2400), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(CPSC 1001), CLASS(CPSC 1230), CLASS(CPSC 2010), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [SELECT 1 FROM [CLASS(CHEM 1740), CLASS(CHEM 2200)], SELECT 1 FROM [CLASS(CHEM 1750), CLASS(CHEM 2210)], CLASS(CHEM 2220L), CLASS(CHEM 2230L), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [SELECT 1 FROM [CLASS(PHYS 1700), CLASS(PHYS 1800)], SELECT 1 FROM [CLASS(PHYS 1710), CLASS(PHYS 1810)], PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")], SELECT 0-2 FROM [CLASS(EPS 1100), CLASS(EPS 2120), CLASS(EPS 2200), CLASS(EPS 2220), CLASS(EPS 2320), CLASS(EPS 2400), CLASS(EPS 2550), PLACEMENT("Equivalent Qualification"), PLACEMENT("Equivalent Qualification")]]] : "Prerequisites" : 1;
-SELECT 3 FROM [CLASS(EEB 2290), SELECT 1 FROM [CLASS(EEB 2295), CLASS(BENG 3200)], SELECT 1 FROM [CLASS(MCDB 3000), CLASS(MB&B 3000)], CLASS(EEB 2291L)] : "Lecture Courses and Laboratory" : 2;
-SELECT 1 FROM [CLASS(EEB 4470), PLACEMENT("Senior Essay with DUS Approval")] : "Senior Requirement" : 1;
+// Ecology and Evolutionary Biology B.A. (Organismal Biology concentration): 3.5 course credits beyond the
+// prerequisites, plus the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/ecology-evolutionary-biology/
+program eeb_ba_organismal_biology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact biology_placement "Placed out of BIOL 1010-1040 by the biology placement examination":
+  placement { test: "Biology placement examination", result: "pass" };
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+effect biology_placed when fact biology_placement: waive prereq_biology;
+
+// Acceleration credit or advanced courses in chemistry, mathematics, or physics may replace those prerequisites.
+requirement prereq_chemistry "Prerequisite: general chemistry CHEM 1610 and 1650, or CHEM 1630 and 1670" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610 and 1650" { courses exactly 2 from [CHEM 1610, CHEM 1650]; }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" { courses exactly 2 from [CHEM 1630, CHEM 1670]; }
+  requirement prereq_chem_accelerated "Acceleration credit or an advanced chemistry course accepted by the DUS" {
+    slot where attempt.source = "acceleration" and course.subject = "CHEM" or attempt.approved_for contains "prereq_chemistry";
+  }
+}
+
+requirement prereq_chemistry_lab "Prerequisite: CHEM 1340L and 1360L" [prerequisite] {
+  courses exactly 2 where course.code in ["CHEM1340L", "CHEM1360L"] or attempt.approved_for contains "prereq_chemistry_lab";
+}
+
+requirement prereq_quantitative "Prerequisite: one term of mathematics (MATH 1150, 1160, or 1200) or statistics (S&DS 1000-1060 or 2300)" [prerequisite] {
+  slot where course.code in ["MATH1150", "MATH1160", "MATH1200", "S&DS2300"]
+      or course.subject = "S&DS" and course.number >= 1000 and course.number <= 1060
+      or attempt.source = "acceleration" and course.subject = "MATH";
+}
+
+requirement prereq_additional "Prerequisite: four or five additional quantitative and physical science courses totaling four credits" [prerequisite] {
+  credits at least 4
+    where course.code in [
+        "MATH1150", "MATH1160", "MATH1180", "MATH1200", "MATH2220", "MATH2250", "MATH2350", "MATH2410",
+        "MATH2420", "MATH2440", "MATH2460", "MATH2470", "MATH2550", "S&DS2200", "S&DS2300", "S&DS2380",
+        "S&DS2400", "CPSC1001", "CPSC1230", "CPSC2010", "CHEM1740", "CHEM2200", "CHEM1750", "CHEM2210",
+        "CHEM2220L", "CHEM2230L", "PHYS1700", "PHYS1800", "PHYS1710", "PHYS1810", "EPS1100", "EPS2120",
+        "EPS2200", "EPS2220", "EPS2320", "EPS2400", "EPS2550"
+      ]
+      or course.subject = "S&DS" and course.number >= 1000 and course.number <= 1060
+      or attempt.source = "acceleration" and course.subject in ["CHEM", "MATH", "PHYS"];
+  constraint per_department "No more than two of these courses from the same department":
+    group course.subject at most 2 per group;
+}
+
+requirement organismal "Organismal Biology: EEB 2290" [core] {
+  slot from [EEB 2290];
+}
+
+requirement physiology "Organismal Biology: EEB 2295 or BENG 3200" [core] {
+  slot from [EEB 2295, BENG 3200];
+}
+
+requirement biochemistry "Organismal Biology: MCDB 3000 or MB&B 3000" [core] {
+  slot from [MCDB 3000, MB&B 3000];
+}
+
+requirement organismal_lab "Organismal Biology: EEB 2291L" [core] {
+  slot from [EEB 2291L];
+}
+
+requirement senior "Senior requirement: EEB 4470, or a senior essay approved by the DUS" [senior] {
+  slot where course.code = "EEB4470" or attempt.approved_for contains "senior";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_credits "3.5 course credits beyond the prerequisites, not counting the senior requirement" in roles [core, elective]:
+  total at least 3.5 credits;

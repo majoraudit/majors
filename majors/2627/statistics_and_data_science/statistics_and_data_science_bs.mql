@@ -1,0 +1,63 @@
+// Statistics and Data Science B.S.: fourteen term courses beyond the prerequisite, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/statistics-data-science/
+// The discipline-area lists are the catalog's examples; other courses may count with DUS approval. A course counts once.
+program statistics_and_data_science_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq "Prerequisite: multivariable calculus (MATH 1200, ENAS 1510, or MATH 3020) or an equivalent" [prerequisite] {
+  slot where course.code in ["MATH1200", "ENAS1510", "MATH3020"] or attempt.approved_for contains "prereq";
+}
+
+requirement linear_algebra "Mathematical foundations: linear algebra (MATH 2220, 2250, or 2260), or another foundations course after linear algebra elsewhere" [core] {
+  slot where course.code in ["MATH2220", "MATH2250", "MATH2260"] or attempt.approved_for contains "linear_algebra";
+}
+
+requirement probability_statistics "Core probability and statistics: two courses, including S&DS 2420" [core] {
+  courses at least 2 where course.code in ["S&DS2380", "S&DS2410", "S&DS2420", "S&DS3120", "S&DS3510"] or attempt.approved_for contains "probability_statistics";
+  constraint sds_2420 "Including S&DS 2420": at least 1 attempts where course.code = "S&DS2420";
+}
+
+requirement computation "Computational skills: two courses" [core] {
+  courses at least 2 where course.code in ["S&DS2200", "S&DS2300", "S&DS2620", "S&DS2650", "S&DS4250", "CPSC1001", "CPSC2010", "ENAS1300"] or attempt.approved_for contains "computation";
+}
+
+requirement methods "Methods of data science: two courses, including S&DS 3650" [core] {
+  courses at least 2 where course.code in ["S&DS3120", "S&DS3170", "S&DS3610", "S&DS3630", "S&DS3650", "S&DS4300", "S&DS4310", "S&DS4680", "ECE4000", "CPSC4460", "CPSC4520", "CPSC4770"] or attempt.approved_for contains "methods";
+  constraint sds_3650 "Including S&DS 3650": at least 1 attempts where course.code = "S&DS3650";
+}
+
+requirement math_theory "B.S.: one additional Mathematical Foundations and Theory course" [core] {
+  slot where course.code in ["S&DS3640", "S&DS4000", "S&DS4100", "S&DS4110", "CPSC3650", "CPSC3660", "CPSC4690", "MATH2220", "MATH2250", "MATH2260", "MATH2440", "MATH2550", "MATH2560", "MATH2600", "MATH3020"] or attempt.approved_for contains "math_theory";
+}
+
+requirement electives "Three electives from any discipline area, with DUS approval" [elective] {
+  courses at least 3
+    where course.code in ["S&DS2380", "S&DS2410", "S&DS2420", "S&DS3120", "S&DS3510"] or course.code in ["S&DS2200", "S&DS2300", "S&DS2620", "S&DS2650", "S&DS4250", "CPSC1001", "CPSC2010", "ENAS1300"] or course.code in ["S&DS3120", "S&DS3170", "S&DS3610", "S&DS3630", "S&DS3650", "S&DS4300", "S&DS4310", "S&DS4680", "ECE4000", "CPSC4460", "CPSC4520", "CPSC4770"] or course.code in ["S&DS3640", "S&DS4000", "S&DS4100", "S&DS4110", "CPSC3650", "CPSC3660", "CPSC4690", "MATH2220", "MATH2250", "MATH2260", "MATH2440", "MATH2550", "MATH2560", "MATH2600", "MATH3020"]
+      or course.code in ["CPSC2230", "CPSC3230", "CPSC4240"] or course.code in ["ANTH3476", "EVST3620", "GLBL3191", "GLBL3195", "LING3290", "LING2340", "LING3800", "PSYC2658"] or course.code in ["CPSC4530", "CPSC4700", "CPSC4750", "ECON2136", "ECON4420", "ECE4450", "S&DS3520", "LING2270"]
+      or attempt.approved_for contains "electives";
+}
+
+requirement bs_electives "B.S.: two additional electives, not from Data Science in Context or Methods in Application Areas" [elective] {
+  courses at least 2
+    where course.code in ["S&DS2380", "S&DS2410", "S&DS2420", "S&DS3120", "S&DS3510"] or course.code in ["S&DS2200", "S&DS2300", "S&DS2620", "S&DS2650", "S&DS4250", "CPSC1001", "CPSC2010", "ENAS1300"] or course.code in ["S&DS3120", "S&DS3170", "S&DS3610", "S&DS3630", "S&DS3650", "S&DS4300", "S&DS4310", "S&DS4680", "ECE4000", "CPSC4460", "CPSC4520", "CPSC4770"] or course.code in ["S&DS3640", "S&DS4000", "S&DS4100", "S&DS4110", "CPSC3650", "CPSC3660", "CPSC4690", "MATH2220", "MATH2250", "MATH2260", "MATH2440", "MATH2550", "MATH2560", "MATH2600", "MATH3020"] or course.code in ["CPSC2230", "CPSC3230", "CPSC4240"]
+      or attempt.approved_for contains "bs_electives";
+}
+
+requirement senior "Senior requirement: an individual research project in S&DS 4910 or 4920 (not both)" [senior] {
+  slot from [S&DS 4910, S&DS 4920];
+}
+
+constraint one_project "Only one of S&DS 4910 and 4920 counts" in program:
+  limit 1 attempts where course.code in ["S&DS4910", "S&DS4920"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen term courses beyond the prerequisite" in roles [core, elective, senior]:
+  total at least 14 attempts;

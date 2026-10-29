@@ -1,0 +1,105 @@
+// Chemistry B.S.: thirteen course credits beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/chemistry/
+program chemistry_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact chemistry_placement "Placement beyond general chemistry approved by the DUS":
+  placement { test: "Yale chemistry placement", result: "beyond general chemistry" };
+fact calculus_placement "Placement beyond MATH 1150 or an equivalent approved by the DUS":
+  placement { test: "Yale mathematics placement", result: "beyond MATH 1150" };
+
+requirement prereq_general_chemistry "Prerequisite: general chemistry with laboratory (CHEM 1610 and 1650 with 1340L and 1360L, or CHEM 1700 with 1710L)" [prerequisite] {
+  children at least 1;
+  requirement prereq_chem_1610 "CHEM 1610, 1650, 1340L, and 1360L" {
+    courses exactly 4 from [CHEM 1610, CHEM 1650, CHEM 1340L, CHEM 1360L];
+  }
+  requirement prereq_chem_1700 "CHEM 1700 and 1710L" {
+    courses exactly 2 from [CHEM 1700, CHEM 1710L];
+  }
+  requirement prereq_chem_1630 "CHEM 1630 and 1670" {
+    courses exactly 2 from [CHEM 1630, CHEM 1670];
+  }
+}
+
+effect chemistry_placed when fact chemistry_placement: waive prereq_general_chemistry;
+
+requirement prereq_calculus "Prerequisite: MATH 1150 or 1160 (MATH 1200, 1210, or ENAS 1510 also fulfill it)" [prerequisite] {
+  slot from [MATH 1150, MATH 1160, MATH 1200, MATH 1210, ENAS 1510];
+}
+
+effect calculus_placed when fact calculus_placement: waive prereq_calculus;
+
+requirement prereq_physics "Prerequisite: one term of introductory physics numbered 1700 or higher" [prerequisite] {
+  slot from [PHYS 1700, PHYS 1710, PHYS 1800, PHYS 1810, PHYS 2000, PHYS 2010, PHYS 2600, PHYS 2610];
+}
+
+requirement organic_1 "Organic chemistry: CHEM 1740 or 2200" [core] {
+  slot from [CHEM 1740, CHEM 2200];
+}
+
+requirement organic_2 "Organic chemistry: CHEM 1750, 2210, or 2300" [core] {
+  slot from [CHEM 1750, CHEM 2210, CHEM 2300];
+}
+
+requirement organic_labs "Organic chemistry laboratories CHEM 2220L and 2230L (half credit each)" [core] {
+  courses exactly 2 from [CHEM 2220L, CHEM 2230L];
+}
+
+requirement physical "Physical chemistry: CHEM 3320 or 3280" [core] {
+  slot from [CHEM 3320, CHEM 3280];
+}
+
+requirement inorganic "Inorganic chemistry: CHEM 2520" [core] {
+  slot from [CHEM 2520];
+}
+
+requirement physical_2 "Second term of physical chemistry: CHEM 3330" [core] {
+  slot from [CHEM 3330];
+}
+
+requirement physical_lab "Physical chemistry laboratory: CHEM 3300L" [core] {
+  slot from [CHEM 3300L];
+}
+
+requirement advanced "4 course credits of advanced Chemistry lecture or laboratory courses" [elective] {
+  credits at least 4
+    where (course.code in ["CHEM2260L", "CHEM2510L", "CHEM3310L", "CHEM3490L", "CHEM3550L", "CHEM3350L"] or course.subject = "CHEM" and course.format = "lab" and course.attributes contains "YC CHEM Advanced Courses") or (course.subject = "CHEM" and course.format != "lab" and course.attributes overlaps ["YC CHEM Advanced Courses", "YC CHEM GR of Interest to UG"]) or attempt.approved_for contains "advanced";
+  constraint advanced_lecture "At least 1 full credit of advanced lecture courses in the Chemistry department":
+    at least 1 credits where (course.subject = "CHEM" and course.format != "lab" and course.attributes overlaps ["YC CHEM Advanced Courses", "YC CHEM GR of Interest to UG"]);
+  constraint advanced_lab "At least one Chemistry laboratory course":
+    at least 1 attempts where (course.code in ["CHEM2260L", "CHEM2510L", "CHEM3310L", "CHEM3490L", "CHEM3550L", "CHEM3350L"] or course.subject = "CHEM" and course.format = "lab" and course.attributes contains "YC CHEM Advanced Courses");
+  constraint outside_science "Up to two credits of advanced science outside Chemistry, with the written approval of the DUS":
+    at most 2 credits where course.subject != "CHEM";
+}
+
+requirement senior "Senior requirement with a capstone report: two terms of CHEM 4900, or CHEM 4000 with one more advanced credit or CHEM 4900" [senior] {
+  children at least 1;
+  requirement senior_research "Two terms of CHEM 4900, with an oral or poster presentation" {
+    courses exactly 2 where course.code = "CHEM4900";
+  }
+  requirement senior_seminar "CHEM 4000 and one additional advanced lecture or laboratory credit or CHEM 4900" {
+    children exactly 2;
+    requirement senior_seminar_course "CHEM 4000" { slot from [CHEM 4000]; }
+    requirement senior_seminar_additional "One additional advanced credit or CHEM 4900" {
+      credits at least 1 where (course.code in ["CHEM2260L", "CHEM2510L", "CHEM3310L", "CHEM3490L", "CHEM3550L", "CHEM3350L"] or course.subject = "CHEM" and course.format = "lab" and course.attributes contains "YC CHEM Advanced Courses") or (course.subject = "CHEM" and course.format != "lab" and course.attributes overlaps ["YC CHEM Advanced Courses", "YC CHEM GR of Interest to UG"]) or course.code = "CHEM4900";
+    }
+  }
+}
+
+constraint research_repeat "CHEM 4900 counts at most twice" in program:
+  repeat at most 2 times where course.code = "CHEM4900";
+
+constraint no_research_for_labs "CHEM 4900 never substitutes for a laboratory requirement; CHEM 5620L, 5640L, and 5650L never count" in program:
+  limit 0 attempts where course.code in ["CHEM5620L", "CHEM5640L", "CHEM5650L"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites and substitutions" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "13 course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 13 credits;

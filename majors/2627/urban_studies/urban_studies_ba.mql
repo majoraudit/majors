@@ -1,0 +1,50 @@
+// Urban Studies B.A.: thirteen course credits including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/urban-studies/
+// Urban Labs carry 1.5 credits, so the number of electives depends on course credit values and the senior option.
+program urban_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement surveys "Three survey courses, completed by the end of the second year, at least one a URBN course" [core] {
+  courses at least 3 where course.code in ["URBN1300", "URBN1101", "URBN1100", "URBN1102", "EVST3226", "ARCH1001"] or course.attributes contains "YC URBN Survey Course";
+  constraint urbn_survey "At least one survey is a URBN course": at least 1 attempts where course.subject = "URBN";
+  constraint by_second_year "Completed by the end of the second year": all where attempt.year_of_study <= 2;
+}
+
+requirement urban_lab "Methods: one Urban Lab (1.5 credits)" [core] {
+  slot where course.code in ["URBN3601", "URBN3602", "URBN3603", "URBN3604", "URBN3605"] or course.attributes contains "YC URBN Urban Lab";
+}
+
+requirement methods "Methods: two additional methods courses" [core] {
+  courses at least 2
+    where course.code in ["URBN2000", "ANTH3720", "EVST2290"] or course.code in ["URBN3601", "URBN3602", "URBN3603", "URBN3604", "URBN3605"] or course.attributes contains "YC URBN Urban Lab" or course.attributes contains "YC URBN Methods Course";
+}
+
+requirement electives "Electives toward the thirteen credits (approved Urban Studies electives, or others by petition to the DUS)" [elective] {
+  courses at least 0 where course.attributes contains "YC URBN Elective" or attempt.approved_for contains "electives";
+}
+
+requirement senior "Senior requirement: a yearlong project (URBN 4900 and 4901), or an advanced seminar (URBN 4000-4910) with a 6,000-word paper and an additional elective" [senior] {
+  children at least 1;
+  requirement senior_project "URBN 4900 and 4901" { courses exactly 2 from [URBN 4900, URBN 4901]; }
+  requirement senior_seminar "An advanced seminar with a 6,000-word paper, and an additional elective" {
+    children exactly 2;
+    requirement senior_seminar_course "Advanced seminar (URBN 4000-4910)" {
+      slot where course.subject = "URBN" and course.number >= 4000 and course.number <= 4910 and not course.code in ["URBN4900", "URBN4901"];
+    }
+    requirement senior_extra_elective "An additional elective" {
+      slot where course.attributes contains "YC URBN Elective" or attempt.approved_for contains "electives";
+    }
+  }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Thirteen course credits including the senior requirement" in program:
+  total at least 13 credits;

@@ -1,0 +1,76 @@
+// Sociology B.A. (Student-Designed concentration, standard senior requirement): thirteen term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/sociology/
+// No more than two introductory courses in any department or program may count (checked for the departments these tracks use).
+program sociology_ba_standard_student_designed {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact plan_approval "Course of study approved by the DUS by the beginning of junior year": approval dus_approval { for: "concentration_plan" };
+
+requirement concentration_plan "Concentration plan approved by the DUS" [senior] {
+  slot where attempt.approved_for contains "concentration_plan";
+}
+
+effect plan_approved when fact plan_approval: waive concentration_plan;
+
+requirement intro "One introductory sociology course (1000 level)" [core] {
+  slot where course.subject = "SOCY" and course.number >= 1000 and course.number <= 1999;
+}
+
+requirement theory "Sociological theory: SOCY 2001 and 2002" [core] {
+  courses exactly 2 from [SOCY 2001, SOCY 2002];
+}
+
+requirement research_design "Research design: SOCY 2100, usually in the spring of junior year" [core] {
+  slot from [SOCY 2100];
+}
+
+requirement methodology "One social science methodology course" [core] {
+  slot where course.code in ["S&DS1000", "S&DS1100", "S&DS1600", "S&DS2300", "S&DS3630", "GLBL2122", "SOCY2103", "AMST3304"] or attempt.approved_for contains "methodology";
+}
+
+requirement advanced_seminar "One advanced seminar in Sociology (3000 level)" [core] {
+  slot where course.subject = "SOCY" and course.number >= 3000 and course.number <= 3999 and course.format = "seminar";
+}
+
+requirement electives "Five electives relevant to the designed concentration, within or outside Sociology (one 1000-level course acceptable)" [elective] {
+  courses at least 5 where course.subject = "SOCY" and course.number >= 1000 and course.number <= 3999 or attempt.approved_for contains "outside_concentration";
+  constraint one_intro_elective "At most one 1000-level course": at most 1 attempts where course.number <= 1999;
+}
+
+requirement senior "Senior requirement: a senior essay in SOCY 4100 and an additional 3000-level Sociology seminar, integrating the designed concentration topic" [senior] {
+  children exactly 2;
+  requirement senior_essay "SOCY 4100" { slot from [SOCY 4100]; }
+  requirement senior_seminar "An additional 3000-level Sociology seminar" {
+    slot where course.subject = "SOCY" and course.number >= 3000 and course.number <= 3999 and course.format = "seminar";
+  }
+}
+
+constraint intro_limit_socy "No more than two introductory courses (below 2000) in Sociology" in program:
+  limit 2 attempts where course.subject = "SOCY" and course.number <= 1999;
+
+constraint intro_limit_sds "No more than two introductory courses (below 2000) in Statistics and Data Science" in program:
+  limit 2 attempts where course.subject = "S&DS" and course.number <= 1999;
+
+constraint intro_limit_biol "No more than two introductory courses (below 2000) in Biology" in program:
+  limit 2 attempts where course.subject = "BIOL" and course.number <= 1999;
+
+constraint intro_limit_math "No more than two introductory courses (below 2000) in Mathematics" in program:
+  limit 2 attempts where course.subject = "MATH" and course.number <= 1999;
+
+constraint intro_limit_econ "No more than two introductory courses (below 2000) in Economics" in program:
+  limit 2 attempts where course.subject = "ECON" and course.number <= 1999;
+
+constraint outside_limit "Up to 4 concentration-relevant courses from outside Sociology, with DUS approval" in program:
+  limit 4 attempts where course.subject != "SOCY";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count toward the major" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Thirteen term courses including the senior requirement" in roles [core, elective, senior]:
+  total at least 13 attempts;

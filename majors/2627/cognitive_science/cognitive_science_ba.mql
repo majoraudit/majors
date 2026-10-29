@@ -1,0 +1,66 @@
+// Cognitive Science B.A.: fifteen term courses (13.5 credits), including the prerequisite and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/cognitive-science/
+// No course may fulfill more than one requirement, which is the MQL default (exclusive sharing).
+program cognitive_science_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq "Prerequisite: CGSC 1100" [prerequisite] {
+  slot from [CGSC 1100];
+}
+
+requirement breadth "Breadth: one course in each of four of the seven subfields" [core] {
+  children at least 4;
+  requirement breadth_computer_science "Computer science: CPSC 2010" { slot from [CPSC 2010]; }
+  requirement breadth_economics "Economics and decision making: ECON 2259" { slot from [ECON 2259]; }
+  requirement breadth_linguistics "Linguistics: LING 1100, 1160, 1300, 1179, 2320, or 2530" {
+    slot from [LING 1100, LING 1160, LING 1300, LING 1179, LING 2320, LING 2530];
+  }
+  requirement breadth_neuroscience "Neuroscience: MCDB 3200, NSCI 3400, PSYC 1600, or 2670" {
+    slot from [MCDB 3200, NSCI 3400, PSYC 1600, PSYC 2670];
+  }
+  requirement breadth_philosophy "Philosophy: PHIL 1126, 1182, 2269, 2270, or 2271" {
+    slot from [PHIL 1126, PHIL 1182, PHIL 2269, PHIL 2270, PHIL 2271];
+  }
+  requirement breadth_psychology "Psychology: PSYC 1100, S1390, or 1400" { slot from [PSYC 1100, "PSYCS1390", PSYC 1400]; }
+  requirement breadth_anthropology "Anthropology: ANTH 1482" { slot from [ANTH 1482]; }
+}
+
+requirement depth "Depth: six intermediate or advanced courses (normally 3000+) on a specific topic, approved by the DUS" [concentration] {
+  courses at least 6 where attempt.approved_for contains "depth";
+  constraint two_disciplines "Chosen from at least two disciplines": group course.subject distinct at least 2;
+  constraint one_directed "At most one directed reading or research course, with DUS permission":
+    at most 1 attempts where course.format in ["independent_study", "research"];
+}
+
+requirement skills "Skills course, preferably before senior year: CPSC 1001, 2020, LING 2249, PSYC 2670, S&DS 1000, 2200, 2300, or S107E" [core] {
+  slot where course.code in ["CPSC1001", "CPSC2020", "LING2249", "PSYC2670", "S&DS1000", "S&DS2200", "S&DS2300", "S&DSS1070"]
+    or attempt.approved_for contains "skills";
+}
+
+requirement junior_colloquium "Junior colloquium CGSC 3950 (half credit), in the junior year" [core] {
+  slot from [CGSC 3950];
+  constraint junior_year "Taken in the junior year": all where attempt.year_of_study = 3;
+}
+
+requirement senior "Senior requirement: CGSC 4800 and 4810, nonempirical senior essay (half credit each), in the senior year for a letter grade" [senior] {
+  courses exactly 2 from [CGSC 4800, CGSC 4810];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint repeat_tutorial "Only one term of CGSC 4710, 4720, 4730, or 4740 counts toward the major" in program:
+  limit 1 attempts where course.code in ["CGSC4710", "CGSC4720", "CGSC4730", "CGSC4740"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, except with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fifteen term courses in all, including the prerequisite" in program:
+  total at least 15 attempts;
+
+constraint total_credits "13.5 course credits in all" in program:
+  total at least 13.5 credits;

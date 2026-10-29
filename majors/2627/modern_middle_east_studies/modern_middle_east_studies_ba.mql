@@ -1,43 +1,51 @@
-SELECT 10 FROM [
-  TAG("YC MMES Survey Course"),
-  TAG("YC MMES Survey Course"),
-  SELECT 1 FROM [
-    DIST_DEPT("L5", "ARBC"),
-    DIST_DEPT("L5", "HEBR"),
-    DIST_DEPT("L5", "PERS"),
-    DIST_DEPT("L5", "TURK")
-  ],
-  TAG("YC HIST Middle East"),
-  TAG("YC HIST Preindustrial"),
-  TAG("YC MMES Adv Seminar"),
-  TAG("YC MMES Adv Seminar")
-] : "Core Classes" : 10;
+// Modern Middle East Studies B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/modern-middle-east-studies/
+// The proposed course of study requires DUS approval.
+program modern_middle_east_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [
-  DIST_DEPT("L4", "ARBC"),
-  DIST_DEPT("L3", "ARBC"),
-  DIST_DEPT("L2", "ARBC"),
-  DIST_DEPT("L1", "ARBC"),
+requirement surveys "Two introductory survey courses on the Middle East, focusing on the modern period" [core] {
+  courses at least 2 where course.attributes contains "YC MMES Survey Course";
+}
 
-  DIST_DEPT("L4", "HEBR"),
-  DIST_DEPT("L3", "HEBR"),
-  DIST_DEPT("L2", "HEBR"),
-  DIST_DEPT("L1", "HEBR"),
-  
-  DIST_DEPT("L4", "PERS"),
-  DIST_DEPT("L3", "PERS"),
-  DIST_DEPT("L2", "PERS"),
-  DIST_DEPT("L1", "PERS"),
-  
-  DIST_DEPT("L4", "TURK"),
-  DIST_DEPT("L3", "TURK"),
-  DIST_DEPT("L2", "TURK"),
-  DIST_DEPT("L1", "TURK")
-] : "Electives" : 2;
+requirement distribution "Eight distribution courses spread geographically, temporally, and across disciplines" [distribution] {
+  courses at least 8
+    where course.attributes overlaps ["YC MMES Distribution Course", "YC MMES Adv Seminar"]
+      or attempt.approved_for contains "distribution";
+  constraint regions "Two courses on different Middle Eastern regions or countries":
+    at least 2 attempts where attempt.approved_for contains "distinct_region";
+  constraint departments "Two courses from different departments or programs":
+    group course.subject distinct at least 2;
+  constraint pre_1750 "Two courses focusing substantially on the period before 1750":
+    at least 2 attempts
+      where course.attributes overlaps ["YC NELC Medieval Near East", "YC NELC Ancient Near East"] or attempt.approved_for contains "pre_1750";
+  constraint seminars "Two advanced seminars": at least 2 attempts where course.attributes contains "YC MMES Adv Seminar";
+  constraint language_below_l5 "Up to two Middle Eastern language courses below L5, with DUS approval":
+    at most 2 attempts where course.format = "language" and not course.distributionals contains "L5";
+}
 
-SELECT 1 FROM [
-  CLASS(MMES 4491),
-  CLASS(MMES 4492),
-  CLASS(MMES 4493),
-  TAG("YC MMES Adv Seminar")
-] : "Senior Requirement" : 1;
+requirement language "One course at the L5 level in a Middle Eastern language" [language] {
+  slot where course.subject in ["ARBC", "HEBR", "PERS", "TKSH", "OTTM"] and course.distributionals contains "L5";
+}
+
+requirement senior "Senior essay using modern Middle Eastern language materials: MMES 4491, MMES 4492 and 4493, or an essay in an additional advanced seminar" [senior] {
+  children at least 1;
+  requirement senior_one_term "MMES 4491" { slot from [MMES 4491]; }
+  requirement senior_two_term "MMES 4492 and 4493" { courses exactly 2 from [MMES 4492, MMES 4493]; }
+  requirement senior_seminar "An essay in an additional advanced seminar" {
+    slot where course.attributes contains "YC MMES Adv Seminar" and attempt.approved_for contains "senior";
+  }
+  constraint senior_year "Completed in the senior year" in subtree senior: all where attempt.year_of_study = 4;
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses including the senior requirement" in program:
+  total at least 12 attempts;

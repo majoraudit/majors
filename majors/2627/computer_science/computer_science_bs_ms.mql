@@ -1,31 +1,88 @@
-SELECT 5 FROM [
-    CLASS(CPSC 2010),
-    SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)],
-    CLASS(CPSC 2230),
-    CLASS(CPSC 3230),
-    SELECT 1 FROM [CLASS(CPSC 3650), CLASS(CPSC 3660)]
-] : "Core Classes" : 1;
+// Computer Science simultaneous B.S./M.S.: the twelve-course B.S. plus graduate courses for the M.S.
+// Available only through the Class of 2029.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computer-science/
+program computer_science_bs_ms {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 6 FROM [
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999),
-    RANGE(CPSC 2000 , CPSC 9999)
-] : "CS Electives (Intermediate/Advanced)" : 2;
+// CPSC 3230 replaces the CPSC 3231-3232 pair and adds one elective.
+choice systems "Systems sequence": solver one of "split", "combined";
 
-SELECT 1 FROM [
-    CLASS(CPSC 4900)
-] : "Senior Project" : 3;
+requirement intro "Core: CPSC 2010" [core] {
+  slot from [CPSC 2010];
+}
 
-SELECT 8 FROM [
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999),
-    RANGE(CPSC 6000 , CPSC 6999)
-] : "Graduate Courses (Total 8)" : 4;
+requirement discrete "Core: discrete mathematics (CPSC 2020 or MATH 2440)" [core] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement data_structures "Core: data structures (CPSC 2230)" [core] {
+  slot from [CPSC 2230];
+}
+
+requirement systems_split "Core: systems programming and computer architecture (CPSC 3231 and 3232)" [core]
+    when systems = "split" {
+  courses exactly 2 from [CPSC 3231, CPSC 3232];
+}
+
+requirement systems_combined "Core: systems programming and computer architecture (CPSC 3230)" [core]
+    when systems = "combined" {
+  slot from [CPSC 3230];
+}
+
+requirement algorithms "Core: algorithms (CPSC 3650 or 3660)" [core] {
+  slot from [CPSC 3650, CPSC 3660];
+}
+
+requirement electives "Intermediate or advanced Computer Science electives (six if CPSC 3230 is taken)" [elective] {
+  courses at least (systems: "split" => 5, "combined" => 6)
+    where course.attributes contains "YC CPSC Elective" or attempt.approved_for contains "electives";
+  constraint outside_electives "At most two advanced courses from another department, with DUS permission":
+    at most 2 attempts where not course.attributes contains "YC CPSC Elective";
+}
+
+requirement senior "Senior project (CPSC 4900), in the senior year unless the DUS permits otherwise" [senior] {
+  slot from [CPSC 4900];
+  constraint senior_year "Senior project taken in the senior year":
+    all where attempt.year_of_study = 4 or attempt.approved_for contains "senior";
+}
+
+constraint one_algorithms "Only one of CPSC 3650 or 3660 may count toward the major" in program:
+  limit 1 attempts where course.code in ["CPSC3650", "CPSC3660"];
+
+constraint no_split_with_combined "If CPSC 3230 is taken, neither CPSC 3231 nor 3232 counts" when systems = "combined" in program:
+  limit 0 attempts where course.code in ["CPSC3231", "CPSC3232"];
+
+constraint letter_grades "All courses in the B.S. taken for a letter grade" in roles [core, elective, senior]:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all for the B.S." in roles [core, elective, senior]:
+  total at least 12 attempts;
+
+// Graduate work: Honors, High Pass, or Pass in every course, at least two Honors, and a High Pass average.
+requirement graduate "Graduate courses for the M.S." [graduate] {
+  courses at least 8 where course.subject = "CPSC" and course.number >= 5000;
+  constraint graduate_grades "Graduate courses earn Honors, High Pass, or Pass":
+    all where attempt.graduate_grade in ["H", "HP", "P"];
+  constraint graduate_honors "At least two grades of Honors":
+    at least 2 attempts where attempt.graduate_grade = "H";
+}
+
+fact ms_admission "Admitted to the simultaneous B.S./M.S. by the DUS and DGS (application due by the last day of classes in the fifth term)":
+  approval committee_approval { for: "ms_admission" };
+
+requirement admission "Admission to the simultaneous B.S./M.S. program" [graduate] {
+  slot where attempt.approved_for contains "ms_admission";
+}
+
+effect admitted "Admission satisfies the admission requirement" when fact ms_admission: waive admission;
+
+// The High Pass average across graduate courses is computed by the Graduate School, not from course records.
+advisory requirement graduate_average "All graduate grades must average High Pass" [graduate] {
+  slot where attempt.approved_for contains "graduate_average";
+}

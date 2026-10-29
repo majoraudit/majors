@@ -1,21 +1,61 @@
-SELECT 1 FROM [
-  CLASS(MATH 1150),
-  TAG("Equivalent Placement or Credit")
-] : "Prerequisites" : 1;
+// Mathematics B.A.: ten term courses numbered MATH 2250-5999, including the introductory sequence and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mathematics/
+// Courses count when numbered MATH 2250-5999 (not MATH 4700); graduate courses 6000 and above do not count.
+program mathematics_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 3 FROM [
-  SELECT 1 FROM [CLASS(MATH 2250), CLASS(MATH 2260)],
-  SELECT 1 FROM [CLASS(MATH 2550), CLASS(MATH 2560)],
-  SELECT 1 FROM [CLASS(MATH 3020), CLASS(MATH 1200)]
-] : "Introductory Sequence" : 3;
+fact calculus_equivalent "Equivalent of MATH 1150 (e.g., AP Calculus BC 4 or 5)": placement { test: "AP Calculus BC", result: "4 or 5" };
 
-SELECT 6 FROM [
-  CLASS(MATH 3500),
-  SELECT 1 FROM [CLASS(MATH 3050), CLASS(MATH 3100)],
-  RANGE(MATH 2250 , MATH 5999),
-  RANGE(MATH 2250 , MATH 5999),
-  RANGE(MATH 2250 , MATH 5999),
-  RANGE(MATH 2250 , MATH 5999)
-] : "Core Classes" : 6;
+requirement prereq "Prerequisite: single-variable calculus through MATH 1150" [prerequisite] {
+  slot from [MATH 1150];
+}
 
-SELECT 1 FROM [RANGE(MATH 4800 , MATH 4890), CLASS(MATH 4750)] : "Senior Requirement" : 1;
+effect calculus_waived when fact calculus_equivalent: waive prereq;
+
+requirement linear_algebra "Introductory sequence: linear algebra with proofs (MATH 2250 or 2260)" [mathematics] {
+  slot from [MATH 2250, MATH 2260];
+}
+
+requirement real_analysis_intro "Introductory sequence: real analysis (MATH 2550 or 2560)" [mathematics] {
+  slot from [MATH 2550, MATH 2560];
+}
+
+requirement vector_analysis "Introductory sequence: vector analysis or multivariable calculus (MATH 3020 or 1200)" [mathematics] {
+  slot from [MATH 3020, MATH 1200];
+}
+
+requirement algebra "Algebra: MATH 3500 (or a higher-level algebra course such as MATH 3700 with prior written DUS permission)" [mathematics] {
+  slot where course.code = "MATH3500" or attempt.approved_for contains "algebra";
+}
+
+requirement analysis "Real analysis (MATH 3050) or complex analysis (MATH 3100), or a higher-level analysis course with prior written DUS permission" [mathematics] {
+  slot where course.code in ["MATH3050", "MATH3100"] or attempt.approved_for contains "analysis";
+}
+
+requirement distribution "Three courses carrying the Math distribution attribute" [mathematics] {
+  courses at least 3 where course.attributes contains "YC MATH Distribution" and course.subject = "MATH" and course.number >= 2250 and course.number <= 5999 and course.code != "MATH4700";
+}
+
+requirement elective "One additional mathematics elective (MATH 2250-5999, or a math-intensive course from another department with DUS approval)" [mathematics] {
+  slot where course.subject = "MATH" and course.number >= 2250 and course.number <= 5999 and course.code != "MATH4700" or attempt.approved_for contains "math_intensive";
+}
+
+requirement senior "Senior requirement: a seminar numbered MATH 4800-4890, or MATH 4750 with DUS consent" [senior] {
+  slot where course.subject = "MATH" and course.number >= 4800 and course.number <= 4890
+    or course.code = "MATH4750" and attempt.approved_for contains "senior";
+}
+
+constraint outside_limit "Up to two math-intensive courses from other departments, with DUS approval" in roles [mathematics]:
+  limit 2 attempts where course.subject != "MATH";
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses taken elsewhere after matriculation count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint ten_math "Ten mathematics courses including the senior requirement" in roles [mathematics, senior]:
+  total at least 10 attempts;

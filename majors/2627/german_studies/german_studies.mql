@@ -1,33 +1,54 @@
-SELECT 2 FROM [
-    PLACEMENT("First year German completed or equivalent"),
-    PLACEMENT("Second year German completed or equivalent")
-] : "Prerequisites" : 1;
+// German Studies B.A.: ten course credits including the senior essay, not including the prerequisite.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/german-studies/
+// The intensive major replaces one advanced seminar with GMAN 4930, the second term of the senior essay.
+program german_studies {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 1 FROM [
-    SELECT 10 FROM [
-        SELECT 1 FROM [RANGE(GMAN 1500 , GMAN 1599)],
-        SELECT 6 FROM [
-            RANGE(GMAN 1600 , GMAN 1699),
-            RANGE(GMAN 1700 , GMAN 1799),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus")
-        ],
-        SELECT 2 FROM [RANGE(GMAN 1600 , GMAN 9999), RANGE(GMAN 1600 , GMAN 9999)],
-        SELECT 1 FROM [CLASS(GMAN 4920)]
-    ],
-    SELECT 10 FROM [
-        SELECT 1 FROM [RANGE(GMAN 1500 , GMAN 1599)],
-        SELECT 6 FROM [
-            RANGE(GMAN 1600 , GMAN 1699),
-            RANGE(GMAN 1700 , GMAN 1799),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus"),
-            TAG("YC GMAN Group B or C 1600 Plus")
-        ],
-        SELECT 1 FROM [RANGE(GMAN 1600 , GMAN 9999)],
-        SELECT 2 FROM [CLASS(GMAN 4920), CLASS(GMAN 4930)]
-    ]
-] : "German Studies Major Plan" : 1;
+choice track "Major track": declared one of "standard", "intensive";
+
+fact german_placement "Placement equivalent to first- and second-year German": placement { test: "German placement", result: "beyond GMAN 1400" };
+
+requirement prereq "Prerequisite: first- and second-year German (through GMAN 1400) or the equivalent" [prerequisite] {
+  slot from [GMAN 1400];
+}
+
+effect placed when fact german_placement: waive prereq;
+
+requirement gman_1500s "One GMAN course numbered in the 1500s" [core] {
+  slot where course.subject = "GMAN" and course.number >= 1500 and course.number <= 1599;
+}
+
+requirement gman_1600s "One GMAN course numbered in the 1600s" [core] {
+  slot where course.subject = "GMAN" and course.number >= 1600 and course.number <= 1699;
+}
+
+requirement gman_1700s "One GMAN course numbered in the 1700s" [core] {
+  slot where course.subject = "GMAN" and course.number >= 1700 and course.number <= 1799;
+}
+
+requirement electives "Additional courses numbered GMAN 1600 and above (Groups B and C): six, or five in the intensive major" [elective] {
+  courses at least (track: "standard" => 6, "intensive" => 5)
+    where course.subject = "GMAN" and course.number >= 1600 and not course.code in ["GMAN4920", "GMAN4930"];
+}
+
+requirement senior "Senior essay: GMAN 4920 (the intensive major continues in GMAN 4930)" [senior] {
+  courses exactly (track: "standard" => 1, "intensive" => 2) from [GMAN 4920, GMAN 4930];
+}
+
+constraint intensive_order "The intensive essay begins in GMAN 4920 in the fall" when track = "intensive" in program:
+  order course.code = "GMAN4920" before course.code = "GMAN4930";
+
+constraint crdf_limit "At most two Credit/D/Fail courses count, with DUS permission" in program:
+  limit 2 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "Credit/D/Fail courses count only with DUS permission" in program:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Ten course credits including the senior essay" in roles [core, elective, senior]:
+  total at least 10 credits;

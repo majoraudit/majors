@@ -12,5 +12,8 @@
     "dus": [["Greta LaFleur", "greta.lafleur@yale.edu"]],
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/american-studies/",
     "websiteLink": "https://americanstudies.yale.edu/",
-    "specializations": []
+    "specializations": [
+        "american_studies_ba_standard.mql",
+        "american_studies_ba_intensive.mql"
+    ]
 }

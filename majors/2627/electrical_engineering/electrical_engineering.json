@@ -17,8 +17,6 @@
     "catalogLink": "https://catalog.yale.edu/ycps/subjects-of-instruction/electrical-engineering/",
     "websiteLink": "https://engineering.yale.edu/academic-study/departments/electrical-engineering",
     "specializations": [
-        "electrical_engineering.mql",
-        "electrical_engineering_ba.mql",
         "electrical_engineering_bs.mql",
         "electrical_engineering_bs_abet.mql"
     ]

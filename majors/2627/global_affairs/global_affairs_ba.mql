@@ -1,0 +1,72 @@
+// Global Affairs B.A.: fourteen courses including the eight introductory courses and the senior requirement,
+// plus an L4 modern-language requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/global-affairs/
+program global_affairs_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement intro_micro "Introductory: microeconomics (ECON 1108, 1110, or 1115)" [introductory] {
+  slot from [ECON 1108, ECON 1110, ECON 1115];
+}
+
+requirement intro_macro "Introductory: macroeconomics (ECON 1111 or 1116)" [introductory] {
+  slot from [ECON 1111, ECON 1116];
+}
+
+requirement intro_political_science "Introductory: two political science courses from different subdisciplines" [introductory] {
+  children at least 2;
+  requirement plsc_international "PLSC 1113" { slot from [PLSC 1113]; }
+  requirement plsc_comparative "PLSC 1413" { slot from [PLSC 1413]; }
+  requirement plsc_theory "Political theory: PLSC 1327, 1335, 1352, DRST 0005, 0006, or PHIL 1178" {
+    slot from [PLSC 1327, PLSC 1335, PLSC 1352, DRST 0005, DRST 0006, PHIL 1178];
+  }
+}
+
+requirement intro_history "Introductory: two History courses, enrolled under the HIST number" [introductory] {
+  courses at least 2 where attempt.enrolled_subject = "HIST";
+}
+
+requirement intro_glbl_2121 "Introductory: GLBL 2121 (not an elective)" [introductory] {
+  slot from [GLBL 2121];
+}
+
+requirement intro_advanced "Introductory: an advanced course in game theory, intermediate micro- or macroeconomics, or approved qualitative methods" [introductory] {
+  slot where course.code in ["GLBL2159", "ECON2259", "ECON2121", "ECON2122"]
+    or course.attributes contains "YC GLBL Qualitative Methods";
+}
+
+requirement glbl_2122 "GLBL 2122 (not an elective)" [core] {
+  slot from [GLBL 2122];
+}
+
+requirement glbl_3101 "GLBL 3101" [core] {
+  slot from [GLBL 3101];
+}
+
+requirement electives "Three Global Affairs electives (YC GLBL Elective), at most two taught by Senior Fellows" [elective] {
+  courses at least 3 where course.attributes contains "YC GLBL Elective";
+  constraint senior_fellows "At most two taught by Senior Fellows":
+    at most 2 attempts where course.attributes contains "YC GLBL Senior Fellow Elective";
+}
+
+requirement senior "Senior requirement: the Capstone (GLBL 4499), GLBL 4500, or a senior essay written in a senior seminar" [senior] {
+  slot where course.code in ["GLBL4499", "GLBL4500"] or course.format = "seminar" and attempt.approved_for contains "senior";
+}
+
+requirement language "Language requirement: an L4 course in a modern language other than English (a Credit grade may count)" [language] {
+  slot where course.distributionals contains "L4" and course.language != "English";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts, except a Credit grade in the L4 language course" in roles [introductory, core, elective, senior]:
+  all where attempt.grading_mode = "letter";
+
+constraint abroad_scope "Courses taken abroad count only as electives or, rarely, introductory courses" in roles [core, senior]:
+  all where attempt.source = "yale";
+
+constraint outside_credit "Courses taken elsewhere count only with DUS approval, after the credit transfers to Yale" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen courses, excluding the language requirement" in roles [introductory, core, elective, senior]:
+  total at least 14 attempts;

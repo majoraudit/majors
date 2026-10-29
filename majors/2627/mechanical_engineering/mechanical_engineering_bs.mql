@@ -1,40 +1,78 @@
-SELECT 8 FROM [
-  CLASS(MATH 1120),
-  CLASS(MATH 1150),
-  CLASS(ENAS 1510),
-  SELECT 1 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810), CLASS(PHYS 2000)],
-  SELECT 1 FROM [CLASS(PHYS 1810), CLASS(PHYS 2010)],
-  SELECT 1 FROM [CLASS(PHYS 1650L), CLASS(PHYS 2050L)],
-  SELECT 1 FROM [CLASS(PHYS 1660L), CLASS(PHYS 2060L)],
-  SELECT 1 FROM [CLASS(CHEM 1610), TAG("Equivalent Placement or Credit (AP 4/5 or IB 6/7)")]
-] : "Prerequisites" : 8;
+// Mechanical Engineering B.S. (ABET accredited): twenty courses (19.5 credits) beyond the prerequisites, including the senior requirement.
+// The curriculum follows prescribed patterns; departures require DUS approval.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/mechanical-engineering/
+program mechanical_engineering_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 14 FROM [
-  CLASS(ENAS 1300),
-  CLASS(ENAS 1940),
-  SELECT 1 FROM [CLASS(MATH 2220), CLASS(MATH 2250)],
-  CLASS(ECE 2000),
-  CLASS(MENG 1105),
-  CLASS(MENG 2311),
-  CLASS(MENG 2511),
-  CLASS(MENG 2615),
-  CLASS(MENG 2616L),
-  CLASS(MENG 3125),
-  CLASS(MENG 3323),
-  CLASS(MENG 3422),
-  CLASS(MENG 3423L),
-  CLASS(MENG 3424),
-  CLASS(MENG 3020L)
-] : "Core Classes" : 14;
+fact chemistry_exam "Chemistry AP 4 or 5, or IB HL/SL 6 or 7": placement { test: "AP or IB Chemistry", result: "AP 4-5 or IB 6-7" };
 
-SELECT 3 FROM [
-  RANGE(MENG 3000 , MENG 4999),
-  RANGE(ENAS 2000 , ENAS 4999),
-  CLASS(MENG 4991),
-  CLASS(MENG 4992)
-] : "Electives" : 3;
+requirement prereq_math "Prerequisite: MATH 1120, MATH 1150, and ENAS 1510, or equivalents" [prerequisite] {
+  courses at least 3 where course.code in ["MATH1120", "MATH1150", "ENAS1510"] or attempt.approved_for contains "prereq_math";
+}
 
-SELECT 2 FROM [
-  CLASS(MENG 4137L),
-  CLASS(MENG 4138L)
-] : "Senior Requirement" : 2;
+requirement prereq_physics_1 "Prerequisite: physics lecture PHYS 1800, 2000, or 2600, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1800", "PHYS2000", "PHYS2600"] or attempt.approved_for contains "prereq_physics_1";
+}
+
+requirement prereq_physics_2 "Prerequisite: physics lecture PHYS 1810, 2010, or 2610, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1810", "PHYS2010", "PHYS2610"] or attempt.approved_for contains "prereq_physics_2";
+}
+
+requirement prereq_lab_1 "Prerequisite: physics laboratory PHYS 1650L or 2050L, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1650L", "PHYS2050L"] or attempt.approved_for contains "prereq_lab_1";
+}
+
+requirement prereq_lab_2 "Prerequisite: physics laboratory PHYS 1660L or 2060L, or an equivalent" [prerequisite] {
+  slot where course.code in ["PHYS1660L", "PHYS2060L"] or attempt.approved_for contains "prereq_lab_2";
+}
+
+requirement prereq_chemistry "Prerequisite: a one-credit chemistry lecture numbered CHEM 1610 or higher, or an equivalent" [prerequisite] {
+  slot where course.subject = "CHEM" and course.number >= 1610 and course.format != "lab";
+}
+
+effect chemistry_equivalent when fact chemistry_exam: waive prereq_chemistry;
+
+requirement differential_equations "Advanced mathematics: ENAS 1940" [core] {
+  slot from [ENAS 1940];
+}
+
+requirement linear_algebra "Advanced mathematics: MATH 2220 or 2250" [core] {
+  slot from [MATH 2220, MATH 2250];
+}
+
+requirement related "Related courses: ENAS 1300 and ECE 2000" [core] {
+  courses exactly 2 from [ENAS 1300, ECE 2000];
+}
+
+requirement meng_core "Mechanical engineering: MENG 1105, 2311, 2511, 2615, 2616L, 3020L, 3125, 3323, 3422, 3423L, and 3424" [core] {
+  courses exactly 11 from [MENG 1105, MENG 2311, MENG 2511, MENG 2615, MENG 2616L, MENG 3020L, MENG 3125, MENG 3323, MENG 3422, MENG 3423L, MENG 3424];
+}
+
+requirement technical_electives "Three technical electives chosen with the DUS (at most one of MENG 4991 or 4992)" [elective] {
+  courses at least 3
+    where course.attributes contains "YC MENG BS Technical Elective" or course.code in ["MENG4991", "MENG4992"]
+      or attempt.approved_for contains "technical_electives";
+}
+
+requirement senior "Senior requirement: MENG 4137L (full credit) and MENG 4138L (half credit), in the senior year" [senior] {
+  courses exactly 2 from [MENG 4137L, MENG 4138L];
+  constraint senior_year "Taken in the senior year": all where attempt.year_of_study = 4;
+}
+
+constraint one_special_project "At most one of MENG 4991 or 4992 counts toward the major" in program:
+  limit 1 attempts where course.code in ["MENG4991", "MENG4992"];
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "Twenty courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 20 attempts;
+
+constraint total_credits "19.5 credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 19.5 credits;

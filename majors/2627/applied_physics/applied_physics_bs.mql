@@ -1,4 +1,67 @@
-SELECT 5 FROM [] : "Prerequisites - Physics" : 2
-SELECT 3 FROM [] : "Core Courses" : 2
-SELECT 3 FROM [] : "Area of Focus"
-SELECT 2 FROM [] : "Senior Requirement" : 2
+// Applied Physics B.S.: eight term courses beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/applied-physics/
+program applied_physics_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_physics "Prerequisite: two introductory physics courses (PHYS 1800 and 1810, or PHYS 2000 and 2010)" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_2600 "PHYS 2600 and 2610" { courses exactly 2 from [PHYS 2600, PHYS 2610]; }
+}
+
+requirement prereq_lab "Prerequisite: physics laboratory (PHYS 1660L or 2060L)" [prerequisite] {
+  slot from [PHYS 1660L, PHYS 2060L];
+}
+
+requirement prereq_math "Prerequisite: APHY 1510 or MATH 1200" [prerequisite] {
+  slot from [APHY 1510, MATH 1200];
+}
+
+requirement prereq_methods "Prerequisite: PHYS 4000, or APHY 1940 with MATH 2220, 2250, or 2260" [prerequisite] {
+  children at least 1;
+  requirement prereq_phys_4000 "PHYS 4000" { slot from [PHYS 4000]; }
+  requirement prereq_aphy_1940 "APHY 1940 with linear algebra" {
+    children exactly 2;
+    requirement prereq_aphy_1940_course "APHY 1940" { slot from [APHY 1940]; }
+    requirement prereq_linear_algebra "MATH 2220, 2250, or 2260" { slot from [MATH 2220, MATH 2250, MATH 2260]; }
+  }
+}
+
+requirement electromagnetism "Electromagnetic waves and devices (APHY 3220 or an equivalent approved by the DUS)" [core] {
+  slot where course.code = "APHY3220" or attempt.approved_for contains "electromagnetism";
+}
+
+requirement quantum "Quantum mechanics (APHY 4390 or PHYS 4400, or an equivalent approved by the DUS)" [core] {
+  slot where course.code in ["APHY4390", "PHYS4400"] or attempt.approved_for contains "quantum";
+}
+
+requirement thermal "Thermodynamics and statistical mechanics (APHY 4200 or an equivalent approved by the DUS)" [core] {
+  slot where course.code = "APHY4200" or attempt.approved_for contains "thermal";
+}
+
+// The catalog's examples: solid-state/quantum electronics (APHY 3210, 4480, 4490, ECE 3200, 3250);
+// materials/nanoscience (APHY 4480, 4490, CHEM 2200, MENG 2615). Other focus areas need DUS approval.
+requirement focus "Three advanced courses in the physical or mathematical sciences or engineering forming an area of focus" [concentration] {
+  courses at least 3 where attempt.approved_for contains "focus";
+}
+
+requirement senior "Senior research project (APHY 4710 and 4720), taken for a letter grade" [senior] {
+  courses exactly 2 from [APHY 4710, APHY 4720];
+  constraint senior_letter "Senior projects only for a letter grade": all where attempt.grading_mode = "letter";
+}
+
+constraint crdf_limit "At most one Credit/D/Fail course counts, with DUS permission" in roles [core, concentration, senior]:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint crdf_permission "A Credit/D/Fail course counts only with DUS permission" in roles [core, concentration, senior]:
+  all where attempt.grading_mode = "letter" or attempt.approved_for contains "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Eight term courses beyond the prerequisites" in roles [core, concentration, senior]:
+  total at least 8 attempts;

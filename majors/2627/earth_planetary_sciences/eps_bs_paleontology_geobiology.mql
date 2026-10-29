@@ -1,48 +1,73 @@
-SELECT 4 FROM [
-    SELECT 1 FROM [
-        CLASS(MATH 1200),
-        CLASS(ENAS 1510)
-    ],
-    SELECT 4 FROM [
-        CLASS(BIOL 1010),
-        CLASS(BIOL 1020),
-        CLASS(BIOL 1030),
-        CLASS(BIOL 1040)
-    ],
-    CLASS(CHEM 1650),
-    CLASS(CHEM 1670)
-] : "Prerequisites" : 1;
-SELECT 4 FROM [
-    SELECT 1 FROM [
-        CLASS(EPS 1000), 
-        CLASS(EPS 1010),
-        SELECT 2 FROM [
-            CLASS(EPS 1100),
-            CLASS(EPS 1110L)
-        ]
-    ], 
-    CLASS(EPS 1250),
-    CLASS(EPS 1260L),
-    SELECT 4 FROM [
-        SELECT 1 FROM [
-            CLASS(EPS 2320),
-            CLASS(EPS 3550)
-        ],
-        CLASS(EEB 2225),
-        SELECT 1 FROM [
-            CLASS(EPS 2700),
-            CLASS(EPS 3250),
-            CLASS(EPS 3750)
-        ],
-        CLASS(EPS 3130),
-        CLASS(EPS 3450),
-        CLASS(EPS 2550),
-        SELECT 1 FROM [
-            CLASS(EPS 3100),
-            CLASS(EPS 4020)
-        ],
-        PLACEMENT("Statistical Data Analysis Class with DUS Approval")
-    ]
-] : "EPS Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("2000+ Paleontology Class with DUS Approval"), PLACEMENT("EPS 2000+ Paleontology Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+// Earth and Planetary Sciences B.S. (Paleontology and Geobiology concentration): at least twelve term courses (11.5 credits)
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/
+// Acceleration credits may satisfy prerequisites with DUS permission; higher-level courses may replace
+// prerequisites and specific required courses with DUS permission (recorded as approvals).
+program eps_bs_paleontology_geobiology {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_chemistry "Prerequisite: CHEM 1650 or 1670" [prerequisite] {
+  slot from [CHEM 1650, CHEM 1670];
+}
+
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement prereq_biology "Prerequisite: BIOL 1010, 1020, 1030, and 1040" [prerequisite] {
+  courses exactly 4 from [BIOL 1010, BIOL 1020, BIOL 1030, BIOL 1040];
+}
+
+requirement intro "One introductory EPS course (EPS 1000-1400), with accompanying laboratories" [core] {
+  children at least 1;
+  requirement intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+}
+
+requirement paleo_intro "EPS 1250 and 1260L" [core] {
+  courses exactly 2 from [EPS 1250, EPS 1260L];
+}
+
+requirement core "Four core courses from four different areas" [core] {
+  children at least 4;
+  requirement core_geochemistry "Geochemistry: EPS 2320 or 3550" { slot where course.code in ["EPS2320", "EPS3550"] or attempt.approved_for contains "core_geochemistry"; }
+  requirement core_evolution "Evolution: EEB 2225" { slot where course.code in ["EEB2225", "E&EB2225"] or attempt.approved_for contains "core_evolution"; }
+  requirement core_paleobiology "Paleobiology: EPS 2700, 3250, or 3750" { slot where course.code in ["EPS2700", "EPS3250", "EPS3750"] or attempt.approved_for contains "core_paleobiology"; }
+  requirement core_3130 "EPS 3130" { slot where course.code in ["EPS3130"] or attempt.approved_for contains "core_3130"; }
+  requirement core_3450 "EPS 3450" { slot where course.code in ["EPS3450"] or attempt.approved_for contains "core_3450"; }
+  requirement core_2550 "EPS 2550" { slot where course.code in ["EPS2550"] or attempt.approved_for contains "core_2550"; }
+  requirement core_3100 "EPS 3100" { slot where course.code in ["EPS3100"] or attempt.approved_for contains "core_3100"; }
+  requirement core_statistics "Statistical data analysis applied to the life sciences, approved by the DUS" { slot where attempt.approved_for contains "core_statistics"; }
+}
+
+requirement electives "Four electives in EPS, EEB, MCDB, or related fields, at least one in EPS" [elective] {
+  courses at least 4
+    where course.subject = "EPS" and course.number >= 2000 or course.subject in ["EEB", "E&EB", "MCDB"] or attempt.approved_for contains "electives";
+  constraint eps_elective "At least one elective from EPS": at least 1 attempts where course.subject = "EPS";
+}
+
+constraint upper_paleontology "At least four of the twelve courses are upper-level (2000+) paleontology courses" in roles [core, elective]:
+  at least 4 attempts
+    where course.code in ["EPS2700", "EPS3250", "EPS3750", "EPS3130", "EPS3450", "EPS2550"] or attempt.approved_for contains "upper_paleontology";
+
+requirement senior "Senior essay (EPS 4920) or, with faculty permission, a two-term senior thesis (EPS 4900 and 4910)" [senior] {
+  children at least 1;
+  requirement senior_essay "EPS 4920" { slot from [EPS 4920]; }
+  requirement senior_thesis "EPS 4900 and 4910, with faculty permission" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the prerequisites or the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "At least twelve term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 12 attempts;
+
+constraint total_credits "11.5 course credits beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 11.5 credits;

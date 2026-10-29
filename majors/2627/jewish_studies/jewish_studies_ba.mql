@@ -1,21 +1,59 @@
-SELECT 3 FROM [
-  CLASS(JDST 1000),
-  CLASS(JDST 3035),
-  CLASS(JDST 2000),
-  CLASS(JDST 2001),
-  CLASS(JDST 3681),
-  CLASS(JDST 3693),
-  PLACEMENT("Survey in Hebrew and Jewish Literature")
-] : "Core Classes" : 3;
+// Jewish Studies B.A.: thirteen term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/jewish-studies/
+// Core-area and concentration membership is not a catalog attribute; the DUS approves those courses.
+program jewish_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 8 FROM [
-  SELECT 2 FROM [CLASS(HEBR 1100), CLASS(HEBR 1200), PLACEMENT("Hebrew Literature")],
-  PLACEMENT("Ancient Israel and Hebrew Bible"),
-  PLACEMENT("Second Temple and Talmudic Judaism"),
-  PLACEMENT("Medieval and Renaissance Jewish Civilization"),
-  PLACEMENT("Modern Jewish History and Civilization"),
-  PLACEMENT("Jewish and Hebrew Literature"),
-  PLACEMENT("Jewish Thought")
-] : "Electives" : 8;
+requirement core "Core: three of the six core areas" [core] {
+  children at least 3;
+  requirement core_bible "Hebrew Bible" { slot where attempt.approved_for contains "core_bible"; }
+  requirement core_ancient "Ancient Judaism (Second Temple or rabbinic literature)" { slot where attempt.approved_for contains "core_ancient"; }
+  requirement core_premodern "Premodern Jewish history" { slot where attempt.approved_for contains "core_premodern"; }
+  requirement core_modern "Modern Jewish history" { slot where attempt.approved_for contains "core_modern"; }
+  requirement core_thought "Jewish thought" { slot where attempt.approved_for contains "core_thought"; }
+  requirement core_literature "Survey course in Hebrew or Jewish literature" { slot where attempt.approved_for contains "core_literature"; }
+}
 
-SELECT 2 FROM [CLASS(JDST 4491), CLASS(JDST 4492)] : "Senior Requirement" : 1;
+requirement language "Language or literature: HEBR 1100 and 1200, or two courses in Hebrew literature in translation" [language] {
+  children at least 1;
+  requirement language_hebrew "HEBR 1100 and 1200" { courses exactly 2 from [HEBR 1100, HEBR 1200]; }
+  requirement language_translation "Two courses in Hebrew literature in translation" {
+    courses exactly 2 where attempt.approved_for contains "hebrew_in_translation";
+  }
+}
+
+// Areas: ancient Israel/Hebrew Bible; Second Temple and rabbinic Judaism; medieval and early modern Jewish history and
+// culture; modern Jewish history and culture; Jewish/Hebrew literature (in Hebrew or Yiddish); Jewish thought; or
+// student-designed. Each area normally includes an introductory course, a seminar, and a relevant course outside JDST.
+requirement first_area "First area of concentration: three courses" [concentration] {
+  courses at least 3 where attempt.approved_for contains "first_area";
+}
+
+requirement second_area "Second area of concentration: three courses" [concentration] {
+  courses at least 3 where attempt.approved_for contains "second_area";
+}
+
+requirement senior "Senior requirement: a two-term senior essay (JDST 4491 and 4492), or a one-term essay and an additional seminar" [senior] {
+  children at least 1;
+  requirement senior_two_term "JDST 4491 and 4492" { courses exactly 2 from [JDST 4491, JDST 4492]; }
+  requirement senior_one_term "A one-term senior essay and an additional seminar" {
+    children exactly 2;
+    requirement senior_essay "JDST 4491 or 4492" { slot from [JDST 4491, JDST 4492]; }
+    requirement senior_seminar "An additional seminar" { slot where course.format = "seminar" and attempt.approved_for contains "senior_seminar"; }
+  }
+}
+
+constraint hebrew_limit "Up to three Hebrew or Yiddish language courses count toward the major" in program:
+  limit 3 attempts where course.subject = "HEBR" and course.format = "language" or attempt.approved_for contains "yiddish";
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Thirteen term courses including the senior requirement" in program:
+  total at least 13 attempts;

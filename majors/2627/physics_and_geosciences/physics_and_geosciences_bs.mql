@@ -1,8 +1,94 @@
-SELECT 1 FROM [CLASS(PHYS 2060L)] : "Physics Lab" : 1;
-SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 4010), CLASS(PHYS 4020)], SELECT 3 FROM [CLASS(PHYS 4100), CLASS(PHYS 4300), CLASS(PHYS 4500)]] : "Advanced Physics Sequence" : 2;
-SELECT 1 FROM [CLASS(PHYS 4390), CLASS(PHYS 4400)] : "Quantum Mechanics" : 3;
-SELECT 1 FROM [RANGE(PHYS 3000 , PHYS 4999)] : "Physics Elective" : 4;
-SELECT 1 FROM [RANGE(EPS 1000 , EPS 1400)] : "Intro EPS Course" : 5;
-SELECT 1 FROM [RANGE(EPS 2000 , EPS 4999)] : "EPS Elective" : 6;
-SELECT 4 FROM [RANGE(EPS 2000 , EPS 4999)] : "Advanced EPS Track Courses" : 7;
-SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 4710), CLASS(PHYS 4720)], SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 8;
+// Physics and Geosciences B.S.: thirteen courses (12.5 course credits) beyond the prerequisites, including the senior project,
+// with at least 4.5 credits in Physics and at least 6 in Earth and Planetary Sciences.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/physics-geosciences/
+// No elective may count toward more than one requirement (the exclusive default).
+program physics_and_geosciences_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_math "Prerequisite: MATH 1200 or an equivalent" [prerequisite] {
+  slot where course.code = "MATH1200" or attempt.approved_for contains "prereq_math";
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710 or above" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1700 "PHYS 1700 and 1710" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+  requirement prereq_physics_2600 "PHYS 2600 and 2610" { courses exactly 2 from [PHYS 2600, PHYS 2610]; }
+}
+
+requirement prereq_lab "Prerequisite: PHYS 2050L" [prerequisite] {
+  slot from [PHYS 2050L];
+}
+
+requirement prereq_differential_equations "Prerequisite: ENAS 1940, MATH 2460, or PHYS 4000" [prerequisite] {
+  slot from [ENAS 1940, MATH 2460, PHYS 4000];
+}
+
+requirement physics_lab "PHYS 2060L" [physics] {
+  slot from [PHYS 2060L];
+}
+
+requirement physics_advanced "PHYS 4010 and 4020, or PHYS 4100, 4300, and 4500" [physics] {
+  children at least 1;
+  requirement physics_4010 "PHYS 4010 and 4020" { courses exactly 2 from [PHYS 4010, PHYS 4020]; }
+  requirement physics_4100 "PHYS 4100, 4300, and 4500" { courses exactly 3 from [PHYS 4100, PHYS 4300, PHYS 4500]; }
+}
+
+requirement quantum "PHYS 4390 or 4400" [physics] {
+  slot from [PHYS 4390, PHYS 4400];
+}
+
+requirement physics_elective "One physics elective numbered 3000 or above (a related course with Physics DUS permission)" [physics] {
+  slot where course.subject = "PHYS" and course.number >= 3000 and not course.code in ["PHYS4710", "PHYS4720"]
+    or attempt.approved_for contains "physics_elective";
+}
+
+requirement eps_intro "One introductory EPS course numbered 1000-1400, with its laboratory if applicable" [geosciences] {
+  children at least 1;
+  requirement eps_intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement eps_intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement eps_intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+  requirement eps_intro_1250 "EPS 1250 with EPS 1260L" { courses exactly 2 from [EPS 1250, EPS 1260L]; }
+  requirement eps_intro_1400 "EPS 1400" { slot from [EPS 1400]; }
+}
+
+requirement eps_elective "One EPS elective numbered 2000 or above (a related course with EPS DUS permission)" [geosciences] {
+  slot where course.subject = "EPS" and course.number >= 2000 and not course.code in ["EPS4900", "EPS4910"]
+    or attempt.approved_for contains "eps_elective";
+}
+
+requirement eps_track "Four advanced courses from one EPS track" [geosciences] {
+  children at least 1;
+  requirement track_climate "Atmosphere, Ocean, and Climate" {
+    courses at least 4 where course.code in ["EPS3220", "EPS3230", "EPS3350", "MENG3422", "EPS1400"] or attempt.approved_for contains "track_climate";
+  }
+  requirement track_solid_earth "Solid Earth Science" {
+    courses at least 4
+      where course.code in ["EPS2100", "EPS2120", "EPS3500", "EPS2200", "EPS2320", "EPS3100", "EPS3120"] or attempt.approved_for contains "track_solid_earth";
+  }
+}
+
+requirement senior "Two-term senior project on a topic acceptable to both departments (PHYS 4710 and 4720, or EPS 4900 and 4910), with an oral report" [senior] {
+  children at least 1;
+  requirement senior_physics "PHYS 4710 and 4720" { courses exactly 2 from [PHYS 4710, PHYS 4720]; }
+  requirement senior_eps "EPS 4900 and 4910" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint physics_credits "At least 4.5 credits in Physics beyond the prerequisites" in roles [physics, geosciences, senior]:
+  at least 4.5 credits where course.subject = "PHYS";
+
+constraint eps_credits "At least six credits in Earth and Planetary Sciences beyond the prerequisites" in roles [physics, geosciences, senior]:
+  at least 6 credits where course.subject = "EPS";
+
+constraint letter_grades "No course taken Credit/D/Fail counts, including prerequisites" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "12.5 course credits beyond the prerequisites" in roles [physics, geosciences, senior]:
+  total at least 12.5 credits;

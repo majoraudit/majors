@@ -1,18 +1,88 @@
-SELECT 3 FROM [
-    SELECT 1 FROM [
-        CLASS(S&DS 1000),
-        CLASS(S&DS 1230),
-        CLASS(S&DS 2200),
-        PLACEMENT("DUS Approval for Statistics")
-    ],
-    PLACEMENT("DUS Approval for Programming"),
-    RANGE(LING 1000, LING 1999)
-] : "Prerequisites" : 1;
+// Computing and Linguistics B.S.: fourteen term credits beyond the prerequisites, not including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-linguistics/
+// The DUS approves each student's full selection of courses.
+program computing_and_ling_bs {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 2 FROM [SELECT 1 FROM [CLASS(MATH 2440), CLASS(LING 2249), CLASS(CPSC 2020)], SELECT 1 FROM[CLASS(MATH 2220), CLASS(MATH 2250)]] : "Math Requirement" : 2;
-SELECT 2 FROM [SELECT 2 FROM [SELECT 1 FROM [CLASS(S&DS 2400), CLASS(S&DS 2410)], CLASS(S&DS 2420)], SELECT 2 FROM [CLASS(S&DS 2380), SELECT 1 FROM [CLASS(S&DS 2300), RANGE(S&DS 2420, S&DS 9999)]]] : "Statistics Core Courses" : 2;
-SELECT 3 FROM [CLASS(LING 2320), CLASS(LING 2530), CLASS(LING 2630)] : "Linguistics Requirement" : 2;
-SELECT 2 FROM [CLASS(CPSC 2010), CLASS(CPSC 2230)] : "Computation Core Courses" : 2;
-SELECT 3 FROM [SELECT 1 FROM [CLASS(LING 3350), CLASS(LING 3540), CLASS(LING 3640)], SELECT 1 FROM [CLASS(CPSC 4770), CLASS(LING 2270)], SELECT 1 FROM [CLASS(S&DS 2650), CLASS(S&DS 3650), CLASS(CPSC 3810)]] : "Advanced Course Requirement" : 2;
-SELECT 2 FROM [TAG("YC CPLI Elective in CP & Ling"), TAG("YC CPLI Elective in CP & Ling"), PLACEMENT("DUS Approved Course"), PLACEMENT("DUS Approved Course")] : "Electives" : 3;
-SELECT 2 FROM [CLASS(CSLI 4900), PLACEMENT("Semester of Working on Senior Project")] : "Senior Capstone Seminar" : 1;
+fact statistics_experience "Comparable statistics experience accepted by the DUS": prior_coursework { description: "statistics" };
+fact programming_experience "Comparable programming experience accepted by the DUS": prior_coursework { description: "programming" };
+
+requirement prereq_statistics "Prerequisite: S&DS 1000, 1230, or 2200, or comparable experience" [prerequisite] {
+  slot from [S&DS 1000, S&DS 1230, S&DS 2200];
+}
+
+requirement prereq_programming "Prerequisite: an introductory programming course, or comparable experience" [prerequisite] {
+  slot where course.code in ["CPSC1001", "CPSC1100", "ENAS1300"] or attempt.approved_for contains "prereq_programming";
+}
+
+requirement prereq_linguistics "Prerequisite: a 1000-level LING course" [prerequisite] {
+  slot where course.subject = "LING" and course.number >= 1000 and course.number <= 1999;
+}
+
+effect statistics_known when fact statistics_experience: waive prereq_statistics;
+effect programming_known when fact programming_experience: waive prereq_programming;
+
+requirement math_discrete "Math core: proof-based discrete mathematics (MATH 2440, LING 2249, or CPSC 2020)" [core] {
+  slot from [MATH 2440, LING 2249, CPSC 2020];
+}
+
+requirement math_linear "Math core: linear algebra (MATH 2220 or 2250)" [core] {
+  slot from [MATH 2220, MATH 2250];
+}
+
+requirement statistics "Statistics core: S&DS 2400 or 2410 with S&DS 2420, or S&DS 2380 with S&DS 2300 or any S&DS course numbered 2420 or above" [core] {
+  children at least 1;
+  requirement statistics_2420 "S&DS 2400 or 2410, with S&DS 2420" {
+    children exactly 2;
+    requirement statistics_probability "S&DS 2400 or 2410" { slot from [S&DS 2400, S&DS 2410]; }
+    requirement statistics_theory "S&DS 2420" { slot from [S&DS 2420]; }
+  }
+  requirement statistics_2380 "S&DS 2380 with S&DS 2300 or an S&DS course numbered 2420 or above" {
+    children exactly 2;
+    requirement statistics_2380_course "S&DS 2380" { slot from [S&DS 2380]; }
+    requirement statistics_second "S&DS 2300 or an S&DS course numbered 2420 or above" {
+      slot where course.code = "S&DS2300" or course.subject = "S&DS" and course.number >= 2420;
+    }
+  }
+}
+
+requirement linguistics "Linguistics core: LING 2320, 2530, and 2630" [core] {
+  courses exactly 3 from [LING 2320, LING 2530, LING 2630];
+}
+
+requirement computation "Computation core: CPSC 2010 and 2230" [core] {
+  courses exactly 2 from [CPSC 2010, CPSC 2230];
+}
+
+requirement advanced "Three advanced courses: linguistic structure, natural language processing, and machine learning" [core] {
+  children exactly 3;
+  requirement advanced_structure "Linguistic structure: LING 3350, 3540, or 3640" { slot from [LING 3350, LING 3540, LING 3640]; }
+  requirement advanced_nlp "Natural language processing: CPSC 4770 or LING 2270" { slot from [CPSC 4770, LING 2270]; }
+  requirement advanced_ml "Machine learning: S&DS 2650, 3650, or CPSC 3810" { slot from [S&DS 2650, S&DS 3650, CPSC 3810]; }
+}
+
+requirement electives "Two electives in computing and linguistics, pre-approved or approved by the DUS" [elective] {
+  courses at least 2 where course.attributes contains "YC CPLI Elective in CP & Ling" or attempt.approved_for contains "electives";
+}
+
+requirement senior "Capstone seminar CSLI 4900 in the fall of senior year, continued with an independent senior research project in the spring" [senior] {
+  children exactly 2;
+  requirement senior_seminar "CSLI 4900, fall of senior year" { slot from [CSLI 4900]; }
+  requirement senior_project "Spring-term independent senior research project" {
+    slot where attempt.approved_for contains "senior_project";
+  }
+  constraint senior_order "The seminar precedes the spring project" in subtree senior:
+    order course.code = "CSLI4900" before attempt.approved_for contains "senior_project";
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major, other than prerequisites" in roles [core, elective, senior]:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Fourteen term credits beyond the prerequisites, not counting the senior requirement" in roles [core, elective]:
+  total at least 14 credits;

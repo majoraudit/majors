@@ -1,4 +1,68 @@
-SELECT 1 FROM [CLASS(CPSC 1001), CLASS(TDPS 1000), CLASS(TDPS 1001)] : "Prerequisites" : 1;
-SELECT 6 FROM [CLASS(CPSC 2010), SELECT 1 FROM [CLASS(CPSC 2020), CLASS(MATH 2440)], CLASS(CPSC 2230), SELECT 1 FROM [CLASS(CPSC 4310), CLASS(CPSC 4320)], SELECT 1 FROM [CLASS(CPSC 4780), CLASS(CPSC 4790), CLASS(CPSC 4840)], TAG("YC CPAR THST CS Elective")] : "Computer Science Courses" : 2;
-SELECT 5 FROM [TAG("YC TDPS Artistic Practice"), TAG("YC TDPS Histories"), TAG("YC TDPS Performance Theory"), TAG("YC TDPS Interarts"), SELECT 1 FROM [SELECT 2 FROM [TAG("YC TDPS Artistic Practice"), TAG("YC TDPS Artistic Practice")], SELECT 2 FROM [TAG("YC TDPS Histories"), TAG("YC TDPS Histories")], SELECT 2 FROM [TAG("YC TDPS Performance Theory"), TAG("YC TDPS Performance Theory")], SELECT 2 FROM [TAG("YC TDPS Interarts"), TAG("YC TDPS Interarts")]]] : "Theater, Dance, and Performance Studies Courses" : 2;
-SELECT 2 FROM [CLASS(CPSC 4900), SELECT 1 FROM [CLASS(TDPS 4701), CLASS(TDPS 4900), CLASS(TDPS 4901)]] : "Senior Requirements" : 1;
+// Computing and the Arts B.A. (Theater, Dance, and Performance Studies concentration): twelve term courses beyond the prerequisites
+// (six in Computer Science, six in the arts), plus the two-term senior project.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/computing-arts/
+program computing_and_arts_tdps {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_tdps "Prerequisite: TDPS 1000 and 1001" [prerequisite] {
+  courses exactly 2 from [TDPS 1000, TDPS 1001];
+}
+
+requirement cs_intro "CPSC 2010" [computing] {
+  slot from [CPSC 2010];
+}
+
+requirement cs_discrete "CPSC 2020 (or MATH 2440), advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2020, MATH 2440];
+}
+
+requirement cs_data_structures "CPSC 2230, advised by the end of sophomore year" [computing] {
+  slot from [CPSC 2230];
+}
+
+requirement cs_music "CPSC 4310 or 4320" [computing] {
+  slot from [CPSC 4310, CPSC 4320];
+}
+
+requirement cs_graphics "CPSC 4780, 4790, or 4840" [computing] {
+  slot from [CPSC 4780, CPSC 4790, CPSC 4840];
+}
+
+requirement cs_elective "One additional intermediate or advanced Computer Science course for the track (not CPSC 4900)" [computing] {
+  slot where course.attributes contains "YC CPAR THST CS Elective"
+    or course.subject = "CPSC" and course.number >= 2000 and course.code != "CPSC4900";
+}
+
+requirement tdps_domains "One TDPS course in each of the four domains" [arts] {
+  children exactly 4;
+  requirement tdps_artistic_practice "Artistic Practice" { slot where course.attributes contains "YC TDPS Artistic Practice"; }
+  requirement tdps_histories "Histories" { slot where course.attributes contains "YC TDPS Histories"; }
+  requirement tdps_performance_theory "Performance Theory" { slot where course.attributes contains "YC TDPS Performance Theory"; }
+  requirement tdps_interarts "Interarts" { slot where course.attributes contains "YC TDPS Interarts"; }
+}
+
+requirement tdps_additional "Two additional TDPS courses in any domain" [arts] {
+  courses at least 2
+    where course.attributes overlaps ["YC TDPS Artistic Practice", "YC TDPS Histories", "YC TDPS Performance Theory", "YC TDPS Interarts"];
+}
+
+requirement senior "Two-term senior project approved by the DUS and acceptable to both departments: CPSC 4900 and TDPS 4701, or one of TDPS 4900-4902" [senior] {
+  children exactly 2;
+  requirement senior_cpsc "CPSC 4900" { slot from [CPSC 4900]; }
+  requirement senior_arts "TDPS 4701, or one of TDPS 4900-4902" { slot from [TDPS 4701, TDPS 4900, TDPS 4901, TDPS 4902]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint six_cs "Six courses in Computer Science" in roles [computing]:
+  total at least 6 attempts;
+
+constraint six_arts "Six courses in the arts discipline" in roles [arts]:
+  total at least 6 attempts;

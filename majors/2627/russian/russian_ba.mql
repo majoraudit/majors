@@ -1,0 +1,72 @@
+// Russian B.A.: eleven term courses (twelve credits) beyond the prerequisite, including the senior essay.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/russian/
+// A Yale summer program in Russian culture may fulfill requirements with DUS approval.
+program russian_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact russian_placement "Second-year Russian completed by placement examination or RUSS S140":
+  placement { test: "Russian placement", result: "second year" };
+fact russian_proficiency "Third- and fourth-year language proficiency met without coursework":
+  language_proficiency { language: "Russian", level: "fourth year" };
+
+requirement prereq "Prerequisite: second-year Russian (RUSS 1400, 1420, or 1450)" [prerequisite] {
+  slot from [RUSS 1400, RUSS 1420, RUSS 1450];
+}
+
+effect placed when fact russian_placement: waive prereq;
+
+requirement third_year "Third-year Russian: RUSS 1500 and 1510 (or approved summer or study abroad equivalents)" [language] {
+  courses at least 2 where course.code in ["RUSS1500", "RUSS1510"] or attempt.approved_for contains "third_year";
+}
+
+requirement fourth_year "Fourth-year Russian: RUSS 1600 and 1610 (or approved summer or study abroad equivalents)" [language] {
+  courses at least 2 where course.code in ["RUSS1600", "RUSS1610"] or attempt.approved_for contains "fourth_year";
+}
+
+// Proficiency met without coursework is replaced by additional courses toward the eleven.
+effect third_year_proficient when fact russian_proficiency: waive third_year;
+effect fourth_year_proficient when fact russian_proficiency: waive fourth_year;
+
+requirement literature_early "Russian literature in translation: the nineteenth century or earlier" [core] {
+  slot where course.subject = "RUSS" and (course.number <= 999 or course.number >= 2000 and course.number <= 4899)
+    and attempt.approved_for contains "literature_early";
+}
+
+requirement literature_late "Russian literature in translation: the twentieth century or later" [core] {
+  slot where course.subject = "RUSS" and (course.number <= 999 or course.number >= 2000 and course.number <= 4899)
+    and attempt.approved_for contains "literature_late";
+}
+
+requirement content_in_russian "One content course taught in Russian (RUSS 1700-1900)" [core] {
+  slot where course.subject = "RUSS" and course.number >= 1700 and course.number <= 1900;
+}
+
+requirement history_social "One course in Russian, East European, or Eurasian history or social sciences" [core] {
+  slot where course.subject = "RSEE" or attempt.approved_for contains "history_social";
+}
+
+requirement electives "Electives as needed to reach eleven courses (RUSS, RSEE, or an approved Yale summer program in Russian culture)" [elective] {
+  courses at least 0 where course.subject in ["RUSS", "RSEE"] and not course.code in ["RUSS4900", "RUSS4910"]
+    or attempt.approved_for contains "electives";
+}
+
+// Only one of RUSS 4900 and 4910 counts, except as a twelfth course for students in two majors.
+requirement senior "Senior essay reading primary sources in Russian: RUSS 4900 or 4910" [senior] {
+  slot from [RUSS 4900, RUSS 4910];
+}
+
+// Some courses may fulfill more than one requirement.
+share literature_early_content: literature_early, content_in_russian;
+share literature_late_content: literature_late, content_in_russian;
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Eleven term courses beyond the prerequisite, including the senior essay" in roles [language, core, elective, senior]:
+  total at least 11 attempts;

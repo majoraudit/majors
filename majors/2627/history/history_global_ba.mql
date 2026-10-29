@@ -1,31 +1,70 @@
-SELECT 2 FROM [
-    RANGE(HIST 0000, HIST 4999)
-] : "Prerequisites" : 1;
+// History B.A. (Global concentration): twelve course credits in History, including the prerequisites and the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/history/
+// Courses may count toward regional, preindustrial, and seminar requirements at once (sharing rules below).
+program history_global_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
 
-SELECT 5 FROM [
-    TAG("YC HIST Africa"),
-    TAG("YC HIST Asia"),
-    TAG("YC HIST Europe"),
-    TAG("YC HIST Latin America"),
-    TAG("YC HIST Middle East"),
-    TAG("YC HIST United States")
-] : "Regional Distribution (Global)" : 2;
+// A one-term essay (HIST 4997) needs one more full-credit course, which may be taken Credit/D/Fail.
+choice senior_length "Senior essay length": solver one of "two_term", "one_term";
 
-SELECT 2 FROM [
-    TAG("YC HIST Preindustrial")
-] : "Preindustrial History" : 3;
+requirement prereq "Prerequisite: two course credits in History (Directed Studies history and philosophy count); these also count toward the major" [prerequisite] {
+  credits at least 2 where course.subject = "HIST" or course.code in ["DRST0003", "DRST0004", "DRST0005", "DRST0006"];
+}
 
-SELECT 2 FROM [
-    TAG("YC HIST Departmental Seminars")
-] : "Departmental Seminars" : 4;
+requirement preindustrial "Two preindustrial course credits (material before the mid-19th century, no later than 1900)" [core] {
+  credits at least 2 where course.attributes contains "YC HIST Preindustrial";
+}
 
-SELECT 3 FROM [
-    RANGE(HIST 0000, HIST 4999),
-    RANGE(HIST 0000, HIST 4999),
-    RANGE(HIST 0000, HIST 4999)
-] : "Additional History Electives" : 5;
+requirement seminars "Two 3000-level departmental seminars, not taken Credit/D/Fail" [core] {
+  courses at least 2
+    where course.subject = "HIST" and course.number >= 3000 and course.number <= 3999
+      and course.attributes contains "YC HIST Departmental Seminars" and attempt.source = "yale";
+  constraint seminar_letter "Departmental seminars may not be taken Credit/D/Fail": all where attempt.grading_mode = "letter";
+}
 
-SELECT 1 FROM [
-    SELECT 1 FROM [CLASS(HIST 4997)],
-    SELECT 2 FROM [CLASS(HIST 4995), CLASS(HIST 4996)]
-] : "Senior Requirement" : 6;
+requirement electives "Further History course credits toward the twelve (up to two non-departmental with DUS approval)" [elective] {
+  credits at least 0 where (course.subject = "HIST" or attempt.approved_for contains "outside_history");
+}
+
+requirement senior "Senior requirement: a two-term senior essay or project (HIST 4995 and 4996), or a one-term essay (HIST 4997) and one more course" [senior] {
+  children at least 1;
+  requirement senior_two_term "HIST 4995 and 4996" when senior_length = "two_term" { courses exactly 2 from [HIST 4995, HIST 4996]; }
+  requirement senior_one_term "HIST 4997, normally in the fall of senior year" when senior_length = "one_term" { slot from [HIST 4997]; }
+}
+
+requirement regions "One course credit in each of five of the six geographic regions" [core] {
+  children at least 5;
+  requirement regions_africa "Africa (Sub-Saharan)" { credits at least 1 where course.attributes contains "YC HIST Africa"; }
+  requirement regions_asia "Asia" { credits at least 1 where course.attributes contains "YC HIST Asia"; }
+  requirement regions_europe "Europe" { credits at least 1 where course.attributes contains "YC HIST Europe"; }
+  requirement regions_latin_america "Latin America" { credits at least 1 where course.attributes contains "YC HIST Latin America"; }
+  requirement regions_middle_east "Middle East/North Africa" { credits at least 1 where course.attributes contains "YC HIST Middle East"; }
+  requirement regions_united_states "United States/Canada" { credits at least 1 where course.attributes contains "YC HIST United States"; }
+}
+
+// Prerequisite courses may also count toward the major, and one course may serve region, preindustrial, and seminar requirements.
+share regions_africa_share: regions_africa, preindustrial, seminars, prereq;
+share regions_asia_share: regions_asia, preindustrial, seminars, prereq;
+share regions_europe_share: regions_europe, preindustrial, seminars, prereq;
+share regions_latin_america_share: regions_latin_america, preindustrial, seminars, prereq;
+share regions_middle_east_share: regions_middle_east, preindustrial, seminars, prereq;
+share regions_united_states_share: regions_united_states, preindustrial, seminars, prereq;
+share prereq_counts "Prerequisite courses also count toward the major": prereq, preindustrial, seminars, electives;
+
+constraint outside_limit "At most two course credits taught outside the department, with DUS approval (not seminars or the senior requirement)" in program:
+  limit 2 credits where course.subject != "HIST" and not course.code in ["DRST0003", "DRST0004", "DRST0005", "DRST0006"];
+
+constraint crdf_limit_two_term "At most two lecture or non-3000-level seminar credits taken Credit/D/Fail" when senior_length = "two_term" in program:
+  limit 2 credits where attempt.grading_mode = "crdf";
+
+constraint crdf_limit_one_term "One-term essay writers may also take their additional course Credit/D/Fail" when senior_length = "one_term" in program:
+  limit 3 credits where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_credits "Twelve course credits in History, including the prerequisites and the senior requirement" in program:
+  total at least 12 credits;

@@ -1,0 +1,52 @@
+// African Studies B.A.: twelve term courses including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/african-studies/
+program african_studies_ba {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+fact language_waiver "African language requirement waived by placement into an advanced-level course or an equivalent CLS test":
+  placement { test: "African language placement", result: "advanced" };
+
+requirement humanities "One African Studies course in the humanities" [core] {
+  slot where course.subject = "AFST" and course.distributionals contains "Hu";
+}
+
+requirement social_sciences "One African Studies course in the social sciences" [core] {
+  slot where course.subject = "AFST" and course.distributionals contains "So";
+}
+
+requirement language "Two years (four courses) of one African language; other languages with DUS permission" [language] {
+  courses at least 4
+    where course.subject in ["SWAH", "TWI", "WLOF", "YORU", "ZULU", "ARBC"] or attempt.approved_for contains "language";
+  constraint one_language "All four courses in the same language": group course.subject same;
+}
+
+requirement language_substitute "Four additional African Studies courses in place of the waived language requirement" [language]
+    when fact language_waiver {
+  courses at least 4 where course.subject = "AFST";
+}
+
+requirement methods "Research methods course: AFST 5505 or an alternative selected with the DUS" [core] {
+  slot where course.code = "AFST5505" or attempt.approved_for contains "methods";
+}
+
+requirement focus "Four courses in an area of focus approved by the DUS" [concentration] {
+  courses at least 4 where attempt.approved_for contains "focus";
+}
+
+requirement senior "Senior essay (AFST 4491)" [senior] {
+  slot from [AFST 4491];
+}
+
+effect waive_language "Placement waives the language requirement" when fact language_waiver: waive language;
+
+constraint crdf_limit "At most one Credit/D/Fail course counts toward the major" in program:
+  limit 1 attempts where attempt.grading_mode = "crdf";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.approved_for contains "major";
+
+constraint total_courses "Twelve term courses in all" in program:
+  total at least 12 attempts;

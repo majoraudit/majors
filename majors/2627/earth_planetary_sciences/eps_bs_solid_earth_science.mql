@@ -1,5 +1,63 @@
-SELECT 3 FROM [SELECT 1 FROM [CLASS(MATH 1200), CLASS(ENAS 1510)], SELECT 1 FROM [CLASS(CHEM 1650), CLASS(CHEM 1670)], SELECT 1 FROM [SELECT 2 FROM [CLASS(PHYS 1700), CLASS(PHYS 1710)], SELECT 2 FROM [CLASS(PHYS 1800), CLASS(PHYS 1810)], SELECT 2 FROM [CLASS(PHYS 2000), CLASS(PHYS 2010)]]] : "Prerequisites" : 1;
-SELECT 2 FROM [CLASS(EPS 1000), CLASS(EPS 1010), SELECT 2 FROM [CLASS(EPS 1100), CLASS(1110L)], SELECT 2 FROM [CLASS(EPS 1250), CLASS(EPS 1260L)], CLASS(EPS 1400)] : "Intro EPS Courses" : 2;
-SELECT 4 FROM [SELECT 1 FROM [CLASS(EPS 2100), CLASS(EPS 2120), CLASS(EPS 3500)], CLASS(EPS 2200), CLASS(EPS 2320), CLASS(EPS 3100), CLASS(EPS 3120)] : "EPS Core Courses" : 2;
-SELECT 4 FROM [PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("Class with DUS Approval"), PLACEMENT("EPS Class with DUS Approval")] : "Electives" : 3;
-SELECT 1 FROM [CLASS(EPS 4920), SELECT 2 FROM [CLASS(EPS 4900), CLASS(EPS 4910)]] : "Senior Requirement" : 1;
+// Earth and Planetary Sciences B.S. (Solid Earth Science concentration): at least eleven term courses
+// beyond the prerequisites, including the senior requirement.
+// Source: https://catalog.yale.edu/ycps/subjects-of-instruction/earth-planetary-sciences/
+// Acceleration credits may satisfy prerequisites with DUS permission; higher-level courses may replace
+// prerequisites and specific required courses with DUS permission (recorded as approvals).
+program eps_bs_solid_earth_science {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+requirement prereq_chemistry "Prerequisite: CHEM 1650 or 1670" [prerequisite] {
+  slot from [CHEM 1650, CHEM 1670];
+}
+
+requirement prereq_physics "Prerequisite: PHYS 1700 and 1710, 1800 and 1810, or 2000 and 2010" [prerequisite] {
+  children at least 1;
+  requirement prereq_physics_1700 "PHYS 1700 and 1710" { courses exactly 2 from [PHYS 1700, PHYS 1710]; }
+  requirement prereq_physics_1800 "PHYS 1800 and 1810" { courses exactly 2 from [PHYS 1800, PHYS 1810]; }
+  requirement prereq_physics_2000 "PHYS 2000 and 2010" { courses exactly 2 from [PHYS 2000, PHYS 2010]; }
+}
+
+requirement prereq_multivariable "Prerequisite: MATH 1200 or ENAS 1510" [prerequisite] {
+  slot from [MATH 1200, ENAS 1510];
+}
+
+requirement intro "Two introductory EPS courses (EPS 1000-1400), with accompanying laboratories" [core] {
+  children at least 2;
+  requirement intro_1000 "EPS 1000" { slot from [EPS 1000]; }
+  requirement intro_1010 "EPS 1010" { slot from [EPS 1010]; }
+  requirement intro_1100 "EPS 1100 with EPS 1110L" { courses exactly 2 from [EPS 1100, EPS 1110L]; }
+  requirement intro_1250 "EPS 1250 with EPS 1260L" { courses exactly 2 from [EPS 1250, EPS 1260L]; }
+  requirement intro_1400 "EPS 1400" { slot from [EPS 1400]; }
+}
+
+requirement core "Four core courses: tectonics, rocks and minerals, sedimentary processes, isotope geochemistry, structural geology" [core] {
+  children at least 4;
+  requirement core_tectonics "Tectonics: EPS 2100, 2120, or 3500" { slot where course.code in ["EPS2100", "EPS2120", "EPS3500"] or attempt.approved_for contains "core_tectonics"; }
+  requirement core_minerals "Rocks and minerals: EPS 2200" { slot where course.code = "EPS2200" or attempt.approved_for contains "core_minerals"; }
+  requirement core_sedimentary "Sedimentary processes: EPS 2320" { slot where course.code = "EPS2320" or attempt.approved_for contains "core_sedimentary"; }
+  requirement core_isotope "Isotope geochemistry: EPS 3100" { slot where course.code = "EPS3100" or attempt.approved_for contains "core_isotope"; }
+  requirement core_structural "Structural geology: EPS 3120" { slot where course.code = "EPS3120" or attempt.approved_for contains "core_structural"; }
+}
+
+requirement electives "Four electives in geology, geochemistry, geophysics, or related topics (further core courses may count), at least two in EPS" [elective] {
+  courses at least 4 where course.subject = "EPS" and course.number >= 2000 or attempt.approved_for contains "electives";
+  constraint eps_electives "At least two electives from EPS": at least 2 attempts where course.subject = "EPS";
+}
+
+requirement senior "Senior essay (EPS 4920) or, with faculty permission, a two-term senior thesis (EPS 4900 and 4910)" [senior] {
+  children at least 1;
+  requirement senior_essay "EPS 4920" { slot from [EPS 4920]; }
+  requirement senior_thesis "EPS 4900 and 4910, with faculty permission" { courses exactly 2 from [EPS 4900, EPS 4910]; }
+}
+
+constraint letter_grades "No course taken Credit/D/Fail counts toward the prerequisites or the major" in program:
+  all where attempt.grading_mode = "letter";
+
+constraint outside_credit "Courses from another institution or study abroad count only with DUS approval" in program:
+  all where attempt.source = "yale" or attempt.source = "acceleration" or attempt.approved_for contains "major";
+
+constraint total_courses "At least eleven term courses beyond the prerequisites" in roles [core, elective, senior]:
+  total at least 11 attempts;
