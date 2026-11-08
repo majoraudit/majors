@@ -31,6 +31,11 @@ MQL filenames in `specializations`. `validate.py` checks that the catalog
 inventory, program counts, JSON mappings, files, and parsed MQL requirements
 agree, and it compiles every program with the institution schema.
 
+`collegePrograms` lists directories that are not majors but are audited the
+same way. `general_degree` holds the Yale College B.A./B.S. requirements
+(thirty-six term courses and the distributional requirements) that every
+student completes alongside a major.
+
 ## Set up testing environment
 Programs are written in MQL 0.2 (see `MQL_Language_Specification.md` at the repository root) and need pylibmql 0.3.0 or later.
 

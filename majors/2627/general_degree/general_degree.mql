@@ -1,0 +1,193 @@
+// Yale College B.A./B.S.: thirty-six term courses, including the distributional requirements.
+// Source: https://catalog.yale.edu/ycps/academic-regulations/requirements-for-ba-bs-degree/
+program general_degree {
+  catalog 2026-2027
+  institution "https://majoraudit.org/mql/yale" @ "2026-2027"
+  credit_scale 2
+}
+
+// Placement by departmental test, or by the DUS where there is none. "native" is a student
+// whose secondary schooling was in a language other than English.
+choice language_start "Language placement level": declared one of "L1", "L2", "L3", "L4", "L5", "native";
+
+requirement humanities "Two course credits in the humanities and arts" [distribution] {
+  credits at least 2 where course.distributionals contains "Hu";
+}
+
+requirement sciences "Two course credits in the sciences" [distribution] {
+  credits at least 2 where course.distributionals contains "Sc";
+}
+
+requirement social_sciences "Two course credits in the social sciences" [distribution] {
+  credits at least 2 where course.distributionals contains "So";
+}
+
+requirement quantitative "Two course credits in quantitative reasoning" [distribution] {
+  credits at least 2 where course.distributionals contains "QR";
+}
+
+requirement writing "Two course credits in writing" [distribution] {
+  credits at least 2 where course.distributionals contains "WR";
+}
+
+// Each branch is the placement's own language path or, where the catalog allows, a path in a
+// different language. The audit cannot tell which language the student placed in, so the
+// alternative path checks only the level reached. Earlier courses in a series may be taken
+// Credit/D/Fail; the final course needs a letter grade.
+requirement language_from_l1 "Language: L1, L2, and L3 in one language" [language]
+    when language_start = "L1" {
+  children exactly 3;
+  constraint from_l1_same_language "All in one language" in subtree language_from_l1: group course.subject same;
+  requirement language_from_l1_l1 "L1" { slot where course.distributionals contains "L1"; }
+  requirement language_from_l1_l2 "L2" { slot where course.distributionals contains "L2"; }
+  requirement language_from_l1_l3 "L3, for a letter grade" {
+    slot where course.distributionals contains "L3";
+    constraint from_l1_l3_final_letter "Final course for a letter grade": all where attempt.grading_mode = "letter";
+  }
+}
+
+requirement language_from_l2 "Language: L2, L3, and L4 in one language, or a different language through L3" [language]
+    when language_start = "L2" {
+  children at least 1;
+  requirement language_from_l2_same "L2, L3, and L4 in the placement language" {
+    children exactly 3;
+    constraint from_l2_same_language "All in one language" in subtree language_from_l2_same: group course.subject same;
+    requirement language_from_l2_l2 "L2" { slot where course.distributionals contains "L2"; }
+    requirement language_from_l2_l3 "L3" { slot where course.distributionals contains "L3"; }
+    requirement language_from_l2_l4 "L4, for a letter grade" {
+      slot where course.distributionals contains "L4";
+      constraint from_l2_l4_final_letter "Final course for a letter grade": all where attempt.grading_mode = "letter";
+    }
+  }
+  requirement language_from_l2_other "A different language through L3 (three courses)" {
+    courses at least 3 where course.distributionals overlaps ["L1", "L2", "L3"];
+    constraint from_l2_other_same_language "All in one language": group course.subject same;
+    constraint from_l2_other_final_letter "L3 for a letter grade":
+      at least 1 attempts where course.distributionals contains "L3" and attempt.grading_mode = "letter";
+  }
+}
+
+requirement language_from_l3 "Language: L3 and L4 in one language, or a different language through L3" [language]
+    when language_start = "L3" {
+  children at least 1;
+  requirement language_from_l3_same "L3 and L4 in the placement language" {
+    children exactly 2;
+    constraint from_l3_same_language "Both in one language" in subtree language_from_l3_same: group course.subject same;
+    requirement language_from_l3_l3 "L3" { slot where course.distributionals contains "L3"; }
+    requirement language_from_l3_l4 "L4, for a letter grade" {
+      slot where course.distributionals contains "L4";
+      constraint from_l3_l4_final_letter "Final course for a letter grade": all where attempt.grading_mode = "letter";
+    }
+  }
+  requirement language_from_l3_other "Two or more courses in a different language through L3" {
+    courses at least 2 where course.distributionals overlaps ["L1", "L2", "L3"];
+    constraint from_l3_other_same_language "All in one language": group course.subject same;
+    constraint from_l3_other_final_letter "L3 for a letter grade":
+      at least 1 attempts where course.distributionals contains "L3" and attempt.grading_mode = "letter";
+  }
+}
+
+requirement language_from_l4 "Language: one L4 course, or a different language through L3" [language]
+    when language_start = "L4" {
+  slot where (course.distributionals contains "L4" or course.distributionals contains "L3")
+    and attempt.grading_mode = "letter";
+}
+
+requirement language_from_l5 "Language: one L5 course, or a different language through L2" [language]
+    when language_start = "L5" {
+  slot where (course.distributionals contains "L5" or course.distributionals contains "L2")
+    and attempt.grading_mode = "letter";
+}
+
+requirement language_native "Language: ENGL 1014, 1015, 1020, 1021, or 3450; an L5 course in the native language; or a third language through L2" [language]
+    when language_start = "native" {
+  slot where (course.code in ["ENGL1014", "ENGL1015", "ENGL1020", "ENGL1021", "ENGL3450"]
+      or course.distributionals contains "L5" or course.distributionals contains "L2")
+    and attempt.grading_mode = "letter";
+}
+
+// L1-L2 and L3-L4 courses satisfy both levels.
+share combined_l1_l2_from_l1 "An L1-L2 course satisfies both levels": language_from_l1_l1, language_from_l1_l2;
+share combined_l3_l4_from_l2 "An L3-L4 course satisfies both levels": language_from_l2_l3, language_from_l2_l4;
+share combined_l3_l4_from_l3 "An L3-L4 course satisfies both levels": language_from_l3_l3, language_from_l3_l4;
+
+// Lower bound 0: collects every remaining course so it counts toward the thirty-six.
+requirement other_courses "Other term courses" [elective] {
+  credits at least 0 where course.credits > 0;
+}
+
+constraint distribution_letter "Distributional courses taken for a letter grade" in roles [distribution]:
+  all where attempt.grading_mode = "letter";
+
+constraint distribution_no_acceleration "Acceleration credits do not count toward distributional requirements" in roles [distribution, language]:
+  all where attempt.source != "acceleration";
+
+constraint distribution_no_independent "Independent study does not count toward distributional requirements" in roles [distribution, language]:
+  all where course.format != "independent_study";
+
+constraint total_courses "Thirty-six term courses in all" in program:
+  total at least 36 credits;
+
+// Promotion milestones. The catalog counts terms of enrollment; year_of_study approximates
+// term 2, 4, and 6 as years 1, 2, and 3. The first- and sophomore-year milestones are met by
+// enrollment alone (CR, W, or F included), but only credit-bearing attempts are assigned
+// here, so a W or F does not count toward them.
+fact sophomore_postponed "Committee on Honors and Academic Standing postponed the sophomore distributional requirements to the fifth term":
+  approval committee_approval { for: "sophomore_distribution" };
+
+fact junior_postponed "Committee on Honors and Academic Standing postponed the junior distributional requirements to the seventh term":
+  approval committee_approval { for: "junior_distribution" };
+
+// Sophomore standing: one course credit in two of the three skills by the end of the second term.
+choice first_year_skills "Skills begun in the first year": solver one of "qr_wr", "qr_language", "wr_language";
+
+constraint first_year_qr "One QR course credit in the first year" when first_year_skills != "wr_language" in requirements [quantitative]:
+  at least 1 credits where attempt.year_of_study <= 1;
+
+constraint first_year_wr "One WR course credit in the first year" when first_year_skills != "qr_language" in requirements [writing]:
+  at least 1 credits where attempt.year_of_study <= 1;
+
+constraint first_year_language "One language course credit in the first year" when first_year_skills != "qr_wr" in roles [language]:
+  at least 1 credits where attempt.year_of_study <= 1;
+
+// Junior standing: one course credit in each area and each skill by the end of the fourth term.
+constraint sophomore_hu "One Hu course credit by the end of the sophomore year" when not fact sophomore_postponed in requirements [humanities]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+constraint sophomore_sc "One Sc course credit by the end of the sophomore year" when not fact sophomore_postponed in requirements [sciences]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+constraint sophomore_so "One So course credit by the end of the sophomore year" when not fact sophomore_postponed in requirements [social_sciences]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+constraint sophomore_qr "One QR course credit by the end of the sophomore year" when not fact sophomore_postponed in requirements [quantitative]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+constraint sophomore_wr "One WR course credit by the end of the sophomore year" when not fact sophomore_postponed in requirements [writing]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+constraint sophomore_language "One language course credit by the end of the sophomore year" when not fact sophomore_postponed in roles [language]:
+  at least 1 credits where attempt.year_of_study <= 2;
+
+// A postponement moves these to the fifth term. That is approximated as the junior year, where
+// the junior milestones below already require at least as much.
+
+// Senior standing: every skills requirement and one course credit in each area by the end of
+// the sixth term, with passing letter grades (distribution_letter).
+constraint junior_hu "One Hu course credit by the end of the junior year" when not fact junior_postponed in requirements [humanities]:
+  at least 1 credits where attempt.year_of_study <= 3;
+
+constraint junior_sc "One Sc course credit by the end of the junior year" when not fact junior_postponed in requirements [sciences]:
+  at least 1 credits where attempt.year_of_study <= 3;
+
+constraint junior_so "One So course credit by the end of the junior year" when not fact junior_postponed in requirements [social_sciences]:
+  at least 1 credits where attempt.year_of_study <= 3;
+
+constraint junior_qr "QR requirement complete by the end of the junior year" when not fact junior_postponed in requirements [quantitative]:
+  at least 2 credits where attempt.year_of_study <= 3;
+
+constraint junior_wr "WR requirement complete by the end of the junior year" when not fact junior_postponed in requirements [writing]:
+  at least 2 credits where attempt.year_of_study <= 3;
+
+constraint junior_language "Language requirement complete by the end of the junior year" when not fact junior_postponed in roles [language]:
+  all where attempt.year_of_study <= 3;

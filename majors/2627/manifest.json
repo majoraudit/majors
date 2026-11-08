@@ -6,6 +6,7 @@
   "reviewedOn": "2026-10-28",
   "inventoryCount": 82,
   "programIdPolicy": "A program is a materially distinct degree, concentration, track, or intensive curriculum. Concentrations with identical audit logic, course choices, senior-project options, distinction, and generic simultaneous master's guidance remain inside one MQL.",
+  "collegePrograms": ["general_degree"],
   "majors": [
     {"id":"african_studies","name":"African Studies","catalogPath":"african-studies/","programs":["ba"]},
     {"id":"american_studies","name":"American Studies","catalogPath":"american-studies/","programs":["ba_standard","ba_intensive"]},

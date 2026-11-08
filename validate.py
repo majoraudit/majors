@@ -199,7 +199,9 @@ def validate_manifest(path):
     for major_id in duplicate_ids:
         errors.append(f"{path}: duplicate major id {major_id!r}")
 
-    expected_dirs = set(ids)
+    # Yale College requirements that apply to every student, outside the major inventory.
+    college_programs = manifest.get("collegePrograms", [])
+    expected_dirs = set(ids) | set(college_programs)
     actual_dirs = {p.name for p in year_dir.iterdir() if p.is_dir()}
     for major_id in sorted(expected_dirs - actual_dirs):
         errors.append(f"{path}: major directory does not exist: {major_id}")
