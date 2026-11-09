@@ -36,7 +36,22 @@ effect micro_known when fact micro_preparation: waive prereq_micro;
 effect macro_known when fact macro_preparation: waive prereq_macro;
 
 requirement cs_core "CPSC 2010, 2230, and 3230" [core] {
-  courses at least 3 where course.code in ["CPSC2010", "CPSC2230", "CPSC3230"] or attempt.approved_for contains "cs_core";
+  children exactly 3;
+  requirement cs_core_2010 "CPSC 2010" {
+    slot where course.code = "CPSC2010"
+      or attempt.approved_for contains "cs_core"
+      or attempt.approved_for contains "cs_core_2010";
+  }
+  requirement cs_core_2230 "CPSC 2230" {
+    slot where course.code = "CPSC2230"
+      or attempt.approved_for contains "cs_core"
+      or attempt.approved_for contains "cs_core_2230";
+  }
+  requirement cs_core_3230 "CPSC 3230" {
+    slot where course.code = "CPSC3230"
+      or attempt.approved_for contains "cs_core"
+      or attempt.approved_for contains "cs_core_3230";
+  }
 }
 
 requirement algorithms "Algorithms: CPSC 3650 or 3660 (only one may count)" [core] {
@@ -69,17 +84,33 @@ requirement intersection "A course in the intersection of computer science and e
 }
 
 requirement electives "Five electives that count in the Computer Science or Economics majors" [elective] {
-  courses at least 5
-    where course.attributes contains "YC CPSC Elective"
+  children exactly 5;
+  requirement cs_elective_1 "Computer Science elective" {
+    slot where course.attributes contains "YC CPSC Elective"
+      or course.subject = "CPSC" and course.number >= 3000 and course.number <= 4990 and course.code != "CPSC4900";
+  }
+  requirement cs_elective_2 "Computer Science elective" {
+    slot where course.attributes contains "YC CPSC Elective"
+      or course.subject = "CPSC" and course.number >= 3000 and course.number <= 4990 and course.code != "CPSC4900";
+  }
+  requirement econ_elective "Economics elective" {
+    slot where course.subject = "ECON" and course.number >= 2000
+      or course.code in ["ECON2122", "ECON2259", "ECON6672"];
+  }
+  requirement field_elective_1 "Elective in Computer Science, Economics, or a related department (with adviser permission)" {
+    slot where course.attributes contains "YC CPSC Elective"
+      or course.subject = "CPSC" and course.number >= 3000 and course.number <= 4990 and course.code != "CPSC4900"
       or course.subject = "ECON" and course.number >= 2000
       or course.code in ["ECON2122", "ECON2259", "ECON6672", "S&DS3650"]
       or course.attributes contains "YC CSEC Elective not CS or EC";
-  constraint cs_electives "At least two electives in Computer Science":
-    at least 2 attempts where course.attributes contains "YC CPSC Elective";
-  constraint econ_electives "At least one elective in Economics":
-    at least 1 attempts where course.subject = "ECON";
-  constraint related_electives "At most two electives in related departments, with adviser permission":
-    at most 2 attempts where not course.attributes contains "YC CPSC Elective" and course.subject != "ECON";
+  }
+  requirement field_elective_2 "Elective in Computer Science, Economics, or a related department (with adviser permission)" {
+    slot where course.attributes contains "YC CPSC Elective"
+      or course.subject = "CPSC" and course.number >= 3000 and course.number <= 4990 and course.code != "CPSC4900"
+      or course.subject = "ECON" and course.number >= 2000
+      or course.code in ["ECON2122", "ECON2259", "ECON6672", "S&DS3650"]
+      or course.attributes contains "YC CSEC Elective not CS or EC";
+  }
 }
 
 requirement senior "Senior project (CSEC 4910) combining computer science and economics, in the senior year" [senior] {
